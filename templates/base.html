@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <title>My fancy web app</title>
+    </head>
+    <body>
+        {% block pagebody %}
+        {% endblock %}
+        <form action="http://127.0.0.1:5000/">
+            <button type="submit">HOME</button>
+        </form>
+        <form action="http://127.0.0.1:5000/logout">
+            <button type="submit">LOGOUT</button>
+        </form>
+        Insert your username and password:
+        <form action="/login" method="POST">
+            <input name="user" type="text">
+            <input name="pwd" type="password">
+            <input type="submit">
+        </form>
+    </body>
+</html>
