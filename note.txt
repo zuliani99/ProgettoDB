@@ -1,0 +1,3 @@
+http://www.rahmatsiswanto.com/2018/04/python-flask-mysqldb-simple-login.html
+
+BUON SITO PER IL LOGIN SE SI RIESCE A SCARICARE TUTTI I PACCHETTI
