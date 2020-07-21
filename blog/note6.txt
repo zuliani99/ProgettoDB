@@ -1,0 +1,25 @@
+pip install flask_bcrypt
+from flask_brcrypt import Bcrypt
+bcrypt = Bcrypt()
+bycrypt.generate_password_hash('testing')
+bcrypt.generayte_password_hasdh('testing').decode('utf-8')
+bcrypt.generayte_password_hasdh('testing').decode('utf-8')
+bcrypt.generayte_password_hasdh('testing').decode('utf-8')
+
+
+hashed:pw = bcrypt.generayte_password_hasdh('testing').decode('utf-8'
+
+bcrypt.check_password_hash(hashed_pw, 'password') -> false
+
+bcrypt.check_password_hash(hashed_pw, 'testing') -> true
+
+
+python 
+from flaskblog import db
+form falskblog.models import User
+user = User.query.first()
+user
+user.password
+
+
+pip install flask-login
