@@ -1,0 +1,45 @@
+python
+db.create_all()
+from flaskbog import User, Post
+user_1 = User(username='Riccardo', email='ric@blog.com', password='password')
+db.session.add(user_1) -> questo comando non ha definitivamente aggunto l'utente, possimamo avere diversi cambiamenti allo stesso tempo
+user_2 = User(username'Michele', email='mich@blog.com', password='password')
+db.session.add(user_2)
+de.session.commit() -> ora i due usuername sono stati insetiti nel datbase
+
+User.query.all() -> restituisce la lista di username
+User.query.first() -> restituisce il primo della lista
+User.query.filter_by(username='Riccardo').all() -> restituisce tutti gli username che hannpo username Riccardo, ma ce ne sarà sempre uno perchè l'username l'abbiamo imposttao unico
+User.query.filter_by(username='Riccardo').first()
+
+user = User.query.filter_by(username='Riccardo').first()
+user -> così facendo abbiamo accesso a informazioni aggiuntive come l'ID
+user.id
+user = User.query.get(1) -> col get posso filtrare gli username a seconda di un specifico ID in questo caso 1
+user
+
+user.post -> rtona la lista vuota perchè questo username non ha ancora nessun post che ha scritto
+
+
+
+INSERIAMO DEI POST
+post_1 = Post (title='Blog_1', content='First Post Content!', user_id=user.id) -> non abbiamo specificato la data perchè fa il datestamp tipo
+post_1 = Post (title='Blog_2', content='Second Post Content!', user_id=user.id)
+db.session.add(post_1)
+db.session.add(post_2)
+de.sesson.commit()
+user.posts
+for post in user.posts
+	prit (post.title)
+post = Post.query.first()
+post
+post.user_id -> restituisce 1
+
+post.author -> restituisce tutti gli attributi del utente che ha scritto quel post
+
+
+
+db.drop_all()
+db.create_all()
+User.query.all()
+Post.query.all()
