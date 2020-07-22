@@ -1,7 +1,9 @@
+import secrets
+import os
+from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request #import necessari per il funzionamento dell'applicazione
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm
-from flaskblog.models import User, Post
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from flask_login import login_user, current_user, logout_user, login_required
 
 
@@ -67,8 +69,35 @@ def logout(): # funzuione di logout
     logout_user()
     return redirect(url_for('home')) # mi riporta alla homepage
 
+def save_pictures(form_picture): # funzione di salvataggio nel filesystem
+	random_hex = secrets.token_hex(8)	#creazioen di una stringa random
+	_, f_ext = os.path.splitext(form_picture.filename) # _ -> se non usaimao la variabile, ci prendiamo l'estensione del file
+	picture_fn = random_hex + f_ext 	#l'aggiungiamo alla stringa random
+	picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn) # e salviamo il nuovo file nel filesystem
+	
+	output_size = (125, 125) # impostiamo le dimensione che vogliamo avere dell'immagine
+	i = Image.open(form.picture) #apriamo l'imagine
+	i.thumbnail(output_size) # cambiamo le dimensioni
+	i.save(picture_path) # la risalviamo
+	
+	return picture_fn
 
-@app.route("/account")
+
+@app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account(): #funzione di account
-    return render_template('account.html', title='Account') # mi porta alla pagina accout con titolo='Account'
+	from = UpdateAccountForm()  # from di updaTE
+	if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
+		if form.picture.data: # se abbiao aggiornato l'immagine
+			picture_file = save_pictures(form.picture.data)
+			current_user.image_file = picture_file
+		current_user.username = form.username.data
+		current_user.email = form.email.data
+		db.session.commit()
+		flash('Your account has been updated', 'success')
+		return redirect(url_for('account')) #non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
+	elif request.methods == 'GET':
+		form.username.data = current_user.username
+		form.email.data = current_user.email
+	image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', title='Account', image_file=image_file, form=form) # mi porta alla pagina accout con titolo='Account'
