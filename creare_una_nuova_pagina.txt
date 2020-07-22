@@ -1,0 +1,5 @@
+COSA FARE SE SI VUOLE AGGUNGERE UNA NUOVA PAGINA CON FORM PER ESEMPIO
+1-creare la route all'interno del file routes.py
+2-creare il from all'interno del file form.py
+3-creare effettivamente il file html della pagina che sarà salvato in templates
+4-rendere accessibile quella pagina inserendo {{ url_for('pagine') }} all'internod ella home

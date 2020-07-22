@@ -1,31 +1,16 @@
 import secrets
 import os
 from PIL import Image #pip install Pillow
-from flask import render_template, url_for, flash, redirect, request #import necessari per il funzionamento dell'applicazione
+from flask import render_template, url_for, flash, redirect, request, abort #import necessari per il funzionamento dell'applicazione
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flask_login import login_user, current_user, logout_user, login_required
-
-
-posts = [ #i post che visualizzaremo all'interno
-    {
-        'author': 'Corey Schafer',
-        'title': 'Blog Post 1',
-        'content': 'First post content',
-        'date_posted': 'April 20, 2018'
-    },
-    {
-        'author': 'Jane Doe',
-        'title': 'Blog Post 2',
-        'content': 'Second post content',
-        'date_posted': 'April 21, 2018'
-    }
-]
 
 
 @app.route("/")
 @app.route("/home")
 def home():
+    posts = Post.query.all() # andiamo a prendere tutti i post che sono nel database e li passiamo alla home
     return render_template('home.html', posts=posts)  
 
 @app.route("/about") #mi renderizza il template about.html con variabuile title='About'
@@ -84,9 +69,9 @@ def save_pictures(form_picture): # funzione di salvataggio nel filesystem
 
 
 @app.route("/account", methods=['GET', 'POST'])
-@login_required
+@login_required # necessario se vogliaomo ch la pagina sia visitabile solo se l'utente ha eseguito l'accesso alla piattaforma
 def account(): #funzione di account
-	from = UpdateAccountForm()  # from di updaTE
+	form = UpdateAccountForm()  # from di updaTE
 	if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
 		if form.picture.data: # se abbiao aggiornato l'immagine
 			picture_file = save_pictures(form.picture.data)
@@ -101,3 +86,53 @@ def account(): #funzione di account
 		form.email.data = current_user.email
 	image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form) # mi porta alla pagina accout con titolo='Account'
+
+
+@app.route("/post/new", methods=['GET', 'POST'])
+@login_required
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(titl=form.title.data, content=form.content.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post has been created!', 'success')
+        return redirect(url_for('home'))
+    return render_template('create_post.html', title='New Post', form=form, legend='New Post')
+
+
+@app.route("/post/<int:post_id>")
+def post(post_id):
+    post = Post.query.get_or_404(post_id) #get_or_404 -> restituiscimi il post con quel id oppure restituisci l'errore 404 not found
+    return render_template('post.html', title=post.title, post=post)
+
+
+@app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+@login_required
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit:
+        post.title = form.title.data
+        post.content = post.content.data
+        db.session.commit()
+        flash('Your post has been updated', 'success')
+        return redirect(url_for('post', post_id=post.id))
+    elif request.methods == 'GET':
+        form.title.data = post.title
+        form.content = post.content
+    return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
+
+
+@app.route("/post/<int:post_id>/delete", methods=['POST'])
+@login_required
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Your post has been deleted', 'success')
+    return redirect(url_for('home'))
