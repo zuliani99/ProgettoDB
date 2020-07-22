@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import secrets
 import os
 from PIL import Image #pip install Pillow
@@ -5,7 +6,7 @@ from flask import render_template, url_for, flash, redirect, request, abort #imp
 from flaskblog import app, db, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flask_login import login_user, current_user, logout_user, login_required
-
+from flaskblog.models import User, Post
 
 @app.route("/")
 @app.route("/home")
@@ -55,45 +56,44 @@ def logout(): # funzuione di logout
     return redirect(url_for('home')) # mi riporta alla homepage
 
 def save_pictures(form_picture): # funzione di salvataggio nel filesystem
-	random_hex = secrets.token_hex(8)	#creazioen di una stringa random
-	_, f_ext = os.path.splitext(form_picture.filename) # _ -> se non usaimao la variabile, ci prendiamo l'estensione del file
-	picture_fn = random_hex + f_ext 	#l'aggiungiamo alla stringa random
-	picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn) # e salviamo il nuovo file nel filesystem
-	
-	output_size = (125, 125) # impostiamo le dimensione che vogliamo avere dell'immagine
-	i = Image.open(form.picture) #apriamo l'imagine
-	i.thumbnail(output_size) # cambiamo le dimensioni
-	i.save(picture_path) # la risalviamo
-	
-	return picture_fn
+    random_hex = secrets.token_hex(8)   #creazioen di una stringa random
+    _, f_ext = os.path.splitext(form_picture.filename) # _ -> se non usaimao la variabile, ci prendiamo l'estensione del file
+    picture_fn = random_hex + f_ext     #l'aggiungiamo alla stringa random
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn) # e salviamo il nuovo file nel filesystem
+    
+    output_size = (125, 125) # impostiamo le dimensione che vogliamo avere dell'immagine
+    i = Image.open(form_picture) #apriamo l'immagine
+    i.thumbnail(output_size) # cambiamo le dimensioni
+    i.save(picture_path) # la risalviamo
+    
+    return picture_fn
 
 
 @app.route("/account", methods=['GET', 'POST'])
 @login_required # necessario se vogliaomo ch la pagina sia visitabile solo se l'utente ha eseguito l'accesso alla piattaforma
-def account(): #funzione di account
-	form = UpdateAccountForm()  # from di updaTE
-	if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
-		if form.picture.data: # se abbiao aggiornato l'immagine
-			picture_file = save_pictures(form.picture.data)
-			current_user.image_file = picture_file
-		current_user.username = form.username.data
-		current_user.email = form.email.data
-		db.session.commit()
-		flash('Your account has been updated', 'success')
-		return redirect(url_for('account')) #non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
-	elif request.methods == 'GET':
-		form.username.data = current_user.username
-		form.email.data = current_user.email
-	image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+def account(): # funzione di account
+    form = UpdateAccountForm()  # from di updaTE
+    if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
+        if form.picture.data: # se abbiao aggiornato l'immagine
+            picture_file = save_pictures(form.picture.data)
+            current_user.image_file = picture_file
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash('Your account has been updated', 'success')
+        return redirect(url_for('account')) # non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form) # mi porta alla pagina accout con titolo='Account'
-
 
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
 def new_post():
     form = PostForm()
     if form.validate_on_submit():
-        post = Post(titl=form.title.data, content=form.content.data, author=current_user)
+        post = Post(title=form.title.data, content=form.content.data, author=current_user)
         db.session.add(post)
         db.session.commit()
         flash('Your post has been created!', 'success')
@@ -103,7 +103,7 @@ def new_post():
 
 @app.route("/post/<int:post_id>")
 def post(post_id):
-    post = Post.query.get_or_404(post_id) #get_or_404 -> restituiscimi il post con quel id oppure restituisci l'errore 404 not found
+    post = Post.query.get_or_404(post_id) # get_or_404 -> restituiscimi il post con quel id oppure restituisci l'errore 404 not found
     return render_template('post.html', title=post.title, post=post)
 
 
