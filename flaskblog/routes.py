@@ -11,7 +11,8 @@ from flaskblog.models import User, Post
 @app.route("/")
 @app.route("/home")
 def home():
-    posts = Post.query.all() # andiamo a prendere tutti i post che sono nel database e li passiamo alla home
+    page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
+    posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
     return render_template('home.html', posts=posts)  
 
 @app.route("/about") #mi renderizza il template about.html con variabuile title='About'
@@ -92,10 +93,10 @@ def account(): # funzione di account
 @login_required
 def new_post():
     form = PostForm()
-    if form.validate_on_submit():
-        post = Post(title=form.title.data, content=form.content.data, author=current_user)
+    if form.validate_on_submit(): # se ho cliccato il tasto posta
+        post = Post(title=form.title.data, content=form.content.data, author=current_user) # mi crea un nuovo oggetto Post con i valori che ho passato
         db.session.add(post)
-        db.session.commit()
+        db.session.commit() # e lo aggiunge al database
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
@@ -107,7 +108,7 @@ def post(post_id):
     return render_template('post.html', title=post.title, post=post)
 
 
-@app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/update", methods=['GET', 'POST']) #per aggiornare il post, solo se sono io l'utente che lo ha scrtto
 @login_required
 def update_post(post_id):
     post = Post.query.get_or_404(post_id)
@@ -115,18 +116,18 @@ def update_post(post_id):
         abort(403)
     form = PostForm()
     if form.validate_on_submit:
-        post.title = form.title.data
+        post.title = form.title.data # se ho cliccato aggiorna aggiorno iìgli attirbuti del post
         post.content = post.content.data
         db.session.commit()
         flash('Your post has been updated', 'success')
         return redirect(url_for('post', post_id=post.id))
-    elif request.methods == 'GET':
+    elif request.methods == 'GET': # se sono appena entrato nella pagina mi displaya i valori attuali
         form.title.data = post.title
         form.content = post.content
     return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
 
 
-@app.route("/post/<int:post_id>/delete", methods=['POST'])
+@app.route("/post/<int:post_id>/delete", methods=['POST']) # per eliminare il post devo essere io quello che lo ha scritto
 @login_required
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
@@ -136,3 +137,14 @@ def delete_post(post_id):
     db.session.commit()
     flash('Your post has been deleted', 'success')
     return redirect(url_for('home'))
+
+
+@app.route("/user/<string:username>") # funzione per visualizzare tutti i post che quel utente ha scritto
+def user_posts(username):
+    page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
+    user = User.query.filter_by(username=username).first_or_404() # mi prendo l'id del utente 
+    posts = Post.query.filter_by(author=user)\
+        .order_by(Post.date_posted.desc())\
+        .paginate(page=page, per_page=5) 
+        # andiamo a filtrare i post per l'utente che ho, li ordiniamo in senso decrescente per la dato dei post, prendiamo 5 post alla volta che sono nel database e li passiamo alla home
+    return render_template('user_posts.html', posts=posts, user=user) 
