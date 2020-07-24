@@ -6,6 +6,7 @@ from flask_mail import Mail
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'    #chiave necessaria per l'applicazione
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -17,4 +18,7 @@ app.config['MAIL_USERNAME'] = 'noreplayblogprova@gmail.com' # mail che utilizzai
 app.config['MAIL_PASSWORD'] = 'blogprova4852' # questa è la password
 mail = Mail(app)
 
+
 from flaskblog import routes
+
+

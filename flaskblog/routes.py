@@ -6,9 +6,11 @@ from flask import render_template, url_for, flash, redirect, request, abort #imp
 from flaskblog import app, bcrypt, mail
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, RequestResetForm, ResetPasswordForm
 from flask_login import login_user, current_user, logout_user, login_required
-from flaskblog.table import User, Post, users, posts, datetime, engine, metadata
+from flaskblog.table import User, Post, datetime, posts, users, engine, metadata
 from flask_mail import Message
 from sqlalchemy.sql import *
+
+
 
 @app.route("/")
 @app.route("/home")
@@ -16,11 +18,14 @@ def home():
     #page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
     conn = engine.connect()
     #posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
-    #p = conn.execute(select([posts]).order_by(desc('date_posted')))
-    p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
-    ps = Post(p.id, p.title, p.data, p.content, p.user_id)
+    res = conn.execute(select([posts]).order_by(desc('date_posted')))
+    #p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
+    #ps = p.fetchall()
+    p = res.fetchall()
     conn.close()
-    return render_template('home.html', posts=ps)  
+    #ps = Post(p.id, p.title, p.date_posted, p.content, p.user_id)
+    #ps = Post(p[0], p[1], p[2], p[3], p[4])    
+    return render_template('home.html', posts=p)  
 
 @app.route("/about") #mi renderizza il template about.html con variabuile title='About'
 def about():
@@ -34,13 +39,13 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit(): #controlla che tutte le regole del form siano state passate con successo
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8') # criptiamo la password
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password) # creiamo un nuiovo user con tutti i sui attributi
+        #user = User(username=form.username.data, email=form.email.data, password=hashed_password) # creiamo un nuiovo user con tutti i sui attributi
         
 
         #db.session.add(user) # lo aggiungiamo
         #db.session.commit() # e committiamo 
         conn = engine.connect()
-        conn.execute(users.insert(),user)
+        conn.execute(users.insert(),[{"username": form.username.data, "email": form.email.data, "password": hashed_password}])
         conn.close()
 
 
@@ -59,9 +64,10 @@ def login():
 
         #user = User.query.filter_by(email=form.email.data).first() 
         conn = engine.connect()
-        s = select([users]).where(users.c.email == form.email.data)
-        user = conn.execute()
+        rs = conn.execute(select([users]).where(users.c.email == form.email.data))
+        u = rs.fetchone()
         conn.close()
+        user = User(u.id, u.username, u.email, u.image_file, u.password)
 
         if user and bcrypt.check_password_hash(user.password, form.password.data): 
             login_user(user, remember=form.remember.data) 
@@ -134,7 +140,7 @@ def send_newpost_notify(title,content,aut_username,date): # funzione ch einvia u
         msg = Message('New Post By ' + aut_username, sender='noreplay@demo.com', recipients=[usr.email])
         msg.body = f'''Titolo: {title}
 
-Data: {date.strftime('%Y-%m-%d')}
+Data: {date}
 
 Contenuto: {content}
 '''
@@ -155,7 +161,7 @@ def new_post():
         conn.execute(ins, [{"title": form.title.data, "content": form.content.data, "user_id": current_user.id}])
         conn.close()
 
-        send_newpost_notify(form.title.data, form.content.data, current_user.username, datetime.utcnow)
+        send_newpost_notify(form.title.data, form.content.data, current_user.username, datetime.now().strftime("%d/%m/%Y"))
 
 
         flash('Your post has been created!', 'success')
@@ -268,9 +274,10 @@ def reset_request():
     if form.validate_on_submit():
         #user = User.query.filter_by(email=form.email.data).first() # prendiamo la email
         conn = engine.connect()
-        u = conn.execute(select([users]).where(users.c.email == form.email.data)).fetchone()
-        user = User(u.id, u.username, u.email, u.image_file, u.password)
+        rs = conn.execute(select([users]).where(users.c.email == form.email.data))
+        u = rs.fetchone()
         conn.close()
+        user = User(u.id, u.username, u.email, u.image_file, u.password)
 
         send_reset_email(user)  # la inviamo
         flash('An email has been sent with instructions to reset you password', 'info')

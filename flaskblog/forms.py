@@ -3,8 +3,8 @@ from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from flaskblog.table import User
-
+from flaskblog.table import User, users, engine, metadata
+from sqlalchemy.sql import *
 
 class RegistrationForm(FlaskForm):  
     username = StringField('Username', 
@@ -19,12 +19,20 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
-        user = User.query.filter_by(username=username.data).first() 
+        #user = User.query.filter_by(username=username.data).first()
+        conn = engine.connect()
+        u = conn.execute(select([users]).where(users.c.username == username.data))
+        user = u.fetchone()
+        conn.close()
         if user: 
             raise ValidationError('That username is taken. Please choose a different one.')
 
     def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
+        #user = User.query.filter_by(email=email.data).first()
+        conn = engine.connect()
+        u = conn.execute(select([users]).where(users.c.email == email.data))
+        user = u.fetchone()
+        conn.close()
         if user:
             raise ValidationError('That email is taken. Please choose a different one.')
 
@@ -43,13 +51,21 @@ class UpdateAccountForm(FlaskForm):
 
     def validate_username(self, username):
         if username.data != current_user.username:
-            user = User.query.filter_by(username=username.data).first() 
+            #user = User.query.filter_by(username=username.data).first() 
+            conn = engine.connect()
+            u = conn.execute(select([users]).where(users.c.username == username.data))
+            user = u.fetchone()
+            conn.close()
             if user: 
                 raise ValidationError('That username is taken. Please choose a different one.')
 
     def validate_email(self, email):
         if email.data != current_user.email:
-            user = User.query.filter_by(email=email.data).first()
+            #user = User.query.filter_by(email=email.data).first()
+            conn = engine.connect()
+            u = conn.execute(select([users]).where(users.c.email == email.data))
+            user = u.fetchone()
+            conn.close()
             if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
 
@@ -64,7 +80,11 @@ class RequestResetForm(FlaskForm):
     submit = SubmitField('Request Password Reset')
 
     def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
+        #user = User.query.filter_by(email=email.data).first()
+        conn = engine.connect()
+        u = conn.execute(select([users]).where(users.c.email == email.data))
+        user = u.fetchone()
+        conn.close()
         if user is None:
             raise ValidationError('The is no account with that email. You must register first')
 

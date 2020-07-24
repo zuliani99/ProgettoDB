@@ -1,12 +1,11 @@
-from datetime import datetime
 from flaskblog import login_manager, app
-from sqlalchemy import *
 from flask_login import UserMixin
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from sqlalchemy import *
+from datetime import datetime
 
-
-engine = create_engine('sqlite:///:memory:', echo=True)
+engine = create_engine('sqlite:////tmp/test.db', echo=True)
 metadata = MetaData()
-
 users = Table('users', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('username', String(20), unique=True, nullable=False),
@@ -26,13 +25,13 @@ posts = Table('posts', metadata,
 metadata.create_all(engine)
 
 
+
 @login_manager.user_loader
 def load_user(user_id):
 	conn = engine.connect()
-	s = select([users]).where(users.c.id == user_id)
-	user = rs.fetchone()
+	s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
 	conn.close()
-	return User(user.id, user.username, user.email, user.image_file, user.password)
+	return User(s.id, s.username, s.email, s.image_file, s.password)
 
 class Post():
 	def __init__(self, id, title, date_posted, content, user_id):
