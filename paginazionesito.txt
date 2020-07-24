@@ -28,7 +28,11 @@
 
 
 
+<<<<<<< Updated upstream
 
+=======
+QUESTA PARTE E' SENZA LA PAGINAZIONE, QUINDI I POST SI VEDONO TUTTI IN UN UNICA PAGINA
+>>>>>>> Stashed changes
 
 
 {% extends "layout.html" %}
