@@ -3,18 +3,24 @@ import secrets
 import os
 from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request, abort #import necessari per il funzionamento dell'applicazione
-from flaskblog import app, db, bcrypt, mail
+from flaskblog import app, bcrypt, mail
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, RequestResetForm, ResetPasswordForm
 from flask_login import login_user, current_user, logout_user, login_required
-from flaskblog.models import User, Post
+from flaskblog.table import User, Post, users, posts, datetime, engine, metadata
 from flask_mail import Message
+from sqlalchemy.sql import *
 
 @app.route("/")
 @app.route("/home")
 def home():
-    page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
-    posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
-    return render_template('home.html', posts=posts)  
+    #page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
+    conn = engine.connect()
+    #posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
+    #p = conn.execute(select([posts]).order_by(desc('date_posted')))
+    p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
+    ps = Post(p.id, p.title, p.data, p.content, p.user_id)
+    conn.close()
+    return render_template('home.html', posts=ps)  
 
 @app.route("/about") #mi renderizza il template about.html con variabuile title='About'
 def about():
@@ -29,8 +35,15 @@ def register():
     if form.validate_on_submit(): #controlla che tutte le regole del form siano state passate con successo
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8') # criptiamo la password
         user = User(username=form.username.data, email=form.email.data, password=hashed_password) # creiamo un nuiovo user con tutti i sui attributi
-        db.session.add(user) # lo aggiungiamo
-        db.session.commit() # e committiamo 
+        
+
+        #db.session.add(user) # lo aggiungiamo
+        #db.session.commit() # e committiamo 
+        conn = engine.connect()
+        conn.execute(users.insert(),user)
+        conn.close()
+
+
         flash('Your account has been created! You are now able to log in', 'success') # messaggio di avvenuto sing up al blog
         return redirect(url_for('login')) # redirect alla funzione home
     return render_template('register.html', title='Register', form=form)
@@ -42,7 +55,14 @@ def login():
         return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit(): #controlla che tutte le regole del form siano state passate con successo
-        user = User.query.filter_by(email=form.email.data).first() 
+        
+
+        #user = User.query.filter_by(email=form.email.data).first() 
+        conn = engine.connect()
+        s = select([users]).where(users.c.email == form.email.data)
+        user = conn.execute()
+        conn.close()
+
         if user and bcrypt.check_password_hash(user.password, form.password.data): 
             login_user(user, remember=form.remember.data) 
             next_page = request.args.get('next') # se prima di accedere ho provato ad enbtrarte nella pagina account mi salvo i paramentri del url
@@ -79,9 +99,22 @@ def account(): # funzione di account
         if form.picture.data: # se abbiao aggiornato l'immagine
             picture_file = save_pictures(form.picture.data)
             current_user.image_file = picture_file
+            
+            conn = engine.connect()
+            conn.execute(users.update().values(image_file=current_user.image_file).where(users.c.id==current_user.id))
+            conn.close()
+
+
         current_user.username = form.username.data
         current_user.email = form.email.data
-        db.session.commit()
+        
+
+        #db.session.commit()
+        conn = engine.connect()
+        u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
+        conn.execute(u)
+        conn.close()
+
         flash('Your account has been updated', 'success')
         return redirect(url_for('account')) # non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
     elif request.method == 'GET':
@@ -91,15 +124,19 @@ def account(): # funzione di account
     return render_template('account.html', title='Account', image_file=image_file, form=form) # mi porta alla pagina accout con titolo='Account'
 
 
-def send_newpost_notify(post): # funzione ch einvia una mail a tutti gli utenti con il contenuto del post
-    users = User.query.all()
-    for user in users:
-        msg = Message('New Post By ' + post.author.username, sender='noreplay@demo.com', recipients=[user.email])
-        msg.body = f'''Titolo: {post.title}
+def send_newpost_notify(title,content,aut_username,date): # funzione ch einvia una mail a tutti gli utenti con il contenuto del post
+    #users = User.query.all()
+    conn = engine.connect()
+    user = conn.execute(select([users])).fetchall()
+    conn.close()
 
-Data: {post.date_posted.strftime('%Y-%m-%d')}
+    for usr in user:
+        msg = Message('New Post By ' + aut_username, sender='noreplay@demo.com', recipients=[usr.email])
+        msg.body = f'''Titolo: {title}
 
-Contenuto: {post.content}
+Data: {date.strftime('%Y-%m-%d')}
+
+Contenuto: {content}
 '''
         mail.send(msg)
 
@@ -109,10 +146,18 @@ Contenuto: {post.content}
 def new_post():
     form = PostForm()
     if form.validate_on_submit(): # se ho cliccato il tasto posta
-        post = Post(title=form.title.data, content=form.content.data, author=current_user) # mi crea un nuovo oggetto Post con i valori che ho passato
-        db.session.add(post)
-        db.session.commit() # e lo aggiunge al database
-        send_newpost_notify(post)
+        #post = Post(title=form.title.data, content=form.content.data, author=current_user) # mi crea un nuovo oggetto Post con i valori che ho passato
+        #db.session.add(post)
+        #db.session.commit() # e lo aggiunge al database
+        
+        conn = engine.connect()
+        ins = posts.insert()
+        conn.execute(ins, [{"title": form.title.data, "content": form.content.data, "user_id": current_user.id}])
+        conn.close()
+
+        send_newpost_notify(form.title.data, form.content.data, current_user.username, datetime.utcnow)
+
+
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
@@ -120,21 +165,42 @@ def new_post():
 
 @app.route("/post/<int:post_id>")
 def post(post_id):
-    post = Post.query.get_or_404(post_id) # get_or_404 -> restituiscimi il post con quel id oppure restituisci l'errore 404 not found
+    #post = Post.query.get_or_404(post_id) # get_or_404 -> restituiscimi il post con quel id oppure restituisci l'errore 404 not found
+    conn = engine.connect()
+    p = conn.execute(select([posts]).where(posts.c.id == post_id)).fetchone()
+    if p is None:
+        abort(404)
+    conn.close()
+    post = Post(p.id, p.title, p.data, p.content, p.user_id)
+
     return render_template('post.html', title=post.title, post=post)
 
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST']) #per aggiornare il post, solo se sono io l'utente che lo ha scrtto
 @login_required
 def update_post(post_id):
-    post = Post.query.get_or_404(post_id)
-    if post.author != current_user:
+    #post = Post.query.get_or_404(post_id)
+    conn = engine.connect()
+    p = conn.execute(select([posts]).where(posts.c.id == post_id)).fetchone()
+    if p is None:
+        abort(404)
+    post = Post(p.id, p.title, p.data, p.content, p.user_id)
+    conn.close()
+
+
+    if post.id != current_user.id:
         abort(403)
     form = PostForm()
     if form.validate_on_submit:
         post.title = form.title.data # se ho cliccato aggiorna aggiorno iìgli attirbuti del post
         post.content = post.content.data
-        db.session.commit()
+
+
+        conn = engine.connect()
+        conn.execute(posts.update().values(title=post.title, content=post.content).where(post.c.id==post.id))
+        conn.close()
+
+        #db.session.commit()
         flash('Your post has been updated', 'success')
         return redirect(url_for('post', post_id=post.id))
     elif request.methods == 'GET': # se sono appena entrato nella pagina mi displaya i valori attuali
@@ -146,11 +212,22 @@ def update_post(post_id):
 @app.route("/post/<int:post_id>/delete", methods=['POST']) # per eliminare il post devo essere io quello che lo ha scritto
 @login_required
 def delete_post(post_id):
-    post = Post.query.get_or_404(post_id)
-    if post.author != current_user:
+    #post = Post.query.get_or_404(post_id)
+    conn = engine.connect()
+    p = conn.execute(select([posts]).where(posts.c.id == post_id)).fetchone()
+    if p is None:
+        abort(404)
+    post = Post(p.id, p.title, p.data, p.content, p.user_id)
+    
+
+    if post.id != current_user.id:
         abort(403)
-    db.session.delete(post)
-    db.session.commit()
+    #db.session.delete(post)
+    #db.session.commit()
+
+    conn.execute(posts.delete().where(posts.c.id == p.id))
+    conn.close()
+
     flash('Your post has been deleted', 'success')
     return redirect(url_for('home'))
 
@@ -158,11 +235,16 @@ def delete_post(post_id):
 @app.route("/user/<string:username>") # funzione per visualizzare tutti i post che quel utente ha scritto
 def user_posts(username):
     page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
-    user = User.query.filter_by(username=username).first_or_404() # mi prendo l'id del utente 
-    posts = Post.query.filter_by(author=user)\
-        .order_by(Post.date_posted.desc())\
-        .paginate(page=page, per_page=5) 
+    #user = User.query.filter_by(username=username).first_or_404() # mi prendo l'id del utente 
+    conn = engine.connect()
+    user = conn.execute(select([users.c.id]).where(user.c.username == username)).fetchone()
+    p = conn.execute(select([posts]).where(posts.c.user_id == user).order_by(desc('date_posted'))).fetchall()
+    posts = Post(p.id, p.title, p.data, p.content, p.user_id) #manca la cosa del paginate
+    #posts = Post.query.filter_by(author=user)\
+    #    .order_by(Post.date_posted.desc())\
+    #    .paginate(page=page, per_page=5) 
         # andiamo a filtrare i post per l'utente che ho, li ordiniamo in senso decrescente per la dato dei post, prendiamo 5 post alla volta che sono nel database e li passiamo alla home
+    conn.close()
     return render_template('user_posts.html', posts=posts, user=user) 
 
 
@@ -184,7 +266,12 @@ def reset_request():
         return redirect(url_for('home'))
     form = RequestResetForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first() # prendiamo la email
+        #user = User.query.filter_by(email=form.email.data).first() # prendiamo la email
+        conn = engine.connect()
+        u = conn.execute(select([users]).where(users.c.email == form.email.data)).fetchone()
+        user = User(u.id, u.username, u.email, u.image_file, u.password)
+        conn.close()
+
         send_reset_email(user)  # la inviamo
         flash('An email has been sent with instructions to reset you password', 'info')
         return redirect(url_for('login'))
@@ -202,7 +289,12 @@ def reset_token(token):
     if form.validate_on_submit(): #controlla che tutte le regole del form siano state passate con successo
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8') # criptiamo la password
         user.password = hashed_password
-        db.session.commit() # e committiamo 
+        
+        #db.session.commit() # e committiamo 
+        conn = engine.connect()
+        conn.execute(users.update().values(password=user.password).where(users.c.id==user.id))
+        conn.close()
+
         flash('Your password has benn updated! You are now able to log in', 'success')
         return redirect(url_for('login')) # redirect alla funzione login
     return render_template('reset_token.html', title='Reset Password', form=form)
