@@ -18,10 +18,10 @@ def home():
     #page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
     conn = engine.connect()
     #posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
-    res = conn.execute(select([posts]).order_by(desc('date_posted')))
+    #p = conn.execute(select([posts]).order_by(desc('date_posted'))).fetchall()
+    p = conn.execute(select([posts, users]).where(users.c.id == select([posts.c.user_id]).order_by(desc('date_posted')))).fetchall()
     #p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
     #ps = p.fetchall()
-    p = res.fetchall()
     conn.close()
     #ps = Post(p.id, p.title, p.date_posted, p.content, p.user_id)
     #ps = Post(p[0], p[1], p[2], p[3], p[4])    
@@ -176,10 +176,13 @@ def post(post_id):
     p = conn.execute(select([posts]).where(posts.c.id == post_id)).fetchone()
     if p is None:
         abort(404)
+    post = Post(p.id, p.title, p.date_posted, p.content, p.user_id)
+    u = conn.execute(select([users]).where(users.c.id == post.user_id)).fetchone()
     conn.close()
-    post = Post(p.id, p.title, p.data, p.content, p.user_id)
+    user = User(u.id, u.username, u.email, u.image_file, u.password)
+    
 
-    return render_template('post.html', title=post.title, post=post)
+    return render_template('post.html', title=post.title, post=post, user=user)
 
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST']) #per aggiornare il post, solo se sono io l'utente che lo ha scrtto
@@ -190,26 +193,26 @@ def update_post(post_id):
     p = conn.execute(select([posts]).where(posts.c.id == post_id)).fetchone()
     if p is None:
         abort(404)
-    post = Post(p.id, p.title, p.data, p.content, p.user_id)
     conn.close()
+    post = Post(p.id, p.title, p.date_posted, p.content, p.user_id)
 
 
-    if post.id != current_user.id:
+    if post.user_id != current_user.id:
         abort(403)
     form = PostForm()
-    if form.validate_on_submit:
+    if form.validate_on_submit():
         post.title = form.title.data # se ho cliccato aggiorna aggiorno iìgli attirbuti del post
-        post.content = post.content.data
+        post.content = form.content.data
 
 
         conn = engine.connect()
-        conn.execute(posts.update().values(title=post.title, content=post.content).where(post.c.id==post.id))
+        conn.execute(posts.update().values(title=post.title, content=post.content).where(posts.c.id==post.id))
         conn.close()
 
         #db.session.commit()
         flash('Your post has been updated', 'success')
         return redirect(url_for('post', post_id=post.id))
-    elif request.methods == 'GET': # se sono appena entrato nella pagina mi displaya i valori attuali
+    elif request.method == 'GET': # se sono appena entrato nella pagina mi displaya i valori attuali
         form.title.data = post.title
         form.content = post.content
     return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
@@ -223,10 +226,10 @@ def delete_post(post_id):
     p = conn.execute(select([posts]).where(posts.c.id == post_id)).fetchone()
     if p is None:
         abort(404)
-    post = Post(p.id, p.title, p.data, p.content, p.user_id)
+    post = Post(p.id, p.title, p.date_posted, p.content, p.user_id)
     
 
-    if post.id != current_user.id:
+    if post.user_id != current_user.id:
         abort(403)
     #db.session.delete(post)
     #db.session.commit()
@@ -243,15 +246,15 @@ def user_posts(username):
     page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
     #user = User.query.filter_by(username=username).first_or_404() # mi prendo l'id del utente 
     conn = engine.connect()
-    user = conn.execute(select([users.c.id]).where(user.c.username == username)).fetchone()
-    p = conn.execute(select([posts]).where(posts.c.user_id == user).order_by(desc('date_posted'))).fetchall()
-    posts = Post(p.id, p.title, p.data, p.content, p.user_id) #manca la cosa del paginate
+    user = conn.execute(select([users.c.id]).where(users.c.username == username)).fetchone()
+    p = conn.execute(select([posts]).where(posts.c.user_id == user[0]).order_by(desc('date_posted'))).fetchall()
+    ps = Post(p[0], p[1], p[2], p[3], p[4]) #manca la cosa del paginate
     #posts = Post.query.filter_by(author=user)\
     #    .order_by(Post.date_posted.desc())\
     #    .paginate(page=page, per_page=5) 
         # andiamo a filtrare i post per l'utente che ho, li ordiniamo in senso decrescente per la dato dei post, prendiamo 5 post alla volta che sono nel database e li passiamo alla home
     conn.close()
-    return render_template('user_posts.html', posts=posts, user=user) 
+    return render_template('user_posts.html', posts=ps, user=user) 
 
 
 
