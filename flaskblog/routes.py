@@ -19,7 +19,8 @@ def home():
     conn = engine.connect()
     #posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
     #p = conn.execute(select([posts]).order_by(desc('date_posted'))).fetchall()
-    p = conn.execute(select([posts, users]).where(users.c.id == select([posts.c.user_id]).order_by(desc('date_posted')))).fetchall()
+    #p = conn.execute(select([posts, users]).where(users.c.id == select([posts.c.user_id]).order_by(desc('date_posted')))).fetchall()
+    p = conn.execute("SELECT * FROM posts p JOIN users u ON p.user_id = u.id ORDER BY p.date_posted DESC").fetchall()
     #p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
     #ps = p.fetchall()
     conn.close()
