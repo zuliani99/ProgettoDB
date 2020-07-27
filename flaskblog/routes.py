@@ -162,7 +162,7 @@ def new_post():
         conn.execute(ins, [{"title": form.title.data, "content": form.content.data, "user_id": current_user.id}])
         conn.close()
 
-        send_newpost_notify(form.title.data, form.content.data, current_user.username, datetime.now().strftime("%d/%m/%Y"))
+        #send_newpost_notify(form.title.data, form.content.data, current_user.username, datetime.now().strftime("%d/%m/%Y"))
 
 
         flash('Your post has been created!', 'success')
@@ -247,15 +247,19 @@ def user_posts(username):
     page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
     #user = User.query.filter_by(username=username).first_or_404() # mi prendo l'id del utente 
     conn = engine.connect()
-    user = conn.execute(select([users.c.id]).where(users.c.username == username)).fetchone()
-    p = conn.execute(select([posts]).where(posts.c.user_id == user[0]).order_by(desc('date_posted'))).fetchall()
-    ps = Post(p[0], p[1], p[2], p[3], p[4]) #manca la cosa del paginate
+    u = conn.execute(select([users]).where(users.c.username == username)).fetchone()
+    if u is None:
+        abort(404)
+    user = User(u.id, u.username, u.email, u.image_file, u.password)
+    p = conn.execute(select([posts]).where(posts.c.user_id == user.id).order_by(desc('date_posted'))).fetchall()
+    total = conn.execute('SELECT COUNT (*) FROM posts WHERE posts.user_id = ?', user.id).fetchone()
+    #ps = Post(p.id, p.title, p.date_posted, p.content, p.usser_id) #manca la cosa del paginate
     #posts = Post.query.filter_by(author=user)\
     #    .order_by(Post.date_posted.desc())\
     #    .paginate(page=page, per_page=5) 
         # andiamo a filtrare i post per l'utente che ho, li ordiniamo in senso decrescente per la dato dei post, prendiamo 5 post alla volta che sono nel database e li passiamo alla home
     conn.close()
-    return render_template('user_posts.html', posts=ps, user=user) 
+    return render_template('user_posts.html', posts=p, user=user, total=total[0]) 
 
 
 
