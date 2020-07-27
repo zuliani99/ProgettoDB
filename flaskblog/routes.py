@@ -15,12 +15,13 @@ from sqlalchemy.sql import *
 @app.route("/")
 @app.route("/home")
 def home():
-    #page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
+    page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
     conn = engine.connect()
     #posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
     #p = conn.execute(select([posts]).order_by(desc('date_posted'))).fetchall()
     #p = conn.execute(select([posts, users]).where(users.c.id == select([posts.c.user_id]).order_by(desc('date_posted')))).fetchall()
-    p = conn.execute("SELECT * FROM posts p JOIN users u ON p.user_id = u.id ORDER BY p.date_posted DESC").fetchall()
+    m = conn.execute("SELECT MAX(posts.id) FROM posts").fetchone()
+    p = conn.execute("SELECT * FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id BETWEEN ?+1-?-5 AND ?+1-? ORDER BY p.date_posted DESC ", m[0], page, m[0], page).fetchall()
     #p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
     #ps = p.fetchall()
     conn.close()
