@@ -9,6 +9,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from flaskblog.table import User, Post, datetime, posts, users, engine, metadata
 from flask_mail import Message
 from sqlalchemy.sql import *
+import math
 
 
 
@@ -20,14 +21,15 @@ def home():
     #posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
     #p = conn.execute(select([posts]).order_by(desc('date_posted'))).fetchall()
     #p = conn.execute(select([posts, users]).where(users.c.id == select([posts.c.user_id]).order_by(desc('date_posted')))).fetchall()
-    m = conn.execute("SELECT MAX(posts.id) FROM posts").fetchone()
-    p = conn.execute("SELECT * FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id BETWEEN ?+1-?-5 AND ?+1-? ORDER BY p.date_posted DESC ", m[0], page, m[0], page).fetchall()
+    #m = conn.execute("SELECT MAX(posts.id) FROM posts").fetchone()
+    #p = conn.execute("SELECT *, ? FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id BETWEEN ?+1-?-5 AND ?+1-? ORDER BY p.date_posted DESC ",page, m[0], page, m[0], page).fetchall()
+    p = conn.execute("SELECT * FROM posts p JOIN users u ON p.user_id = u.id ORDER BY p.date_posted DESC ").fetchall()
     #p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
     #ps = p.fetchall()
     conn.close()
     #ps = Post(p.id, p.title, p.date_posted, p.content, p.user_id)
     #ps = Post(p[0], p[1], p[2], p[3], p[4])    
-    return render_template('home.html', posts=p)  
+    return render_template('home.html', posts=p)#, page=page, mp=math.ceil(m[0]/5))
 
 @app.route("/about") #mi renderizza il template about.html con variabuile title='About'
 def about():
