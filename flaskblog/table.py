@@ -33,6 +33,10 @@ def load_user(user_id):
 	conn.close()
 	return User(s.id, s.username, s.email, s.image_file, s.password)
 
+@login_manager.user_loader
+def user_by_email
+
+
 class Post():
 	def __init__(self, id, title, date_posted, content, user_id):
 		self.id = id

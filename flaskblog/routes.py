@@ -71,14 +71,15 @@ def login():
         rs = conn.execute(select([users]).where(users.c.email == form.email.data))
         u = rs.fetchone()
         conn.close()
-        user = User(u.id, u.username, u.email, u.image_file, u.password)
+        if u is not None:
+            user = User(u.id, u.username, u.email, u.image_file, u.password)
 
-        if user and bcrypt.check_password_hash(user.password, form.password.data): 
-            login_user(user, remember=form.remember.data) 
-            next_page = request.args.get('next') # se prima di accedere ho provato ad enbtrarte nella pagina account mi salvo i paramentri del url
-            return redirect(next_page) if next_page else redirect(url_for('home')) # e ritorno a quella pagina altrimenti mi ritorna alla homepage
-        else:
-            flash('Login Unsuccessful. Please check email and password', 'danger') # messaggio di login incorretta
+            if user and bcrypt.check_password_hash(user.password, form.password.data): 
+                login_user(user, remember=form.remember.data) 
+                next_page = request.args.get('next') # se prima di accedere ho provato ad enbtrarte nella pagina account mi salvo i paramentri del url
+                return redirect(next_page) if next_page else redirect(url_for('home')) # e ritorno a quella pagina altrimenti mi ritorna alla homepage
+    
+        flash('Login Unsuccessful. Please check email and password', 'danger') # messaggio di login incorretta
     return render_template('login.html', title='Login', form=form)
 
 
