@@ -5,7 +5,7 @@ from sqlalchemy import *
 from datetime import datetime
 from aeroporto.routes import bcrypt
 
-engine = create_engine('sqlite:////tmp/test.db', echo=True)
+engine = create_engine('sqlite:////tmp/aeroporto.db', echo=True)
 metadata = MetaData()
 
 users = Table('users', metadata,
@@ -57,22 +57,25 @@ usersrole = Table('usersrole', metadata,
 )
 
 metadata.create_all(engine)
+
 conn = engine.connect()
-ins = role.insert()
-conn.execute(ins, [
-	{"name": "Admin"}, {"name": "Customer"}
-])
 
-ins = user.insert()
-conn.execute(ins, [
-	{"name": "Administrator", "email": "administrator@airport.com", "password": bcrypt.generate_password_hash("adminpassword123").decode('utf-8')}
-])
+result = conn.execute("SELECT * FROM role WHERE name = 'Admin' OR name = 'Customers'").fetchone()
+if result is None:
+	ins = role.insert()
+	conn.execute(ins, [
+		{"name": "Admin"}, {"name": "Customer"}
+	])
 
-result = conn.execute(select([users.c.id]).where(users.c.name == "Administrator")).fetchone()
-ins = usersrole.insert()
-conn.execute(ins, [
-	{"user_id": result[0], "role_id": 1}
-])
+result = conn.execute("SELECT * FROM users WHERE 'name' = 'Administrator' AND 'email' = 'administrator@airport.com'").fetchone()
+if result is None:
+	conn.execute("INSERT INTO users('name', 'email', 'image_file', 'password', 'admin') VALUES ('Administrator', 'administrator@airport.com', 'default.jpg', ?, 1)", bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
+
+	result = conn.execute(select([users.c.id]).where(users.c.name == "Administrator")).fetchone()
+	ins = usersrole.insert()
+	conn.execute(ins, [
+		{"user_id": result[0], "role_id": 1}
+	])
 
 conn.close()
 
