@@ -13,10 +13,10 @@
 
     {% if title %}
         <!-- in qusto caso il titolo è presente quindi non saiamo nella hompage -->
-        <title>Flask Blog - {{ title }}</title>
+        <title>Compagnia Aerea - {{ title }}</title>
     {% else %}
         <!-- in qusto caso il titolo NON è presente quindi saiamo nella hompage -->
-        <title>Flask Blog</title>
+        <title>>Compagnia Aere</title>
     {% endif %}
 </head>
 <body>
@@ -37,7 +37,6 @@
               {% if current_user.is_authenticated %}
                 <!-- Se ho fatto l'accesso mi displaya le sezioini Account e Logout -->
                 <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
-                <a class="nav-item nav-link" href="{{ url_for('new_post') }}">New Post</a>
                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
               {% else %}
                 <!-- Se NON ho fatto l'accesso mi displaya le sezioini Login e Register -->
