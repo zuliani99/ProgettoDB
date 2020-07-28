@@ -1,2 +1,6 @@
 
+<<<<<<< Updated upstream
 *.pyc
+=======
+flaskblog/__pycache__/routes.cpython-38.pyc
+>>>>>>> Stashed changes

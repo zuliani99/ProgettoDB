@@ -9,7 +9,6 @@ from flask_login import login_user, current_user, logout_user, login_required
 from flaskblog.table import User, Post, datetime, posts, users, engine, metadata
 from flask_mail import Message
 from sqlalchemy.sql import *
-import math
 
 
 
