@@ -1,20 +1,21 @@
 from aeroporto import login_manager, app
 from flask_login import UserMixin
+from flask_user import current_user, roles_required, UserManager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from sqlalchemy import *
 from datetime import datetime
 from aeroporto.routes import bcrypt
 
-engine = create_engine('sqlite:////tmp/aeroporto.db', echo=True)
+engine = create_engine('sqlite:////tmp/aeroporto3.db', echo=True)
 metadata = MetaData()
 
 users = Table('users', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('name', String(20), unique=True, nullable=False),
+	Column('username', String(20), unique=True, nullable=False),
 	Column('email', String(120), unique=True, nullable=False),
 	Column('image_file', String(20), nullable=False, default='default.jpg'),
 	Column('password', String(60), nullable=False),
-	Column('admin', Boolean, nullable=False, default=False)
+	Column('role', String(10), nullable=False, default='customer')
 )
 
 aerei = Table('aerei', metadata,
@@ -45,55 +46,25 @@ prenotazioni = Table('prenotazioni', metadata,
 	Column('numeroPosto', Integer, nullable=False)
 )
 
-role = Table ('role', metadata,
-	Column('id', Integer, primary_key=True),
-	Column('name', String(20), unique=True)
-)
-
-usersrole = Table('usersrole', metadata,
-	Column('id', Integer, primary_key=True),
-	Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
-	Column('role_id', Integer, ForeignKey('role.id', ondelete='CASCADE'), nullable=False)
-)
-
 metadata.create_all(engine)
 
 conn = engine.connect()
-
-result = conn.execute("SELECT * FROM role WHERE name = 'Admin' OR name = 'Customers'").fetchone()
-if result is None:
-	ins = role.insert()
-	conn.execute(ins, [
-		{"name": "Admin"}, {"name": "Customer"}
-	])
-
-result = conn.execute("SELECT * FROM users WHERE 'name' = 'Administrator' AND 'email' = 'administrator@airport.com'").fetchone()
-if result is None:
-	conn.execute("INSERT INTO users('name', 'email', 'image_file', 'password', 'admin') VALUES ('Administrator', 'administrator@airport.com', 'default.jpg', ?, 1)", bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
-
-	result = conn.execute(select([users.c.id]).where(users.c.name == "Administrator")).fetchone()
-	ins = usersrole.insert()
-	conn.execute(ins, [
-		{"user_id": result[0], "role_id": 1}
-	])
-
+trans = conn.begin()
+try:
+	conn.execute("INSERT INTO users ('username', 'email', 'image_file', 'password', 'role') VALUES ('Administrator', 'administrator@takeafly.com', 'default.jpg', ?, 'admin')",  bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
+except:
+	trans.rollback()
 conn.close()
 
-@login_manager.user_loader
-def load_user(user_id):
-	conn = engine.connect()
-	s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
-	conn.close()
-	return User(s.id, s.nome, s.email, s.image_file, s.password, s.admin)
 
 class User(UserMixin):
-    def __init__(self, id, nome, email, image_file, password, admin):
+    def __init__(self, id, username, email, image_file, password, role):
         self.id = id
-        self.nome = username
+        self.username = username
         self.email = email
         self.image_file = image_file
         self.password = password
-        self.admin = admin
+        self.role = role
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
@@ -111,3 +82,12 @@ class User(UserMixin):
 
     def __repr__(self):
         return "User('{self.nome}', '{self.email}', '{self.image_file}')"
+
+@login_manager.user_loader
+def load_user(user_id):
+	conn = engine.connect()
+	s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
+	conn.close()
+	if s is None:
+		return None
+	return User(s.id, s.username, s.email, s.image_file, s.password, s.role)

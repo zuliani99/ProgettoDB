@@ -6,11 +6,32 @@ from flask import render_template, url_for, flash, redirect, request, abort #imp
 from aeroporto import app, bcrypt, mail
 from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm
 from flask_login import login_user, current_user, logout_user, login_required
-from aeroporto.table import User, datetime, users, engine, metadata
+from aeroporto.table import User, datetime, users, engine, metadata, roles_required
 from flask_mail import Message
 from sqlalchemy.sql import *
+from flask_principal import Permission, RoleNeed, ActionNeed, identity_loaded
 
+be_admin = RoleNeed('admin')
+be_customer = RoleNeed('customer')
+to_sign_in = ActionNeed('sign in')
 
+user = Permission(to_sign_in)
+user.description = "User’s permissions"
+admin = Permission(be_admin)
+admin.description = 'Admin’s permissions'
+apps_needs = [be_admin, to_sign_in]
+apps_permissions = [user, admin]
+
+@identity_loaded.connect
+def on_identity_loaded(sender, identity):
+    needs = []
+    if identity.id in ('user', 'admin'):
+        needs.append(to_sign_in)
+    if identity.id == 'admin':
+        needs.append(be_admin)
+    
+    for n in needs:
+        g.identity.provides.add(n)
 
 @app.route("/")
 @app.route("/home")
@@ -71,10 +92,11 @@ def login():
         u = rs.fetchone()
         conn.close()
         if u is not None:
-            user = User(u.id, u.nome, u.email, u.image_file, u.password)
+            user = User(u.id, u.username, u.email, u.image_file, u.password, u.role)
 
             if user and bcrypt.check_password_hash(user.password, form.password.data): 
                 login_user(user, remember=form.remember.data) 
+                identity_changed.send(current_app._get_current_object(), identity=Identity(user.role))
                 next_page = request.args.get('next') # se prima di accedere ho provato ad enbtrarte nella pagina account mi salvo i paramentri del url
                 return redirect(next_page) if next_page else redirect(url_for('home')) # e ritorno a quella pagina altrimenti mi ritorna alla homepage
     
@@ -85,6 +107,7 @@ def login():
 @app.route("/logout")
 def logout(): # funzuione di logout
     logout_user()
+    identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
     return redirect(url_for('home')) # mi riporta alla homepage
 
 def save_pictures(form_picture): # funzione di salvataggio nel filesystem
@@ -115,13 +138,13 @@ def account(): # funzione di account
             conn.close()
 
 
-        current_user.nome = form.nome.data
+        current_user.username = form.username.data
         current_user.email = form.email.data
         
 
         #db.session.commit()
         conn = engine.connect()
-        u = users.update().values(nome=current_user.nome, email=current_user.email).where(users.c.id==current_user.id)
+        u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
         conn.execute(u)
         conn.close()
 
@@ -176,7 +199,7 @@ def reset_request():
         rs = conn.execute(select([users]).where(users.c.email == form.email.data))
         u = rs.fetchone()
         conn.close()
-        user = User(u.id, u.nome, u.email, u.image_file, u.password)
+        user = User(u.id, u.nome, u.email, u.image_file, u.password, u.role)
 
         send_reset_email(user)  # la inviamo
         flash('An email has been sent with instructions to reset you password', 'info')
@@ -204,3 +227,9 @@ def reset_token(token):
         flash('Your password has benn updated! You are now able to log in', 'success')
         return redirect(url_for('login')) # redirect alla funzione login
     return render_template('reset_token.html', title='Reset Password', form=form)
+
+
+@app.route("/dashboard", methods=['GET', 'POST'])
+@admin.require(http_exception=403)
+def dashboard():
+    return render_template('dashboard.html', title='Dashboard')
