@@ -2,36 +2,34 @@
 import secrets
 import os
 from PIL import Image #pip install Pillow
-from flask import render_template, url_for, flash, redirect, request, abort #import necessari per il funzionamento dell'applicazione
+from flask import render_template, url_for, flash, redirect, request, abort, current_app #import necessari per il funzionamento dell'applicazione
 from aeroporto import app, bcrypt, mail
 from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm
-from flask_login import login_user, current_user, logout_user, login_required
-from aeroporto.table import User, datetime, users, engine, metadata, roles_required
+from flask_login import login_user, current_user, logout_user
+from aeroporto.table import User, datetime, users, engine, metadata, load_user
 from flask_mail import Message
 from sqlalchemy.sql import *
-from flask_principal import Permission, RoleNeed, ActionNeed, identity_loaded
+from functools import wraps
+from flask_principal import identity_changed, Identity, AnonymousIdentity
 
-be_admin = RoleNeed('admin')
-be_customer = RoleNeed('customer')
-to_sign_in = ActionNeed('sign in')
 
-user = Permission(to_sign_in)
-user.description = "User’s permissions"
-admin = Permission(be_admin)
-admin.description = 'Admin’s permissions'
-apps_needs = [be_admin, to_sign_in]
-apps_permissions = [user, admin]
+def login_required(role="ANY"):
+    def wrapper(fn):
+        @wraps(fn)
+        def wrap(*args, **kwargs):
+            if not current_user.is_authenticated:
+               	#return current_app.login_manager.unauthorized()
+               	flash("You need to be an admin to view this page.", 'danger')
+                return redirect(url_for('home'))
+            urole = load_user(current_user.id).get_urole()
+            if ((urole != role) and (role != "ANY")):
+                #return current_app.login_manager.unauthorized()
+                flash("You need to be an admin to view this page.", 'danger')
+                return redirect(url_for('home'))
+            return fn(*args, **kwargs)
+        return wrap
+    return wrapper
 
-@identity_loaded.connect
-def on_identity_loaded(sender, identity):
-    needs = []
-    if identity.id in ('user', 'admin'):
-        needs.append(to_sign_in)
-    if identity.id == 'admin':
-        needs.append(be_admin)
-    
-    for n in needs:
-        g.identity.provides.add(n)
 
 @app.route("/")
 @app.route("/home")
@@ -43,7 +41,8 @@ def home():
     #p = conn.execute(select([posts, users]).where(users.c.id == select([posts.c.user_id]).order_by(desc('date_posted')))).fetchall()
     #m = conn.execute("SELECT MAX(posts.id) FROM posts").fetchone()
     #p = conn.execute("SELECT *, ? FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id BETWEEN ?+1-?-5 AND ?+1-? ORDER BY p.date_posted DESC ",page, m[0], page, m[0], page).fetchall()
-    v = conn.execute("SELECT * FROM voli v JOIN aeroporti part ON v.aeropartoPartenza = part.id JOIN aeroporti arr ON v.aeropartoArrivo = arr.id JOIN aerei a ON v.aereo = a.id ORDER BY v.oraPartenza DESC ").fetchall()
+    v = conn.execute("SELECT v.id ,part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo FROM voli v JOIN aeroporti part ON v.aeropartoPartenza = part.id JOIN aeroporti arr ON v.aeropartoArrivo = arr.id JOIN aerei a ON v.aereo = a.id WHERE v.oraPartenza > ? ORDER BY v.oraPartenza ASC", datetime.utcnow()).fetchall()
+    #v =  conn.execute("SELECT * FROM voli").fetchall()
     #p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
     #ps = p.fetchall()
     conn.close()
@@ -69,7 +68,7 @@ def register():
         #db.session.add(user) # lo aggiungiamo
         #db.session.commit() # e committiamo 
         conn = engine.connect()
-        conn.execute(users.insert(),[{"nome": form.nome.data, "email": form.email.data, "password": hashed_password}])
+        conn.execute(users.insert(),[{"username": form.username.data, "email": form.email.data, "password": hashed_password}])
         conn.close()
 
 
@@ -125,7 +124,7 @@ def save_pictures(form_picture): # funzione di salvataggio nel filesystem
 
 
 @app.route("/account", methods=['GET', 'POST'])
-@login_required # necessario se vogliaomo ch la pagina sia visitabile solo se l'utente ha eseguito l'accesso alla piattaforma
+@login_required(role="ANY") # necessario se vogliaomo ch la pagina sia visitabile solo se l'utente ha eseguito l'accesso alla piattaforma
 def account(): # funzione di account
     form = UpdateAccountForm()  # from di updaTE
     if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
@@ -229,7 +228,11 @@ def reset_token(token):
     return render_template('reset_token.html', title='Reset Password', form=form)
 
 
+@app.route("/volo", methods=['GET', 'POST'])
+def volo(volo_id):
+	return render_template('volo.html', title='volo_id')
+
 @app.route("/dashboard", methods=['GET', 'POST'])
-@admin.require(http_exception=403)
+@login_required(role="admin")
 def dashboard():
     return render_template('dashboard.html', title='Dashboard')

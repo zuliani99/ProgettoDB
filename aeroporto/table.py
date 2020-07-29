@@ -31,11 +31,11 @@ aeroporti = Table('aeroporti', metadata,
 
 voli = Table('voli', metadata,
 	Column('id', Integer, primary_key = True),
-	Column('aeropartoArrivo', Integer, ForeignKey('aeroporti.id'), nullable=False),
 	Column('aeropartoPartenza', Integer, ForeignKey('aeroporti.id'), nullable=False),
-	Column('aereo', Integer, ForeignKey('aerei.id'), nullable=False),
 	Column('oraPartenza', DateTime, nullable=False),
+	Column('aeropartoArrivo', Integer, ForeignKey('aeroporti.id'), nullable=False),
 	Column('oraArrivo', DateTime, nullable=False),
+	Column('aereo', Integer, ForeignKey('aerei.id'), nullable=False),
 	Column('prezzo', Float, nullable=False)
 )
 
@@ -54,8 +54,32 @@ try:
 	conn.execute("INSERT INTO users ('username', 'email', 'image_file', 'password', 'role') VALUES ('Administrator', 'administrator@takeafly.com', 'default.jpg', ?, 'admin')",  bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
 except:
 	trans.rollback()
-conn.close()
 
+
+trans = conn.begin()
+try:
+	conn.execute("INSERT INTO aeroporti ('id', 'name', 'indirizzo') VALUES (1, 'Aeroporto di Roma Termini', 'asc')")
+	conn.execute("INSERT INTO aeroporti ('id', 'name', 'indirizzo') VALUES (2, 'Aeroporto di Milano', 'asc')")
+	conn.execute("INSERT INTO aeroporti ('id', 'name', 'indirizzo') VALUES (3, 'Aeroporto di Treviso', 'asc')")
+	conn.execute("INSERT INTO aeroporti ('id', 'name', 'indirizzo') VALUES (4, 'Aeroporto di Bologna', 'asc')")
+	conn.execute("INSERT INTO aeroporti ('id', 'name', 'indirizzo') VALUES (4, 'Aeroporto di Firenze', 'asc')")
+except:
+	trans.rollback()
+
+trans = conn.begin()
+try:
+	conn.execute("INSERT INTO aerei ('id', 'numeroPosti') VALUES (1, 50)")
+	conn.execute("INSERT INTO aerei ('id', 'numeroPosti') VALUES (2, 60)")
+	conn.execute("INSERT INTO aerei ('id', 'numeroPosti') VALUES (3, 100)")
+except:
+	trans.rollback()
+
+trans = conn.begin()
+try:
+	conn.execute("INSERT INTO voli ('id', 'aeropartoPartenza', 'oraPartenza','aeropartoArrivo', 'oraArrivo', 'aereo', 'prezzo') VALUES (1, 3, '2020/07/30 14:00:00.000000', 1, '2020/07/30 15:00:00.000000', 1, 30)")
+except:
+	trans.rollback()
+conn.close()
 
 class User(UserMixin):
     def __init__(self, id, username, email, image_file, password, role):
@@ -65,6 +89,17 @@ class User(UserMixin):
         self.image_file = image_file
         self.password = password
         self.role = role
+
+    def get_id(self):
+        return self.id       
+    def get_username(self):
+        return self.username
+    def get_email(self):
+    	return self.email
+    def get_password(self):
+        return self.password
+    def get_urole(self):
+        return self.role
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
@@ -82,6 +117,8 @@ class User(UserMixin):
 
     def __repr__(self):
         return "User('{self.nome}', '{self.email}', '{self.image_file}')"
+
+
 
 @login_manager.user_loader
 def load_user(user_id):
