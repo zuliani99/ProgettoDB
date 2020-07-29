@@ -11,7 +11,7 @@ from flask_mail import Message
 from sqlalchemy.sql import *
 from functools import wraps
 from flask_principal import identity_changed, Identity, AnonymousIdentity
-
+from flask_mysqldb import MySQL
 
 def login_required(role="ANY"):
     def wrapper(fn):
@@ -35,7 +35,7 @@ def login_required(role="ANY"):
 @app.route("/home")
 def home():
     #page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
-    conn = engine.connect()
+    conn = mysql.connection.cursor()
     #posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
     #p = conn.execute(select([posts]).order_by(desc('date_posted'))).fetchall()
     #p = conn.execute(select([posts, users]).where(users.c.id == select([posts.c.user_id]).order_by(desc('date_posted')))).fetchall()
@@ -67,7 +67,7 @@ def register():
 
         #db.session.add(user) # lo aggiungiamo
         #db.session.commit() # e committiamo 
-        conn = engine.connect()
+        conn = mysql.connection.cursor()
         conn.execute(users.insert(),[{"username": form.username.data, "email": form.email.data, "password": hashed_password}])
         conn.close()
 
@@ -86,7 +86,7 @@ def login():
         
 
         #user = User.query.filter_by(email=form.email.data).first() 
-        conn = engine.connect()
+        conn = mysql.connection.cursor()
         rs = conn.execute(select([users]).where(users.c.email == form.email.data))
         u = rs.fetchone()
         conn.close()
@@ -142,7 +142,7 @@ def account(): # funzione di account
         
 
         #db.session.commit()
-        conn = engine.connect()
+        conn = mysql.connection.cursor()
         u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
         conn.execute(u)
         conn.close()
@@ -158,7 +158,7 @@ def account(): # funzione di account
 
 def send_newpost_notify(title,content,aut_username,date): # funzione ch einvia una mail a tutti gli utenti con il contenuto del post
     #users = User.query.all()
-    conn = engine.connect()
+    conn = mysql.connection.cursor()
     user = conn.execute(select([users])).fetchall()
     conn.close()
 
@@ -194,7 +194,7 @@ def reset_request():
     form = RequestResetForm()
     if form.validate_on_submit():
         #user = User.query.filter_by(email=form.email.data).first() # prendiamo la email
-        conn = engine.connect()
+        conn = mysql.connection.cursor()
         rs = conn.execute(select([users]).where(users.c.email == form.email.data))
         u = rs.fetchone()
         conn.close()
@@ -219,7 +219,7 @@ def reset_token(token):
         user.password = hashed_password
         
         #db.session.commit() # e committiamo 
-        conn = engine.connect()
+        conn = mysql.connection.cursor()
         conn.execute(users.update().values(password=user.password).where(users.c.id==user.id))
         conn.close()
 

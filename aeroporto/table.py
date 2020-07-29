@@ -5,8 +5,9 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from sqlalchemy import *
 from datetime import datetime
 from aeroporto.routes import bcrypt
+from flask_mysqldb import MySQL
 
-engine = create_engine('sqlite:////tmp/aeroporto3.db', echo=True)
+engine = create_engine('mysql://root:root@localhost/MyDB')
 metadata = MetaData()
 
 users = Table('users', metadata,
@@ -48,7 +49,7 @@ prenotazioni = Table('prenotazioni', metadata,
 
 metadata.create_all(engine)
 
-conn = engine.connect()
+conn = mysql.connection.cursor()
 trans = conn.begin()
 try:
 	conn.execute("INSERT INTO users ('username', 'email', 'image_file', 'password', 'role') VALUES ('Administrator', 'administrator@takeafly.com', 'default.jpg', ?, 'admin')",  bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
@@ -122,7 +123,7 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-	conn = engine.connect()
+	conn = mysql.connection.cursor()
 	s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
 	conn.close()
 	if s is None:

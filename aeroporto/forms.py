@@ -5,6 +5,7 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextA
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from aeroporto.table import User, users, engine, metadata
 from sqlalchemy.sql import *
+from flask_mysqldb import MySQL
 
 class RegistrationForm(FlaskForm):  
     username = StringField('Username', 
@@ -20,7 +21,7 @@ class RegistrationForm(FlaskForm):
 
     def validate_username(self, username):
         #user = User.query.filter_by(username=username.data).first()
-        conn = engine.connect()
+        conn = mysql.connection.cursor()
         u = conn.execute(select([users]).where(users.c.username == username.data))
         user = u.fetchone()
         conn.close()
@@ -29,7 +30,7 @@ class RegistrationForm(FlaskForm):
 
     def validate_email(self, email):
         #user = User.query.filter_by(email=email.data).first()
-        conn = engine.connect()
+        conn = mysql.connection.cursor()
         u = conn.execute(select([users]).where(users.c.email == email.data))
         user = u.fetchone()
         conn.close()
@@ -52,7 +53,7 @@ class UpdateAccountForm(FlaskForm):
     def validate_username(self, username):
         if username.data != current_user.username:
             #user = User.query.filter_by(username=username.data).first() 
-            conn = engine.connect()
+            conn = mysql.connection.cursor()
             u = conn.execute(select([users]).where(users.c.username == username.data))
             user = u.fetchone()
             conn.close()
@@ -62,7 +63,7 @@ class UpdateAccountForm(FlaskForm):
     def validate_email(self, email):
         if email.data != current_user.email:
             #user = User.query.filter_by(email=email.data).first()
-            conn = engine.connect()
+            conn = mysql.connection.cursor()
             u = conn.execute(select([users]).where(users.c.email == email.data))
             user = u.fetchone()
             conn.close()
@@ -77,7 +78,7 @@ class RequestResetForm(FlaskForm):
 
     def validate_email(self, email):
         #user = User.query.filter_by(email=email.data).first()
-        conn = engine.connect()
+        conn = mysql.connection.cursor()
         u = conn.execute(select([users]).where(users.c.email == email.data))
         user = u.fetchone()
         conn.close()
