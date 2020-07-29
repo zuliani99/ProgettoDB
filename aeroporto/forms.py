@@ -21,7 +21,7 @@ class RegistrationForm(FlaskForm):
 
     def validate_username(self, username):
         #user = User.query.filter_by(username=username.data).first()
-        conn = mysql.connection.cursor()
+        conn = engine.connect()
         u = conn.execute(select([users]).where(users.c.username == username.data))
         user = u.fetchone()
         conn.close()
@@ -30,7 +30,7 @@ class RegistrationForm(FlaskForm):
 
     def validate_email(self, email):
         #user = User.query.filter_by(email=email.data).first()
-        conn = mysql.connection.cursor()
+        conn = engine.connect()
         u = conn.execute(select([users]).where(users.c.email == email.data))
         user = u.fetchone()
         conn.close()
@@ -53,7 +53,7 @@ class UpdateAccountForm(FlaskForm):
     def validate_username(self, username):
         if username.data != current_user.username:
             #user = User.query.filter_by(username=username.data).first() 
-            conn = mysql.connection.cursor()
+            conn = engine.connect()
             u = conn.execute(select([users]).where(users.c.username == username.data))
             user = u.fetchone()
             conn.close()
@@ -63,7 +63,7 @@ class UpdateAccountForm(FlaskForm):
     def validate_email(self, email):
         if email.data != current_user.email:
             #user = User.query.filter_by(email=email.data).first()
-            conn = mysql.connection.cursor()
+            conn = engine.connect()
             u = conn.execute(select([users]).where(users.c.email == email.data))
             user = u.fetchone()
             conn.close()
@@ -78,7 +78,7 @@ class RequestResetForm(FlaskForm):
 
     def validate_email(self, email):
         #user = User.query.filter_by(email=email.data).first()
-        conn = mysql.connection.cursor()
+        conn = engine.connect()
         u = conn.execute(select([users]).where(users.c.email == email.data))
         user = u.fetchone()
         conn.close()

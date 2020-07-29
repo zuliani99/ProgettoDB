@@ -35,13 +35,13 @@ def login_required(role="ANY"):
 @app.route("/home")
 def home():
     #page = request.args.get('page', 1, type=int) # richiediamo il numero di pagina nell'url, di default è 1 e deve essere un int così se ci passano cose che non sono int darà erorre
-    conn = mysql.connection.cursor()
+    conn = engine.connect()
     #posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # andiamo a prendere 5 post alla volta che sono nel database e li passiamo alla home
     #p = conn.execute(select([posts]).order_by(desc('date_posted'))).fetchall()
     #p = conn.execute(select([posts, users]).where(users.c.id == select([posts.c.user_id]).order_by(desc('date_posted')))).fetchall()
     #m = conn.execute("SELECT MAX(posts.id) FROM posts").fetchone()
     #p = conn.execute("SELECT *, ? FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id BETWEEN ?+1-?-5 AND ?+1-? ORDER BY p.date_posted DESC ",page, m[0], page, m[0], page).fetchall()
-    v = conn.execute("SELECT v.id ,part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo FROM voli v JOIN aeroporti part ON v.aeropartoPartenza = part.id JOIN aeroporti arr ON v.aeropartoArrivo = arr.id JOIN aerei a ON v.aereo = a.id WHERE v.oraPartenza > ? ORDER BY v.oraPartenza ASC", datetime.utcnow()).fetchall()
+    v = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo FROM voli v JOIN aeroporti part ON v.aeroportoPartenza = part.id JOIN aeroporti arr ON v.aeroportoArrivo = arr.id JOIN aerei a ON v.aereo = a.id WHERE v.oraPartenza > ? ORDER BY v.oraPartenza ASC", datetime.utcnow()).fetchall()
     #v =  conn.execute("SELECT * FROM voli").fetchall()
     #p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
     #ps = p.fetchall()
@@ -67,7 +67,7 @@ def register():
 
         #db.session.add(user) # lo aggiungiamo
         #db.session.commit() # e committiamo 
-        conn = mysql.connection.cursor()
+        conn = engine.connect()
         conn.execute(users.insert(),[{"username": form.username.data, "email": form.email.data, "password": hashed_password}])
         conn.close()
 
@@ -86,7 +86,7 @@ def login():
         
 
         #user = User.query.filter_by(email=form.email.data).first() 
-        conn = mysql.connection.cursor()
+        conn = engine.connect()
         rs = conn.execute(select([users]).where(users.c.email == form.email.data))
         u = rs.fetchone()
         conn.close()
@@ -142,7 +142,7 @@ def account(): # funzione di account
         
 
         #db.session.commit()
-        conn = mysql.connection.cursor()
+        conn = engine.connect()
         u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
         conn.execute(u)
         conn.close()
@@ -158,7 +158,7 @@ def account(): # funzione di account
 
 def send_newpost_notify(title,content,aut_username,date): # funzione ch einvia una mail a tutti gli utenti con il contenuto del post
     #users = User.query.all()
-    conn = mysql.connection.cursor()
+    conn = engine.connect()
     user = conn.execute(select([users])).fetchall()
     conn.close()
 
@@ -194,7 +194,7 @@ def reset_request():
     form = RequestResetForm()
     if form.validate_on_submit():
         #user = User.query.filter_by(email=form.email.data).first() # prendiamo la email
-        conn = mysql.connection.cursor()
+        conn = engine.connect()
         rs = conn.execute(select([users]).where(users.c.email == form.email.data))
         u = rs.fetchone()
         conn.close()
@@ -219,7 +219,7 @@ def reset_token(token):
         user.password = hashed_password
         
         #db.session.commit() # e committiamo 
-        conn = mysql.connection.cursor()
+        conn = engine.connect()
         conn.execute(users.update().values(password=user.password).where(users.c.id==user.id))
         conn.close()
 

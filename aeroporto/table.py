@@ -7,7 +7,8 @@ from datetime import datetime
 from aeroporto.routes import bcrypt
 from flask_mysqldb import MySQL
 
-engine = create_engine('mysql://root:root@localhost/MyDB')
+
+engine = create_engine('mysql://admin@localhost/MyDB')
 metadata = MetaData()
 
 users = Table('users', metadata,
@@ -32,9 +33,9 @@ aeroporti = Table('aeroporti', metadata,
 
 voli = Table('voli', metadata,
 	Column('id', Integer, primary_key = True),
-	Column('aeropartoPartenza', Integer, ForeignKey('aeroporti.id'), nullable=False),
+	Column('aeroportoPartenza', Integer, ForeignKey('aeroporti.id'), nullable=False),
 	Column('oraPartenza', DateTime, nullable=False),
-	Column('aeropartoArrivo', Integer, ForeignKey('aeroporti.id'), nullable=False),
+	Column('aeroportoArrivo', Integer, ForeignKey('aeroporti.id'), nullable=False),
 	Column('oraArrivo', DateTime, nullable=False),
 	Column('aereo', Integer, ForeignKey('aerei.id'), nullable=False),
 	Column('prezzo', Float, nullable=False)
@@ -49,7 +50,8 @@ prenotazioni = Table('prenotazioni', metadata,
 
 metadata.create_all(engine)
 
-conn = mysql.connection.cursor()
+
+conn = engine.connect()
 trans = conn.begin()
 try:
 	conn.execute("INSERT INTO users ('username', 'email', 'image_file', 'password', 'role') VALUES ('Administrator', 'administrator@takeafly.com', 'default.jpg', ?, 'admin')",  bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
@@ -123,7 +125,7 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-	conn = mysql.connection.cursor()
+	conn = engine.connect()
 	s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
 	conn.close()
 	if s is None:
