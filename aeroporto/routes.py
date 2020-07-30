@@ -4,7 +4,7 @@ import os
 from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request, abort, current_app #import necessari per il funzionamento dell'applicazione
 from aeroporto import app, bcrypt, mail
-from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm
+from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddFlyForm
 from flask_login import login_user, current_user, logout_user
 from aeroporto.table import User, users, engine, metadata, load_user
 from flask_mail import Message
@@ -236,4 +236,5 @@ def volo(volo_id):
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required(role="admin")
 def dashboard():
-    return render_template('dashboard.html', title='Dashboard')
+    form = AddFlyForm()
+    return render_template('dashboard.html', title='Dashboard', form=form)

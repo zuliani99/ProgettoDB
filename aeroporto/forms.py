@@ -5,13 +5,11 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextA
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from aeroporto.table import User, users, engine, metadata
 from sqlalchemy.sql import *
-from flask_mysqldb import MySQL
+
 
 class RegistrationForm(FlaskForm):  
-    username = StringField('Username', 
-                           validators=[DataRequired(), Length(min=2, max=20)]) 
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()]) 
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)]) 
+    email = StringField('Email',bvalidators=[DataRequired(), Email()]) 
     password = PasswordField('Password', validators=[DataRequired()]) 
     
     confirm_password = PasswordField('Confirm Password',
@@ -89,3 +87,8 @@ class ResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()]) 
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')]) 
     submit = SubmitField('Reset Password')
+
+class AddFlyForm(FlaskForm):
+    aeroportoPartenza = StringField('Aeroporto di partenza', validators=[DataRequired(), Length(min=2, max = 50)])
+    aeroportoArrivo = StringField('Aeroporto di arrivo', validators=[DataRequired(), Length(min=2, max = 50)])
+    submit = SubmitField('Aggiungi')
