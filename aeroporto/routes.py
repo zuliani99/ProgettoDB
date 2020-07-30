@@ -6,12 +6,13 @@ from flask import render_template, url_for, flash, redirect, request, abort, cur
 from aeroporto import app, bcrypt, mail
 from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm
 from flask_login import login_user, current_user, logout_user
-from aeroporto.table import User, datetime, users, engine, metadata, load_user
+from aeroporto.table import User, users, engine, metadata, load_user
 from flask_mail import Message
 from sqlalchemy.sql import *
 from functools import wraps
 from flask_principal import identity_changed, Identity, AnonymousIdentity
 from flask_mysqldb import MySQL
+from datetime import datetime
 
 def login_required(role="ANY"):
     def wrapper(fn):
@@ -41,7 +42,7 @@ def home():
     #p = conn.execute(select([posts, users]).where(users.c.id == select([posts.c.user_id]).order_by(desc('date_posted')))).fetchall()
     #m = conn.execute("SELECT MAX(posts.id) FROM posts").fetchone()
     #p = conn.execute("SELECT *, ? FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id BETWEEN ?+1-?-5 AND ?+1-? ORDER BY p.date_posted DESC ",page, m[0], page, m[0], page).fetchall()
-    v = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo FROM voli v JOIN aeroporti part ON v.aeroportoPartenza = part.id JOIN aeroporti arr ON v.aeroportoArrivo = arr.id JOIN aerei a ON v.aereo = a.id WHERE v.oraPartenza > ? ORDER BY v.oraPartenza ASC", datetime.utcnow()).fetchall()
+    v = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and v.oraPartenza > %s ORDER BY v.oraPartenza ASC", datetime.utcnow()).fetchall()
     #v =  conn.execute("SELECT * FROM voli").fetchall()
     #p = conn.execute("SELECT * FROM posts ORDER BY date_posted DESC")
     #ps = p.fetchall()
