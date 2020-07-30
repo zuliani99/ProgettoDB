@@ -6,7 +6,7 @@ from flask import render_template, url_for, flash, redirect, request, abort, cur
 from aeroporto import app, bcrypt, mail
 from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddFlyForm
 from flask_login import login_user, current_user, logout_user
-from aeroporto.table import User, users, engine, metadata, load_user
+from aeroporto.table import User, users, engine, metadata, load_user, voli
 from flask_mail import Message
 from sqlalchemy.sql import *
 from functools import wraps
@@ -229,9 +229,17 @@ def reset_token(token):
     return render_template('reset_token.html', title='Reset Password', form=form)
 
 
-@app.route("/volo", methods=['GET', 'POST'])
+@app.route("/volo<volo_id>", methods=['GET', 'POST'])
 def volo(volo_id):
-	return render_template('volo.html', title='volo_id')
+    conn = engine.connect()
+    trans = conn.begin()
+    try:
+        conn.execute("CREATE VIEW posticooupati_volo AS SELECT id_volo, COUNT(*) AS postioccupati FROM prenotazioni GROUP BY id_volo")
+    except:
+        trans.rollback()
+    volo = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, pov.postioccupati, a.numeroPosti FROM voli v LEFT JOIN posticooupati_volo pov ON v.id=pov.id_volo, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and v.id = pov.id_volo and v.id = %s",volo_id).fetchall()
+    conn.close()
+    return render_template('volo.html', title='volo_id', volo=volo)
 
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required(role="admin")

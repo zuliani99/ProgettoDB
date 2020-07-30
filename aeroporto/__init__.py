@@ -8,7 +8,7 @@ from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'    #chiave necessaria per l'applicazione
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin@localhost/MyDB'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin:admin@localhostMyDB'
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -23,9 +23,11 @@ mail = Mail(app)
 mysql = MySQL()
 
 app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_PORT'] = '3306'
 app.config['MYSQL_USER'] = 'admin'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'admin'
 app.config['MYSQL_DB'] = 'MyDB'
+app.config['MYSQL_DATABASE_CHARSET'] = 'utf-8'
 
 mysql.init_app(app)
 

@@ -11,16 +11,22 @@
 	    	</tr>
 	  	</thead>
 	  	<tbody>
-    {% for volo in voli %}
-	    	<tr onclick="window.location.href='{{ url_for('volo', volo_id=volo[0]) }}'">
+	    	<tr>
 	        	<td>{{ volo[1] }}</td>
 	        	<td>{{ volo[2] }}</td>
 	        	<td>{{ volo[3] }}</td>
 	        	<td>{{ volo[4] }}</td>
 	        	<td>{{ volo[5] }}</td>
 	    	</tr>
-    {% endfor %}
       	</tbody>
+      	{% if volo[6] <= volo[7]/3 %}
+      	<p color="green">{{ volo[6]/volo[7] }}</p>
+      	{% elif volo[6] > volo[7]/3 and volo[6] <= volo[7]/2*3 %}
+      	<p color="yellow">{{ volo[6]/volo[7] }}</p>
+      	{% else %}
+      	<p color="red">{{ volo[6]/volo[7] }}</p>
+      	{% endif %}
+
     </table>
 {% endblock content %}
 

@@ -54,14 +54,13 @@ metadata.create_all(engine)
 conn = engine.connect()
 trans = conn.begin()
 try:
-	conn.execute("INSERT INTO users (username, email, image_file, password, role) VALUES ('Administrator', 'administrator@takeafly.com', 'default.jpg', ?, 'admin')",  bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
+	conn.execute("INSERT INTO users (username, email, image_file, password, role) VALUES ('Administrator', 'administrator@takeafly.com', 'default.jpg', %s, 'admin')",  bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
 except:
 	trans.rollback()
 
-
 trans = conn.begin()
 try:
-	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Roma Termini', 'asc')")
+	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Roma', 'asc')")
 	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Milano', 'asc')")
 	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Treviso', 'asc')")
 	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Bologna', 'asc')")
@@ -82,6 +81,7 @@ try:
 	conn.execute("INSERT INTO voli (aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo) VALUES (3, '2020/07/31 14:00:00.000000', 1, '2020/07/31 15:00:00.000000', 1, 30)")
 except:
 	trans.rollback()
+
 conn.close()
 
 
