@@ -4,7 +4,7 @@ import os
 from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request, abort, current_app #import necessari per il funzionamento dell'applicazione
 from aeroporto import app, bcrypt, mail
-from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddFlyForm
+from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddFlyForm, AddBooking
 from flask_login import login_user, current_user, logout_user
 from aeroporto.table import User, users, engine, metadata, load_user, voli
 from flask_mail import Message
@@ -231,15 +231,25 @@ def reset_token(token):
 
 @app.route("/volo<volo_id>", methods=['GET', 'POST'])
 def volo(volo_id):
+    form = AddBooking()
     conn = engine.connect()
     trans = conn.begin()
     try:
-        conn.execute("CREATE VIEW posticooupati_volo AS SELECT id_volo, COUNT(*) AS postioccupati FROM prenotazioni GROUP BY id_volo")
+        conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
     except:
         trans.rollback()
-    volo = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, pov.postioccupati, a.numeroPosti FROM voli v LEFT JOIN posticooupati_volo pov ON v.id=pov.id_volo, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and v.id = pov.id_volo and v.id = %s",volo_id).fetchall()
+    volo = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volo_id).fetchone()
+    pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volo[0]).fetchall()
     conn.close()
-    return render_template('volo.html', title='volo_id', volo=volo)
+    l =[]
+    for p in pocc:
+        l.append(p[0])
+    available_groups = []
+    for count in range(1,volo[6]+1):
+        if count not in l:
+            available_groups.append(count)
+    form.posto.choices = [(i, i) for i in available_groups]
+    return render_template('volo.html', title=volo_id, volo=volo, pocc=l, form=form)
 
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required(role="admin")

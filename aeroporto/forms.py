@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from aeroporto.table import User, users, engine, metadata
 from sqlalchemy.sql import *
@@ -9,7 +9,7 @@ from sqlalchemy.sql import *
 
 class RegistrationForm(FlaskForm):  
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)]) 
-    email = StringField('Email',bvalidators=[DataRequired(), Email()]) 
+    email = StringField('Email',validators=[DataRequired(), Email()]) 
     password = PasswordField('Password', validators=[DataRequired()]) 
     
     confirm_password = PasswordField('Confirm Password',
@@ -92,3 +92,7 @@ class AddFlyForm(FlaskForm):
     aeroportoPartenza = StringField('Aeroporto di partenza', validators=[DataRequired(), Length(min=2, max = 50)])
     aeroportoArrivo = StringField('Aeroporto di arrivo', validators=[DataRequired(), Length(min=2, max = 50)])
     submit = SubmitField('Aggiungi')
+
+class AddBooking(FlaskForm):
+    posto = language = SelectField(u'Seduta volo', coerce=int)
+    submit = SubmitField('Acquista Biglietto')

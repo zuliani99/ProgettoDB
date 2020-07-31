@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-	<table class="table table-hover">
+	<table class="table">
 	  	<thead>
 	    	<tr>
 	      		<th scope="col">Aeroporto di Partenza</th>
@@ -8,6 +8,7 @@
 	      		<th scope="col">Aeroporto di Arrivo</th>
 	      		<th scope="col">Orario</th>
 	      		<th scope="col">Prezzo</th>
+	      		<th scope="col">Posti Disponibili</th>
 	    	</tr>
 	  	</thead>
 	  	<tbody>
@@ -17,16 +18,30 @@
 	        	<td>{{ volo[3] }}</td>
 	        	<td>{{ volo[4] }}</td>
 	        	<td>{{ volo[5] }}</td>
+	        	<td>{{ volo[7]}}/{{volo[6] }}</td>
 	    	</tr>
       	</tbody>
-      	{% if volo[6] <= volo[7]/3 %}
-      	<p color="green">{{ volo[6]/volo[7] }}</p>
-      	{% elif volo[6] > volo[7]/3 and volo[6] <= volo[7]/2*3 %}
-      	<p color="yellow">{{ volo[6]/volo[7] }}</p>
-      	{% else %}
-      	<p color="red">{{ volo[6]/volo[7] }}</p>
-      	{% endif %}
-
     </table>
+	<div class="form-group">
+	    <label for="exampleFormControlSelect1">Seleziona un posto</label>
+	    <select class="form-control" id="exampleFormControlSelect1">
+	    {% for count in range(1,volo[6]+1) %}
+			{% if count not in pocc %}
+				<option>{{ count }}</option>
+			{% endif %}
+		{% endfor %}
+	    </select>
+	    <abel for="exampleFormControlSelect1">Seleziona una Tipologia di Bagaglio</label>
+	    <select class="form-control" id="exampleFormControlSelect1">
+	    	<option slected="selected">Standard - Borsa piccola</option>.
+	    	<option>Plus - Bagaglio a mano da 10 Kg e borsa piccola</option>
+	    	<option>Deluxe - Bagaglio a mano da 20 Kg e borsa piccola</option>
+	    </select>
+
+	    {{ form.posto.label(class="form-control") }}
+
+
+	    {{ form.submit(class="btn btn-outline-info") }}
+	  </div>
 {% endblock content %}
 
