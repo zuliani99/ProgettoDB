@@ -100,5 +100,9 @@ class AddFlyForm(FlaskForm):
     submit = SubmitField('Aggiungi')
 
 class AddBooking(FlaskForm):
-    posto = language = SelectField('Seduta volo', coerce=int)
+    bagaglio = SelectField(u'Tipo Bagaglio', choices=[('std', 'Standard - Borsa piccola'), ('pl', 'Plus - Bagaglio a mano da 10 Kg e borsa piccola'), ('del', 'Deluxe - Bagaglio a mano da 20 Kg e borsa piccola')])
+    posto = SelectField(u'Posto da Sedere', coerce=int)
     submit = SubmitField('Acquista Biglietto')
+
+class PayoutForm(FlaskForm):
+    submit = SubmitField('Conferma Acquisto')

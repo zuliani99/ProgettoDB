@@ -4,7 +4,7 @@ import os
 from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request, abort, current_app #import necessari per il funzionamento dell'applicazione
 from aeroporto import app, bcrypt, mail
-from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddFlyForm, AddBooking
+from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddFlyForm, AddBooking, PayoutForm
 from flask_login import login_user, current_user, logout_user
 from aeroporto.table import User, users, engine, metadata, load_user, voli
 from flask_mail import Message
@@ -157,25 +157,6 @@ def account(): # funzione di account
     return render_template('account.html', title='Account', image_file=image_file, form=form) # mi porta alla pagina accout con titolo='Account'
 
 
-def send_newpost_notify(title,content,aut_username,date): # funzione ch einvia una mail a tutti gli utenti con il contenuto del post
-    #users = User.query.all()
-    conn = engine.connect()
-    user = conn.execute(select([users])).fetchall()
-    conn.close()
-
-    for usr in user:
-        msg = Message('New Post By ' + aut_username, sender='noreplay@demo.com', recipients=[usr.email])
-        msg.body = f'''Titolo: {title}
-
-Data: {date}
-
-Contenuto: {content}
-'''
-        mail.send(msg)
-
-
-
-
 
 #funzione per inviare le mail
 def send_reset_email(user):
@@ -248,8 +229,11 @@ def volo(volo_id):
     for count in range(1,volo[6]+1):
         if count not in l:
             available_groups.append(count)
-    form.posto.choices = [(i, i) for i in available_groups]
-    return render_template('volo.html', title=volo_id, volo=volo, pocc=l, form=form)
+    map(str(),available_groups)
+    form.posto.choices = available_groups
+    if form.validate_on_submit():
+        return redirect(url_for('payout', volo=volo, nposto=form.posto.data, bagaglio=form.bagaglio.data))
+    return render_template('volo.html', title=volo_id, volo=volo, form=form)
 
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required(role="admin")
@@ -261,3 +245,36 @@ def dashboard():
     aerei = conn.execute("SELECT name FROM aerei")
     conn.close()
     return render_template('dashboard.html', title='Dashboard', form=form, ap1=aeroporti1, ap2=aeroporti2, aerei=aerei)
+
+
+def send_ticket_notify(title,content,aut_username,date):
+    conn = engine.connect()
+    user = conn.execute(select([users])).fetchall()
+    conn.close()
+
+    for usr in user:
+        msg = Message('New Post By ' + aut_username, sender='noreplay@demo.com', recipients=[usr.email])
+        msg.body = f'''Titolo: {title}
+
+Data: {date}
+
+Contenuto: {content}
+'''
+        mail.send(msg)
+
+@app.route("/payout", methods=['GET', 'POST'])
+@login_required(role="ANY")
+def payout(volo, nposto, bagaglio):
+    form = PayoutForm()
+    if form.validate_on_submit():
+
+        #inserisco la prenotazione nel database
+        conn = engine.connect()
+        conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto) VALUES (%s, %s, %s)", current_user.id, volo[0], nposto)
+        conn.close()
+
+        #send_ticket_notify()
+
+        flash('Purchase Completed. We have been sent an email with all these information', 'success')
+        return redirect('account')
+    return render_template('payout.html', form=form, volo=volo, posto=nbosto, bagaglio=bagaglio)

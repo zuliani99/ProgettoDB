@@ -46,7 +46,8 @@ prenotazioni = Table('prenotazioni', metadata,
 	Column('id', Integer, primary_key = True),
 	Column('id_user', Integer, ForeignKey('users.id'), nullable=False),
 	Column('id_volo', Integer, ForeignKey('voli.id'), nullable=False),
-	Column('numeroPosto', Integer, nullable=False)
+	Column('numeroPosto', Integer, nullable=False),
+	Column('bagaglio', String(30), nullable=False)
 )
 
 metadata.create_all(engine)
