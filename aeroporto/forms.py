@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, DecimalField
+from wtforms.fields.html5 import DateTimeLocalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from aeroporto.table import User, users, engine, metadata
 from sqlalchemy.sql import *
@@ -89,10 +90,15 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField('Reset Password')
 
 class AddFlyForm(FlaskForm):
-    aeroportoPartenza = StringField('Aeroporto di partenza', validators=[DataRequired(), Length(min=2, max = 50)])
-    aeroportoArrivo = StringField('Aeroporto di arrivo', validators=[DataRequired(), Length(min=2, max = 50)])
+    aeroportoPartenza = StringField('Aeroporto di partenza', validators=[DataRequired()])
+    oraPartenza = DateTimeLocalField('Data e ora di partenza', format='%d/%m/%y',validators=[DataRequired()])
+    aeroportoArrivo = StringField('Aeroporto di arrivo', validators=[DataRequired()])
+    oraArrivo = DateTimeLocalField('Data e ora di arrivo', format='%d/%m/%y',validators=[DataRequired()])
+    aereo = StringField('Aero', validators=[DataRequired()])
+    prezzo = DecimalField('Prezzo base', validators=[DataRequired()])
+
     submit = SubmitField('Aggiungi')
 
 class AddBooking(FlaskForm):
-    posto = language = SelectField(u'Seduta volo', coerce=int)
+    posto = language = SelectField('Seduta volo', coerce=int)
     submit = SubmitField('Acquista Biglietto')

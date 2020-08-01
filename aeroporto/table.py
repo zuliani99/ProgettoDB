@@ -22,6 +22,7 @@ users = Table('users', metadata,
 
 aerei = Table('aerei', metadata,
 	Column('id', Integer, primary_key=True),
+	Column('name', String(20), nullable=False, default='Boing 777'),
 	Column('numeroPosti', Integer, nullable=False, default=50)
 )
 
@@ -78,7 +79,7 @@ except:
 
 trans = conn.begin()
 try:
-	conn.execute("INSERT INTO voli (aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo) VALUES (3, '2020/07/31 14:00:00.000000', 1, '2020/07/31 15:00:00.000000', 1, 30)")
+	conn.execute("INSERT INTO voli (aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo) VALUES (3, '2020/08/31 14:00:00.000000', 1, '2020/08/31 15:00:00.000000', 1, 30)")
 except:
 	trans.rollback()
 

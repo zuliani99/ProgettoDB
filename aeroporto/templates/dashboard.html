@@ -1,10 +1,26 @@
 {% extends "layout.html" %}
 {% block content %}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+	
+     <script type="text/javascript">
+     	$(document).ready(function () {
+        	$('select').selectize({
+          		sortField: 'text'
+        	});
+      	});
+    </script>
+
 	<div class="content-section">
     	<h1>Dashboard</h1>
 
     	<!-- Trigger the modal with a button -->
     	<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addFlyModal">Aggiungi un volo</button>
+   		
+   		<!--DEBUG-->
+   		
+		<h4>Ciavo el mondo</h4>
 
     	<!-- Modal -->
     	<div id="addFlyModal" class="modal fade" role="dialog">
@@ -22,8 +38,50 @@
 				        		<fieldset class="form-group">
 				        			<div class="form-group">
 				        				{{ form.aeroportoPartenza.label(class="form-control-label") }}
-				        			</div>
+    									<select id="select-state" placeholder="Seleziona aeroporto di partenza...">
+    										<option value="">Seleziona aeroporto di partenza...</option>
+    											<option value="">Select a state...</option>
+												{% for aeroporto in ap1 %}
+													<option>{{ aeroporto[0] }}</option>
+												{% endfor %}
+									  	</select>
+									</div>
+									<div class="form-group">
+										{{ form.oraPartenza.label(class="form-control-label") }}
+									  	{{ form.oraPartenza(class="form-control form-control-lg") }}
+									</div>
+									<div class="form-group">
+									  	{{ form.aeroportoArrivo.label(class="form-control-label") }}
+    									<select id="select-state" placeholder="Seleziona aeroporto di partenza...">
+    										<option value="">Seleziona aeroporto di arrivo...</option>
+    											<option value="">Select a state...</option>
+												{% for aeroporto in ap2 %}
+													<option>{{ aeroporto[0] }}</option>
+												{% endfor %}
+									  	</select>
+									</div>
+									<div class="form-group">
+										{{ form.oraArrivo.label(class="form-control-label") }}
+									  	{{ form.oraArrivo(class="form-control form-control-lg") }}									
+									</div>
+									<div class="form-group">
+										{{ form.aereo.label(class="form-control-label") }}
+									  	<select id="select-state" placeholder="Seleziona l'aereo per il volo...">
+    										<option value="">Seleziona aereo...</option>
+    											<option value="">Select a state...</option>
+												{% for aereo in aerei %}
+													<option>{{ aereo[0] }}</option>
+												{% endfor %}
+									  	</select>								
+									</div>
+				        			<div class="form-group">
+										{{ form.prezzo.label(class="form-control-label") }}
+									  	{{ form.prezzo(class="form-control form-control-lg") }}									
+									</div>
 				        		</fieldset>
+				        		<div class="form-group">
+				        			{{ form.submit(class="btn btn-outline-info") }}
+				        		</div>
 				        	</form>
 				     	</div>
 
@@ -35,3 +93,4 @@
     	</div>
 	</div>
 {% endblock content %}
+

@@ -255,4 +255,9 @@ def volo(volo_id):
 @login_required(role="admin")
 def dashboard():
     form = AddFlyForm()
-    return render_template('dashboard.html', title='Dashboard', form=form)
+    conn = engine.connect()
+    aeroporti1 = conn.execute("SELECT name FROM aeroporti")
+    aeroporti2 = conn.execute("SELECT name FROM aeroporti")
+    aerei = conn.execute("SELECT name FROM aerei")
+    conn.close()
+    return render_template('dashboard.html', title='Dashboard', form=form, ap1=aeroporti1, ap2=aeroporti2, aerei=aerei)
