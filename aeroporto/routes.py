@@ -239,12 +239,28 @@ def volo(volo_id):
 @login_required(role="admin")
 def dashboard():
     form = AddFlyForm()
+
     conn = engine.connect()
-    aeroporti1 = conn.execute("SELECT name FROM aeroporti")
-    aeroporti2 = conn.execute("SELECT name FROM aeroporti")
+    aeroporti = conn.execute("SELECT name FROM aeroporti")
     aerei = conn.execute("SELECT name FROM aerei")
     conn.close()
-    return render_template('dashboard.html', title='Dashboard', form=form, ap1=aeroporti1, ap2=aeroporti2, aerei=aerei)
+
+    _aeroporti = []
+    _aeroporti.append("")
+    for tmp in aeroporti:
+        _aeroporti.append(tmp[0])
+    form.aeroportoPartenza.choices = _aeroporti
+    form.aeroportoArrivo.choices = _aeroporti
+    
+    
+    _aerei = []
+    _aerei.append("")
+    for tmp in aerei:
+        _aerei.append(tmp[0])
+
+    form.aereo.choices = _aerei
+    
+    return render_template('dashboard.html', title='Dashboard', form=form, aerei=aerei)
 
 
 def send_ticket_notify(title,content,aut_username,date):
