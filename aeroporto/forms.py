@@ -6,7 +6,7 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextA
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from aeroporto.table import User, users, engine, metadata
 from sqlalchemy.sql import *
-
+import datetime
 
 class RegistrationForm(FlaskForm):  
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)]) 
@@ -89,9 +89,11 @@ class ResetPasswordForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')]) 
     submit = SubmitField('Reset Password')
 
+
 class AddFlyForm(FlaskForm):
-    aeroportoPartenza = SelectField('Aeroporto di partenza',validators=[DataRequired()])
-    dataPartenza = DateField('Data partenza', format="%d/%m/%Y",validators=[DataRequired()])
+    tomorrowDate = datetime.date.today() + datetime.timedelta(days=1)
+    aeroportoPartenza = SelectField('Aeroporto di partenza', default='', validators=[DataRequired()])
+    dataPartenza = DateField('Data partenza', default=tomorrowDate, validators=[DataRequired()])
     oraPartenza = TimeField('Ora partenza', validators=[DataRequired()])
     aeroportoArrivo = SelectField('Aeroporto di arrivo', validators=[DataRequired()])
     oraArrivo = TimeField('Ora arrivo', validators=[DataRequired()])
@@ -99,6 +101,13 @@ class AddFlyForm(FlaskForm):
     prezzo = DecimalField('Prezzo base', validators=[DataRequired()])
 
     submit = SubmitField('Aggiungi')
+
+    def validate_dataPartenza(self, dataPartenza):
+        if dataPartenza.data < self.tomorrowDate:
+            raise ValidationError('La data deve essere futura')
+    def validate_aeroportoArrivo(self, aeroportoArrivo):
+        if aeroportoArrivo.data == self.aeroportoPartenza.data:
+            raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')
 
 class AddBooking(FlaskForm):
     bagaglio = SelectField(u'Tipo Bagaglio', choices=[('std', 'Standard - Borsa piccola'), ('pl', 'Plus - Bagaglio a mano da 10 Kg e borsa piccola'), ('del', 'Deluxe - Bagaglio a mano da 20 Kg e borsa piccola')])

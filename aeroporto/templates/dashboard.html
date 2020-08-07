@@ -15,12 +15,7 @@
         	$('select').selectize({
           		sortField: 'text'
         	});
-        	var options = {
-     			width: 100,
-     			symbol: '$'
-    		};
-    		$('.amount').money_field(options);
-      	});
+        });
 
       	$(function(){
 
@@ -53,11 +48,30 @@
 				        		<fieldset class="form-group">
 				        			<div class="form-group">
 				        				{{ form.aeroportoPartenza.label(class="form-control-label") }}
-    									{{ form.aeroportoPartenza( id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
+    									{% if form.aeroportoPartenza.errors %}
+					                        {{ form.aeroportoPartenza(class="form-control is-invalid", id="select-state") }}
+					                        <div class="invalid-feedback">
+					                            {% for error in form.aeroportoPartenza.errors %}
+					                                <span>{{ error }}</span>
+					                            {% endfor %}
+					                        </div>
+					                    {% else %}
+    										{{ form.aeroportoPartenza( id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
+    									{% endif %}
 									</div>
 									<div class="form-group">
 										{{ form.dataPartenza.label(class="form-control-label") }}
-									  	{{ form.dataPartenza(class="form-control", type="date") }}
+										{% if form.dataPartenza.errors %}
+											{{ form.dataPartenza(class="form-control form-control-lg is-invalid", type="date") }}
+											<div class="invalid-feedback">
+					                            {% for error in form.dataPartenza.errors %}
+					                                <span>{{ error }}</span>
+					                            {% endfor %}
+					                        </div>
+										{% else %}
+											{{ form.dataPartenza(class="form-control", type="date") }}
+										{% endif %}
+									  	
 									</div>
 									<div class="form-group">
 										{{ form.oraPartenza.label(class="form-control-label") }}
@@ -65,7 +79,16 @@
 									</div>
 									<div class="form-group">
 									  	{{ form.aeroportoArrivo.label(class="form-control-label") }}
-    									{{ form.aeroportoPartenza( id="select-state", placeholder="Seleziona aeroporto di arrivo...") }}
+									  	{% if form.aeroportoArrivo.errors %}
+					                        {{ form.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
+					                        <div class="invalid-feedback">
+					                            {% for error in form.aeroportoArrivo.errors %}
+					                                <span>{{ error }}</span>
+					                            {% endfor %}
+					                        </div>
+					                    {% else %}
+    										{{ form.aeroportoArrivo( id="select-state", placeholder="Seleziona aeroporto di arrivo...") }}
+    									{% endif %}
 									</div>
 									<div class="form-group">
 										{{ form.oraArrivo.label(class="form-control-label") }}
@@ -73,11 +96,20 @@
 									</div>
 									<div class="form-group">
 										{{ form.aereo.label(class="form-control-label") }}
-    									{{ form.aereo(id="select-state", placeholder="Seleziona aeroporto di arrivo...") }}
+    									{% if form.aereo.errors %}
+					                        {{ form.aereo(class="form-control is-invalid", id="select-state") }}
+					                        <div class="invalid-feedback">
+					                            {% for error in form.aereo.errors %}
+					                                <span>{{ error }}</span>
+					                            {% endfor %}
+					                        </div>
+					                    {% else %}
+    										{{ form.aereo( id="select-state", placeholder="Seleziona aereo...") }}
+    									{% endif %}
 									</div>
 				        			<div class="form-group">
 										{{ form.prezzo.label(class="form-control-label") }}
-									  	{{ form.prezzo(class="form-control amount", type="number", pattern="[0-9]*[.]?[0-9]+") }}									
+									  	{{ form.prezzo(class="form-control amount", type="number", min="0", step="0.01") }}									
 									</div>
 				        		</fieldset>
 				        		<div class="form-group">

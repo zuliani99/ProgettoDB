@@ -235,34 +235,6 @@ def volo(volo_id):
         return redirect(url_for('payout', volo=volo, nposto=form.posto.data, bagaglio=form.bagaglio.data))
     return render_template('volo.html', title=volo_id, volo=volo, form=form)
 
-@app.route("/dashboard", methods=['GET', 'POST'])
-@login_required(role="admin")
-def dashboard():
-    form = AddFlyForm()
-
-    conn = engine.connect()
-    aeroporti = conn.execute("SELECT name FROM aeroporti")
-    aerei = conn.execute("SELECT name FROM aerei")
-    conn.close()
-
-    _aeroporti = []
-    _aeroporti.append("")
-    for tmp in aeroporti:
-        _aeroporti.append(tmp[0])
-    form.aeroportoPartenza.choices = _aeroporti
-    form.aeroportoArrivo.choices = _aeroporti
-    
-    
-    _aerei = []
-    _aerei.append("")
-    for tmp in aerei:
-        _aerei.append(tmp[0])
-
-    form.aereo.choices = _aerei
-    
-    return render_template('dashboard.html', title='Dashboard', form=form, aerei=aerei)
-
-
 def send_ticket_notify(title,content,aut_username,date):
     conn = engine.connect()
     user = conn.execute(select([users])).fetchall()
@@ -294,3 +266,56 @@ def payout(volo, nposto, bagaglio):
         flash('Purchase Completed. We have been sent an email with all these information', 'success')
         return redirect('account')
     return render_template('payout.html', form=form, volo=volo, posto=nbosto, bagaglio=bagaglio)
+
+
+
+
+@app.route("/dashboard", methods=['GET', 'POST'])
+@login_required(role="admin")
+def dashboard():
+    form = AddFlyForm()
+
+    conn = engine.connect()
+    aeroporti = conn.execute("SELECT id, name, indirizzo FROM aeroporti").fetchall()
+    aerei = conn.execute("SELECT id, name FROM aerei").fetchall()
+    conn.close()
+
+    opzioniAeroporti = [(str(choice[0]), str(choice[1]+", "+choice[2])) for choice in aeroporti]
+
+
+    form.aeroportoPartenza.choices = [('','')] + opzioniAeroporti
+    form.aeroportoArrivo.choices = [('','')] + opzioniAeroporti
+    
+
+    opzioniAerei = [(str(choice[0]), str(choice[1])) for choice in aerei]
+    form.aereo.choices = [('','')]  + opzioniAerei
+    
+    if form.validate_on_submit():
+        oraPartenza = datetime.combine(form.dataPartenza.data, form.oraPartenza.data)
+        if form.oraPartenza.data > form.oraArrivo.data:
+            oraArrivo = datetime.combine(form.dataPartenza.date + datetime.timedelta(days=1), form.oraArrivo.data)
+        else:
+            oraArrivo = datetime.combine(form.dataPartenza.data, form.oraArrivo.data)
+
+        conn = engine.connect()
+        conn.execute(voli.insert(),
+            [{
+            "aeroportoPartenza": form.aeroportoPartenza.data[0],
+            "oraPartenza": oraPartenza,
+            "aeroportoArrivo": form.aeroportoArrivo.data[0],
+            "oraArrivo": oraArrivo,
+            "aereo": form.aereo.data[0],
+            "prezzo": form.prezzo.data
+            }])
+        conn.close()
+       
+        flash('Inserimento riuscito', 'success')
+        return redirect('dashboard')
+    return render_template('dashboard.html', title='Dashboard', form=form)
+
+
+
+
+
+
+    conn.execute(users.insert(),[{"username": form.username.data, "email": form.email.data, "password": hashed_password}])
