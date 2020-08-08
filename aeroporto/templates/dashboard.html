@@ -26,8 +26,9 @@
     	<h1>Dashboard</h1>
 
     	<!-- Trigger the modal with a button -->
-    	<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addFlyModal">Aggiungi un volo</button>
-   		
+    	<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addFlyModal">Aggiungi volo</button>
+   		<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addPlaneModal">Aggiungi aereo</button>
+   		<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addAirportModal">Aggiungi aeroporto</button>
    		<!--DEBUG-->
    		
 		<h4>Ciavo el mondo</h4>
@@ -43,77 +44,77 @@
     				</div>
     				
 	    				<div class="modal-body">
-				        	<form method="POST" action="">
-				        		{{ form.hidden_tag() }}
+				        	<form method="POST" action="" id="addFly">
+				        		{{ flyForm.hidden_tag() }}
 				        		<fieldset class="form-group">
 				        			<div class="form-group">
-				        				{{ form.aeroportoPartenza.label(class="form-control-label") }}
-    									{% if form.aeroportoPartenza.errors %}
-					                        {{ form.aeroportoPartenza(class="form-control is-invalid", id="select-state") }}
+				        				{{ flyForm.aeroportoPartenza.label(class="form-control-label") }}
+    									{% if flyForm.aeroportoPartenza.errors %}
+					                        {{ flyForm.aeroportoPartenza(class="form-control is-invalid", id="select-state") }}
 					                        <div class="invalid-feedback">
-					                            {% for error in form.aeroportoPartenza.errors %}
+					                            {% for error in flyForm.aeroportoPartenza.errors %}
 					                                <span>{{ error }}</span>
 					                            {% endfor %}
 					                        </div>
 					                    {% else %}
-    										{{ form.aeroportoPartenza( id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
+    										{{ flyForm.aeroportoPartenza( id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
     									{% endif %}
 									</div>
 									<div class="form-group">
-										{{ form.dataPartenza.label(class="form-control-label") }}
-										{% if form.dataPartenza.errors %}
-											{{ form.dataPartenza(class="form-control form-control-lg is-invalid", type="date") }}
+										{{ flyForm.dataPartenza.label(class="form-control-label") }}
+										{% if flyForm.dataPartenza.errors %}
+											{{ flyForm.dataPartenza(class="form-control form-control-lg is-invalid", type="date") }}
 											<div class="invalid-feedback">
 					                            {% for error in form.dataPartenza.errors %}
 					                                <span>{{ error }}</span>
 					                            {% endfor %}
 					                        </div>
 										{% else %}
-											{{ form.dataPartenza(class="form-control", type="date") }}
+											{{ flyForm.dataPartenza(class="form-control", type="date") }}
 										{% endif %}
 									  	
 									</div>
 									<div class="form-group">
-										{{ form.oraPartenza.label(class="form-control-label") }}
-									  	{{ form.oraPartenza(class="form-control", type="time") }}
+										{{ flyForm.oraPartenza.label(class="form-control-label") }}
+									  	{{ flyForm.oraPartenza(class="form-control", type="time") }}
 									</div>
 									<div class="form-group">
-									  	{{ form.aeroportoArrivo.label(class="form-control-label") }}
-									  	{% if form.aeroportoArrivo.errors %}
-					                        {{ form.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
+									  	{{ flyForm.aeroportoArrivo.label(class="form-control-label") }}
+									  	{% if flyForm.aeroportoArrivo.errors %}
+					                        {{ flyForm.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
 					                        <div class="invalid-feedback">
-					                            {% for error in form.aeroportoArrivo.errors %}
+					                            {% for error in flyForm.aeroportoArrivo.errors %}
 					                                <span>{{ error }}</span>
 					                            {% endfor %}
 					                        </div>
 					                    {% else %}
-    										{{ form.aeroportoArrivo( id="select-state", placeholder="Seleziona aeroporto di arrivo...") }}
+    										{{ flyForm.aeroportoArrivo( id="select-state", placeholder="Seleziona aeroporto di arrivo...") }}
     									{% endif %}
 									</div>
 									<div class="form-group">
-										{{ form.oraArrivo.label(class="form-control-label") }}
-									  	{{ form.oraArrivo(class="form-control", type="time") }}					
+										{{ flyForm.oraArrivo.label(class="form-control-label") }}
+									  	{{ flyForm.oraArrivo(class="form-control", type="time") }}					
 									</div>
 									<div class="form-group">
-										{{ form.aereo.label(class="form-control-label") }}
-    									{% if form.aereo.errors %}
-					                        {{ form.aereo(class="form-control is-invalid", id="select-state") }}
+										{{ flyForm.aereo.label(class="form-control-label") }}
+    									{% if flyForm.aereo.errors %}
+					                        {{ flyForm.aereo(class="form-control is-invalid", id="select-state") }}
 					                        <div class="invalid-feedback">
-					                            {% for error in form.aereo.errors %}
+					                            {% for error in flyForm.aereo.errors %}
 					                                <span>{{ error }}</span>
 					                            {% endfor %}
 					                        </div>
 					                    {% else %}
-    										{{ form.aereo( id="select-state", placeholder="Seleziona aereo...") }}
+    										{{ flyForm.aereo( id="select-state", placeholder="Seleziona aereo...") }}
     									{% endif %}
 									</div>
 				        			<div class="form-group">
-										{{ form.prezzo.label(class="form-control-label") }}
-									  	{{ form.prezzo(class="form-control amount", type="number", min="0", step="0.01") }}									
+										{{ flyForm.prezzo.label(class="form-control-label") }}
+									  	{{ flyForm.prezzo(class="form-control amount", type="number", min="0", step="0.01") }}									
 									</div>
 				        		</fieldset>
 				        		<div class="form-group">
-				        			{{ form.submit(class="btn btn-outline-info") }}
+				        			{{ flyForm.submitFly(class="btn btn-outline-info", form="addFly") }}
 				        		</div>
 				        	</form>
 				     	</div>
@@ -124,6 +125,109 @@
 			    </div>
     		</div>
     	</div>
+
+    	<!-- Aggiungi aereo -->
+    	<div id="addPlaneModal" class="modal fade" role="dialog">
+    		<div class="modal-dialog">
+    			<!-- Modal content-->
+    			<div class="modal-content">
+    				<div class="modal-header">
+    					<h4 class="modal-title">Aggiungi aereo</h4>
+    					<button type="button" class="close" data-dismiss="modal">&times;</button>
+    				</div>
+    				
+	    			<div class="modal-body">
+				       	<form method="POST" action="" id="addPlane">
+				       		{{ planeForm.hidden_tag() }}
+				       		<fieldset class="form-group">
+
+				       			<div class="form-group">
+				       				{{ planeForm.nome.label(class="form-control-label") }}
+    								{% if planeForm.nome.errors %}
+					                    {{ planeForm.nome(class="form-control is-invalid") }}
+					                    <div class="invalid-feedback">
+					                        {% for error in planeForm.nome.errors %}
+					                            <span>{{ error }}</span>
+					                        {% endfor %}
+					                    </div>
+					                {% else %}
+    									{{ planeForm.nome(class= "form-control" ) }}
+    								{% endif %}
+				       			</div>
+
+				       			<div class="form-group">
+				       				{{ planeForm.nPosti.label(class="form-control-label") }}
+    								{% if planeForm.nPosti.errors %}
+					                    {{ planeForm.nPosti(class="form-control is-invalid") }}
+					                    <div class="invalid-feedback">
+					                        {% for error in planeForm.nPosti.errors %}
+					                            <span>{{ error }}</span>
+					                        {% endfor %}
+					                    </div>
+					                {% else %}
+    									{{ planeForm.nPosti(class= "form-control" ) }}
+    								{% endif %}
+				       			</div>
+				       		</fieldset>
+				       		<div class="form-group">
+				        		{{ planeForm.submitPlane(class="btn btn-outline-info", form="addPlane") }}
+				        	</div>
+				       	</form>
+				    </div>
+				</div>
+			</div>
+    	</div>	
+    	<!-- Aggiungi aeroporto -->
+    	<div id="addAirportModal" class="modal fade" role="dialog">
+    		<div class="modal-dialog">
+    			<!-- Modal content-->
+    			<div class="modal-content">
+    				<div class="modal-header">
+    					<h4 class="modal-title">Aggiungi aeroporto</h4>
+    					<button type="button" class="close" data-dismiss="modal">&times;</button>
+    				</div>
+    				
+	    			<div class="modal-body">
+				       	<form method="POST" action="" id="addAirport">
+				       		{{ airportForm.hidden_tag() }}
+				       		<fieldset class="form-group">
+
+				       			<div class="form-group">
+				       				{{ airportForm.nome.label(class="form-control-label") }}
+    								{% if airportForm.nome.errors %}
+					                    {{ airportForm.nome(class="form-control is-invalid") }}
+					                    <div class="invalid-feedback">
+					                        {% for error in airportForm.nome.errors %}
+					                            <span>{{ error }}</span>
+					                        {% endfor %}
+					                    </div>
+					                {% else %}
+    									{{ airportForm.nome(class= "form-control" ) }}
+    								{% endif %}
+				       			</div>
+
+				       			<div class="form-group">
+				       				{{ airportForm.indirizzo.label(class="form-control-label") }}
+    								{% if airportForm.indirizzo.errors %}
+					                    {{ airportForm.indirizzo(class="form-control is-invalid") }}
+					                    <div class="invalid-feedback">
+					                        {% for error in airportForm.indirizzo.errors %}
+					                            <span>{{ error }}</span>
+					                        {% endfor %}
+					                    </div>
+					                {% else %}
+    									{{ airportForm.indirizzo(class= "form-control" ) }}
+    								{% endif %}
+				       			</div>
+				       		</fieldset>
+				       		<div class="form-group">
+				        		{{ airportForm.submitAirport(class="btn btn-outline-info", form="addAirport") }}
+				        	</div>
+				       	</form>
+				    </div>
+				</div>
+			</div>
+    	</div>	
 	</div>
 {% endblock content %}
 

@@ -22,7 +22,7 @@ users = Table('users', metadata,
 
 aerei = Table('aerei', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('name', String(20), nullable=False, default='Boing 777'),
+	Column('name', String(20), nullable=False, default='Boeing 777'),
 	Column('numeroPosti', Integer, nullable=False, default=50)
 )
 

@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, DecimalField, DateField, TimeField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, DecimalField, DateField, TimeField, IntegerField
 #from wtforms.fields.html5 import DateTimeLocalField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange, ValidationError
 from aeroporto.table import User, users, engine, metadata
 from sqlalchemy.sql import *
 import datetime
@@ -90,6 +90,20 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField('Reset Password')
 
 
+
+
+
+
+class AddBooking(FlaskForm):
+    bagaglio = SelectField(u'Tipo Bagaglio', choices=[('std', 'Standard - Borsa piccola'), ('pl', 'Plus - Bagaglio a mano da 10 Kg e borsa piccola'), ('del', 'Deluxe - Bagaglio a mano da 20 Kg e borsa piccola')])
+    posto = SelectField(u'Posto da Sedere', coerce=int)
+    submit = SubmitField('Acquista Biglietto')
+
+class PayoutForm(FlaskForm):
+    submit = SubmitField('Conferma Acquisto')
+
+
+#DASHBOARD
 class AddFlyForm(FlaskForm):
     tomorrowDate = datetime.date.today() + datetime.timedelta(days=1)
     aeroportoPartenza = SelectField('Aeroporto di partenza', default='', validators=[DataRequired()])
@@ -100,7 +114,7 @@ class AddFlyForm(FlaskForm):
     aereo = SelectField('Aereo', validators=[DataRequired()])
     prezzo = DecimalField('Prezzo base', validators=[DataRequired()])
 
-    submit = SubmitField('Aggiungi')
+    submitFly = SubmitField('Aggiungi')
 
     def validate_dataPartenza(self, dataPartenza):
         if dataPartenza.data < self.tomorrowDate:
@@ -109,10 +123,14 @@ class AddFlyForm(FlaskForm):
         if aeroportoArrivo.data == self.aeroportoPartenza.data:
             raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')
 
-class AddBooking(FlaskForm):
-    bagaglio = SelectField(u'Tipo Bagaglio', choices=[('std', 'Standard - Borsa piccola'), ('pl', 'Plus - Bagaglio a mano da 10 Kg e borsa piccola'), ('del', 'Deluxe - Bagaglio a mano da 20 Kg e borsa piccola')])
-    posto = SelectField(u'Posto da Sedere', coerce=int)
-    submit = SubmitField('Acquista Biglietto')
+class AddPlaneForm(FlaskForm):
+    nome = StringField('Nome aereo', validators=[DataRequired()])
+    nPosti = IntegerField('Numero di posti', validators=[DataRequired(), NumberRange(1, None,"L'aereo deve avere almeno un posto ")])
 
-class PayoutForm(FlaskForm):
-    submit = SubmitField('Conferma Acquisto')
+    submitPlane = SubmitField('Aggiungi')
+
+class AddAirportForm(FlaskForm):
+    nome = StringField('Nome aeroporto', validators=[DataRequired()])
+    indirizzo = StringField('Indirizzo',validators=[DataRequired()])
+
+    submitAirport= SubmitField('Aggiungi')
