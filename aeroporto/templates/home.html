@@ -11,15 +11,15 @@
 	    	</tr>
 	  	</thead>
 	  	<tbody>
-    {% for volo in voli %}
-	    	<tr onclick="window.location.href='{{ url_for('volo', volo_id=volo[0]) }}'">
-	        	<td>{{ volo[1] }}</td>
-	        	<td>{{ volo[2] }}</td>
-	        	<td>{{ volo[3] }}</td>
-	        	<td>{{ volo[4] }}</td>
-	        	<td>{{ volo[5] }}</td>
-	    	</tr>
-    {% endfor %}
+		    {% for volo in voli %}
+			    <tr onclick="window.location.href='{{ url_for('volo', volo_id=volo[0]) }}'">
+			       	<td>{{ volo[1] }}</td>
+			       	<td>{{ volo[2] }}</td>
+			       	<td>{{ volo[3] }}</td>
+			       	<td>{{ volo[4] }}</td>
+			       	<td>{{ volo[5] }}</td>
+			    </tr>
+		    {% endfor %}
       	</tbody>
     </table>
 {% endblock content %}
