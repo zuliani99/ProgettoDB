@@ -95,9 +95,9 @@ class ResetPasswordForm(FlaskForm):
 
 
 class AddBooking(FlaskForm):
-    bagaglio = SelectField(u'Tipo Bagaglio', choices=[('std', 'Standard - Borsa piccola'), ('pl', 'Plus - Bagaglio a mano da 10 Kg e borsa piccola'), ('del', 'Deluxe - Bagaglio a mano da 20 Kg e borsa piccola')])
+    bagaglio = SelectField(u'Tipo Bagaglio', coerce=int)
     posto = SelectField(u'Posto da Sedere', coerce=int)
-    submit = SubmitField('Acquista Biglietto')
+    submit = SubmitField('Conferma Acquista Biglietto')
 
 class PayoutForm(FlaskForm):
     submit = SubmitField('Conferma Acquisto')

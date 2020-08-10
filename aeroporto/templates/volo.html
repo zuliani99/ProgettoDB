@@ -36,10 +36,36 @@
                 </div>
             </fieldset>
             <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info") }}
+                <button type="button" class="btn btn-primary btn-sm m-1" data-toggle="modal" data-target="#buyTiketModal">Acquista Biglietto</button>
             </div>
 		</div>
 	</form>
-
+	<!-- Modal -->
+  	<div class="modal fade" id="buyTiketModal" tabindex="-1" role="dialog" aria-labelledby="buyTiketModalLabel" aria-hidden="true">
+    	<div class="modal-dialog" role="document">
+      		<div class="modal-content">
+        		<div class="modal-header">
+          			<h5 class="modal-title" id="buyTiketModalLabel">Resoconto biglietto</h5>
+          			<div>Codice Volo: {{ volo[0] }}</div>
+			        <div>Aeroporto di Partenza: {{ volo[1] }}</div>
+			        <div>Orario: {{ volo[2] }}</div>
+			        <div>Aeroporto di Arrivo: {{ volo[3] }}</div>
+			        <div>Orario: {{ volo[4] }}</div>
+			        <div>Numero posto da sedere: {{ form.posto.data }} </div>
+			        <div>Prezzo Totale: {{ volo[5] }} + {{ form.bagaglio.data }} = </div>
+          			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            			<span aria-hidden="true">&times;</span>
+          			</button>
+        		</div>
+	        	<div class="modal-footer">
+		          	<div class="form-group">
+			            <div class="form-group">
+			                {{ form.submit(class="btn btn-success") }}
+			            </div>
+					</div>
+	        	</div>
+      		</div>
+    	</div>
+  	</div>
 {% endblock content %}
 

@@ -4,7 +4,7 @@ import os
 from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request, abort, current_app #import necessari per il funzionamento dell'applicazione
 from aeroporto import app, bcrypt, mail
-from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, PayoutForm, AddPlaneForm,  AddFlyForm, AddAirportForm
+from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, AddPlaneForm,  AddFlyForm, AddAirportForm
 from flask_login import login_user, current_user, logout_user
 from aeroporto.table import User, users, engine, metadata, load_user, voli, aerei, aeroporti
 from flask_mail import Message
@@ -15,21 +15,21 @@ from flask_mysqldb import MySQL
 from datetime import datetime
 
 def login_required(role="ANY"):
-	def wrapper(fn):
-		@wraps(fn)
-		def wrap(*args, **kwargs):
-			if not current_user.is_authenticated:
-				#return current_app.login_manager.unauthorized()
-				flash("You need to be an admin to view this page.", 'danger')
-				return redirect(url_for('home'))
-			urole = load_user(current_user.id).get_urole()
-			if ((urole != role) and (role != "ANY")):
-				#return current_app.login_manager.unauthorized()
-				flash("You need to be an admin to view this page.", 'danger')
-				return redirect(url_for('home'))
-			return fn(*args, **kwargs)
-		return wrap
-	return wrapper
+    def wrapper(fn):
+        @wraps(fn)
+        def wrap(*args, **kwargs):
+            if not current_user.is_authenticated:
+               	#return current_app.login_manager.unauthorized()
+               	flash("You have to log in before you visit this page.", 'danger')
+                return redirect(url_for('login'))
+            urole = load_user(current_user.id).get_urole()
+            if ((urole != role) and (role != "ANY")):
+                #return current_app.login_manager.unauthorized()
+                flash("You need to be an admin to view this page.", 'danger')
+                return redirect(url_for('home'))
+            return fn(*args, **kwargs)
+        return wrap
+    return wrapper
 
 
 @app.route("/")
@@ -210,31 +210,6 @@ def reset_token(token):
 	return render_template('reset_token.html', title='Reset Password', form=form)
 
 
-@app.route("/volo<volo_id>", methods=['GET', 'POST'])
-def volo(volo_id):
-	form = AddBooking()
-	conn = engine.connect()
-	trans = conn.begin()
-	try:
-		conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
-	except:
-		trans.rollback()
-	volo = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volo_id).fetchone()
-	pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volo[0]).fetchall()
-	conn.close()
-	l =[]
-	for p in pocc:
-		l.append(p[0])
-	available_groups = []
-	for count in range(1,volo[6]+1):
-		if count not in l:
-			available_groups.append(count)
-	map(str(),available_groups)
-	form.posto.choices = available_groups
-	if form.validate_on_submit():
-		return redirect(url_for('payout', volo=volo, nposto=form.posto.data, bagaglio=form.bagaglio.data))
-	return render_template('volo.html', title=volo_id, volo=volo, form=form)
-
 def send_ticket_notify(title,content,aut_username,date):
 	conn = engine.connect()
 	user = conn.execute(select([users])).fetchall()
@@ -250,24 +225,47 @@ Contenuto: {content}
 '''
 		mail.send(msg)
 
-@app.route("/payout", methods=['GET', 'POST'])
-@login_required(role="ANY")
-def payout(volo, nposto, bagaglio):
-	form = PayoutForm()
-	if form.validate_on_submit():
 
-		#inserisco la prenotazione nel database
-		conn = engine.connect()
-		conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto) VALUES (%s, %s, %s)", current_user.id, volo[0], nposto)
-		conn.close()
+@app.route("/volo<volo_id>", methods=['GET', 'POST'])
+def volo(volo_id):
+    form = AddBooking()
+    conn = engine.connect()
+    trans = conn.begin()
+    try:
+        conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
+    except:
+        trans.rollback()
+    volo = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volo_id).fetchone()
+    pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volo[0]).fetchall()
+    conn.close()
 
-		#send_ticket_notify()
+    l = []
+    for p in pocc:
+        l.append(p[0])
+    available_groups = []
+    for count in range(1,volo[6]+1):
+        if count not in l:
+            available_groups.append(count)
+    map(str(),available_groups)
+    form.posto.choices = available_groups
+    conn = engine.connect()
 
-		flash('Purchase Completed. We have been sent an email with all these information', 'success')
-		return redirect('account')
-	return render_template('payout.html', form=form, volo=volo, posto=nbosto, bagaglio=bagaglio)
+    res = conn.execute("SELECT * FROM bagagli").fetchall()
+    form.bagaglio.choices = [(r[0], r[1]) for r in res]
+    conn.close()
 
+    if form.validate_on_submit():
+        #return redirect(url_for('payout', volo=volo, nposto=form.posto.data, bagaglio=form.bagaglio.data))
+        
+        conn = engine.connect()
+        conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo[0], nposto, bagaglio.id)
+        conn.close()
 
+        #send_ticket_notify()
+
+        flash('Purchase Completed. We have been sent an email with all these information', 'success')
+        return redirect('account')
+    return render_template('volo.html', title=volo_id, volo=volo, form=form)
 
 
 @app.route("/dashboard", methods=['GET', 'POST'])

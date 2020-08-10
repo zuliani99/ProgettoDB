@@ -42,12 +42,17 @@ voli = Table('voli', metadata,
 	Column('prezzo', Float, nullable=False)
 )
 
+bagagli = Table('bagagli', metadata,
+	Column('prezzo', Integer, primary_key=True),
+	Column('descrizione', String(50), nullable=False)
+)
+
 prenotazioni = Table('prenotazioni', metadata,
 	Column('id', Integer, primary_key = True),
 	Column('id_user', Integer, ForeignKey('users.id'), nullable=False),
 	Column('id_volo', Integer, ForeignKey('voli.id'), nullable=False),
+	Column('prezzo_bagaglo', Integer, ForeignKey('bagagli.prezzo'), nullable=False),
 	Column('numeroPosto', Integer, nullable=False),
-	Column('bagaglio', String(30), nullable=False)
 )
 
 metadata.create_all(engine)
@@ -81,6 +86,14 @@ except:
 trans = conn.begin()
 try:
 	conn.execute("INSERT INTO voli (aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo) VALUES (3, '2020/08/31 14:00:00.000000', 1, '2020/08/31 15:00:00.000000', 1, 30)")
+except:
+	trans.rollback()
+
+trans = conn.begin()
+try:
+	conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (0, 'Standard - Borsa piccola ( + 0€ )')")
+	conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (20, 'Plus - Bagaglio a mano da 10 Kg e borsa piccola ( + 20€ )')")
+	conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (40, 'Deluxe - Bagaglio a mano da 20Kg e borsa piccola ( + 40€ )'")
 except:
 	trans.rollback()
 
