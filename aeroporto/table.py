@@ -43,7 +43,7 @@ voli = Table('voli', metadata,
 )
 
 bagagli = Table('bagagli', metadata,
-	Column('prezzo', Integer, primary_key=True),
+	Column('prezzo', Float, primary_key=True),
 	Column('descrizione', String(50), nullable=False)
 )
 
@@ -51,7 +51,7 @@ prenotazioni = Table('prenotazioni', metadata,
 	Column('id', Integer, primary_key = True),
 	Column('id_user', Integer, ForeignKey('users.id'), nullable=False),
 	Column('id_volo', Integer, ForeignKey('voli.id'), nullable=False),
-	Column('prezzo_bagaglo', Integer, ForeignKey('bagagli.prezzo'), nullable=False),
+	Column('prezzo_bagaglio', Integer, ForeignKey('bagagli.prezzo'), nullable=False),
 	Column('numeroPosto', Integer, nullable=False),
 )
 

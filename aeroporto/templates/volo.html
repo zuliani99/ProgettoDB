@@ -17,55 +17,73 @@
 	        	<td>{{ volo[2] }}</td>
 	        	<td>{{ volo[3] }}</td>
 	        	<td>{{ volo[4] }}</td>
-	        	<td>{{ volo[5] }}</td>
+	        	<td>{{ volo[5] }} €</td>
 	        	<td>{{ volo[7]}}/{{volo[6] }}</td>
 	    	</tr>
       	</tbody>
     </table>
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
-		<div class="form-group">
+    <div class="content-section">
+	    <form method="POST" action="">
+	        {{ form.hidden_tag() }}
 			<fieldset class="form-group">
-                <div class="form-group">
-                    {{ form.bagaglio.label(class="form-control-label") }}
-                    {{ form.bagaglio(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ form.posto.label(class="form-control-label") }}
+	            <div class="form-group">
+	                {{ form.bagaglio.label(class="form-control-label") }}
+	                {{ form.bagaglio(class="form-control form-control-lg") }}
+	            </div>
+	            <div class="form-group">
+	                {{ form.posto.label(class="form-control-label") }}
 					{{ form.posto(class="form-control form-control-lg") }}
-                </div>
-            </fieldset>
-            <div class="form-group">
-                <button type="button" class="btn btn-primary btn-sm m-1" data-toggle="modal" data-target="#buyTiketModal">Acquista Biglietto</button>
-            </div>
-		</div>
-	</form>
-	<!-- Modal -->
-  	<div class="modal fade" id="buyTiketModal" tabindex="-1" role="dialog" aria-labelledby="buyTiketModalLabel" aria-hidden="true">
-    	<div class="modal-dialog" role="document">
-      		<div class="modal-content">
-        		<div class="modal-header">
-          			<h5 class="modal-title" id="buyTiketModalLabel">Resoconto biglietto</h5>
-          			<div>Codice Volo: {{ volo[0] }}</div>
-			        <div>Aeroporto di Partenza: {{ volo[1] }}</div>
-			        <div>Orario: {{ volo[2] }}</div>
-			        <div>Aeroporto di Arrivo: {{ volo[3] }}</div>
-			        <div>Orario: {{ volo[4] }}</div>
-			        <div>Numero posto da sedere: {{ form.posto.data }} </div>
-			        <div>Prezzo Totale: {{ volo[5] }} + {{ form.bagaglio.data }} = </div>
-          			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            			<span aria-hidden="true">&times;</span>
-          			</button>
-        		</div>
-	        	<div class="modal-footer">
-		          	<div class="form-group">
-			            <div class="form-group">
-			                {{ form.submit(class="btn btn-success") }}
-			            </div>
+	            </div>
+	        </fieldset>
+	        <button id="buyticket" type="button" class="btn btn-primary" data-toggle="modal" data-target="#buyTiketModal">Acquista Biglietto Ora</button>
+
+			<!-- Modal -->
+			<div class="modal fade" id="buyTiketModal" tabindex="-1" aria-labelledby="buyTiketModalLabel" aria-hidden="true">
+			  <div class="modal-dialog">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="buyTiketModalLabel">Resoconto biglietto</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			        <div>Codice Volo: {{ volo[0] }}</div>
+						        <div>Aeroporto di Partenza: {{ volo[1] }}</div>
+						        <div>Orario: {{ volo[2] }}</div>
+						        <div>Aeroporto di Arrivo: {{ volo[3] }}</div>
+						        <div>Orario: {{ volo[4] }}</div>
+						        <div id="nposto"></div>
+						        <div id="prezzobagaglio"></div>
+			      </div>
+			      <div class="modal-footer">
+			      	
+			        <div class="form-group">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+						{{ form.submit(class="btn btn-success") }}
 					</div>
-	        	</div>
-      		</div>
-    	</div>
-  	</div>
+						    
+			      </div>
+			    </div>
+			  </div>
+			</div>
+
+
+		</form>
+	</div>
+    
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#buyticket").click(function(){
+			var p = $("#posto").val()
+			$("#nposto").text("Numero posto da sedere: " + p);
+			var b = parseFloat($("#bagaglio").val());
+			var pb = parseFloat('{{ volo[5] }}' + "€");
+			var sum = b+pb
+			$("#prezzobagaglio").text("Prezzo Totale: " + pb + "€ + " + b + "€ = " + sum + "€");
+		});
+	});
+</script>
 {% endblock content %}
 

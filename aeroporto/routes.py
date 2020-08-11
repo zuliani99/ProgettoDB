@@ -20,12 +20,12 @@ def login_required(role="ANY"):
         def wrap(*args, **kwargs):
             if not current_user.is_authenticated:
                	#return current_app.login_manager.unauthorized()
-               	flash("You have to log in before you visit this page.", 'danger')
+               	flash("Devi accedere al tuo account per visitare la pagina", 'danger')
                 return redirect(url_for('login'))
             urole = load_user(current_user.id).get_urole()
             if ((urole != role) and (role != "ANY")):
                 #return current_app.login_manager.unauthorized()
-                flash("You need to be an admin to view this page.", 'danger')
+                flash("Devi essere un admin per visualizzare la pagina", 'danger')
                 return redirect(url_for('home'))
             return fn(*args, **kwargs)
         return wrap
@@ -73,7 +73,7 @@ def register():
 		conn.close()
 
 
-		flash('Your account has been created! You are now able to log in', 'success') # messaggio di avvenuto sing up al blog
+		flash('Il tuo account è stato creato! YOra puoi effettuare il log in', 'success') # messaggio di avvenuto sing up al blog
 		return redirect(url_for('login')) # redirect alla funzione home
 	return render_template('register.html', title='Register', form=form)
 
@@ -100,7 +100,7 @@ def login():
 				next_page = request.args.get('next') # se prima di accedere ho provato ad enbtrarte nella pagina account mi salvo i paramentri del url
 				return redirect(next_page) if next_page else redirect(url_for('home')) # e ritorno a quella pagina altrimenti mi ritorna alla homepage
 	
-		flash('Login Unsuccessful. Please check email and password', 'danger') # messaggio di login incorretta
+		flash('Login non riuscito. Controlla elìmail e password', 'danger') # messaggio di login incorretta
 	return render_template('login.html', title='Login', form=form)
 
 
@@ -127,45 +127,46 @@ def save_pictures(form_picture): # funzione di salvataggio nel filesystem
 @app.route("/account", methods=['GET', 'POST'])
 @login_required(role="ANY") # necessario se vogliaomo ch la pagina sia visitabile solo se l'utente ha eseguito l'accesso alla piattaforma
 def account(): # funzione di account
-	form = UpdateAccountForm()  # from di updaTE
-	if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
-		if form.picture.data: # se abbiao aggiornato l'immagine
-			picture_file = save_pictures(form.picture.data)
-			current_user.image_file = picture_file
+    form = UpdateAccountForm()  # from di updaTE
+    if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
+        if form.picture.data: # se abbiao aggiornato l'immagine
+            picture_file = save_pictures(form.picture.data)
+            current_user.image_file = picture_file
 			
-			conn = engine.connect()
-			conn.execute(users.update().values(image_file=current_user.image_file).where(users.c.id==current_user.id))
-			conn.close()
+            conn = engine.connect()
+            conn.execute(users.update().values(image_file=current_user.image_file).where(users.c.id==current_user.id))
+            conn.close()
 
 
-		current_user.username = form.username.data
-		current_user.email = form.email.data
+        current_user.username = form.username.data
+        current_user.email = form.email.data
 		
 
 		#db.session.commit()
-		conn = engine.connect()
-		u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
-		conn.execute(u)
-		conn.close()
+        conn = engine.connect()
+        u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
+        conn.execute(u)
+        conn.close()
 
-		flash('Your account has been updated', 'success')
-		return redirect(url_for('account')) # non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
-	elif request.method == 'GET':
-		form.username.data = current_user.username
-		form.email.data = current_user.email
-	image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-	return render_template('account.html', title='Account', image_file=image_file, form=form) # mi porta alla pagina accout con titolo='Account'
+        flash('Il tuo account è stato aggionato', 'success')
+        return redirect(url_for('account')) # non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', title='Account', image_file=image_file, form=form) # mi porta alla pagina accout con titolo='Account'
 
 
 
 #funzione per inviare le mail
 def send_reset_email(user):
 	token = user.get_reset_token() #prendiamo il token
-	msg = Message('Password Reset Request', sender='noreplay@demo.com', recipients=[user.email]) #header del messaggio
-	msg.body = f'''To reset your password, visit the followinfg link: 
+	msg = Message('PRichiesta di Password Reset', sender='noreplay@demo.com', recipients=[user.email]) #header del messaggio
+	msg.body = f'''Per resettare la password, visita il seguente link: 
 {url_for('reset_token', token=token, _external=True)}
 
-If you did not make this request, then simply, ignore this email and no chanhìges will made
+Se non hai fatto questa richiesta, ignora questa mail e nessuna modifica sarà effettuata
 ''' #body del messaggio
 	mail.send(msg)
 
@@ -183,7 +184,7 @@ def reset_request():
 		user = User(u.id, u.nome, u.email, u.image_file, u.password, u.role)
 
 		send_reset_email(user)  # la inviamo
-		flash('An email has been sent with instructions to reset you password', 'info')
+		flash('Una mial ti è stata inviata con le istruzioni per resettare la password', 'info')
 		return redirect(url_for('login'))
 	return render_template('reset_request.html', title='Reset Password', form=form)
 
@@ -193,7 +194,7 @@ def reset_token(token):
 		return redirect(url_for('home'))
 	user = User.verify_reset_token(token)
 	if user is None: # se il token non è valido
-		flash('That is an invalid or expired token', 'warning')
+		flash('TTOken invalido o scaduto', 'warning')
 		return redirect(url_for('reset_request'))
 	form = ResetPasswordForm() # altrimenti prendiamo la form per il reset della password
 	if form.validate_on_submit(): #controlla che tutte le regole del form siano state passate con successo
@@ -205,25 +206,37 @@ def reset_token(token):
 		conn.execute(users.update().values(password=user.password).where(users.c.id==user.id))
 		conn.close()
 
-		flash('Your password has benn updated! You are now able to log in', 'success')
+		flash('La tua password  stata aggiornata! Ora puoi eseguire il log in', 'success')
 		return redirect(url_for('login')) # redirect alla funzione login
 	return render_template('reset_token.html', title='Reset Password', form=form)
 
 
-def send_ticket_notify(title,content,aut_username,date):
-	conn = engine.connect()
-	user = conn.execute(select([users])).fetchall()
-	conn.close()
+def send_ticket_notify(volo, nposto, b):
+	msg = Message('Conferma di Acquisto Tiket: ' + str(volo[0]), sender='noreplay@demo.com', recipients=[current_user.email])
+	msg.body = f'''Grazie per aver acuistato dal nostro sito, ecco tutto ciò che ti serve per l'imbarco:
 
-	for usr in user:
-		msg = Message('New Post By ' + aut_username, sender='noreplay@demo.com', recipients=[usr.email])
-		msg.body = f'''Titolo: {title}
+Dettagli volo
+Codice Volo: {volo[0] }
+Aeroporto di Partenza: { volo[1] }
+Orario: { volo[2] }
+Aeroporto di Arrivo: { volo[3] }
+Orario: { volo[4] }
+Numero posto da sedere: {nposto}
+Tipologia di bagaglio: { b[1] }
+Costo totale: {volo[5]+b[0]}
 
-Data: {date}
+Dettagli del cliente
+Username: {current_user.username}
+Email: {current_user.email}
 
-Contenuto: {content}
+
+Esibisci questo documento per il check-in
+
+Vi auguriamo un bon viaggio
+Lo staff Take a Fly
+
 '''
-		mail.send(msg)
+	mail.send(msg)
 
 
 @app.route("/volo<volo_id>", methods=['GET', 'POST'])
@@ -255,17 +268,35 @@ def volo(volo_id):
     conn.close()
 
     if form.validate_on_submit():
-        #return redirect(url_for('payout', volo=volo, nposto=form.posto.data, bagaglio=form.bagaglio.data))
-        
-        conn = engine.connect()
-        conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo[0], nposto, bagaglio.id)
-        conn.close()
+        if current_user.is_authenticated:
+            conn = engine.connect()
+            trans = conn.begin()
+            try:
+                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo[0], form.posto.data, form.bagaglio.data)
+                b = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglio.data).fetchone()
 
-        #send_ticket_notify()
+                send_ticket_notify(volo, form.posto.data, b)
 
-        flash('Purchase Completed. We have been sent an email with all these information', 'success')
-        return redirect('account')
+                flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
+                return redirect(url_for('account'))
+            except:
+                trans.rollback()
+                flash("Posto da sedere acquistato poco fa, scegliene un altro", 'warning')
+            conn.close()
+        else:
+            flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
+            return redirect(url_for('login'))
     return render_template('volo.html', title=volo_id, volo=volo, form=form)
+
+
+
+@app.route("/user_fly", methods=['GET', 'POST'])
+@login_required(role="customer")
+def user_fly():
+    conn = engine.connect()
+    voli = conn.execute("SELECT p.id, p.id_volo, v.aeroportoPartenza, v.oraPartenza, v.aeroportoArrivo, v.oraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo WHERE p.id_user= %s", current_user.id).fetchall()
+    conn.close()
+    return render_template('imieivoli.html', voli=voli)
 
 
 @app.route("/dashboard", methods=['GET', 'POST'])

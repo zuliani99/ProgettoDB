@@ -95,12 +95,10 @@ class ResetPasswordForm(FlaskForm):
 
 
 class AddBooking(FlaskForm):
-    bagaglio = SelectField(u'Tipo Bagaglio', coerce=int)
+    bagaglio = SelectField(u'Tipo Bagaglio', coerce=float)
     posto = SelectField(u'Posto da Sedere', coerce=int)
-    submit = SubmitField('Conferma Acquista Biglietto')
+    submit = SubmitField('Conferma Aquisto')
 
-class PayoutForm(FlaskForm):
-    submit = SubmitField('Conferma Acquisto')
 
 
 #DASHBOARD

@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2 class="mt-5">I miei voli</h3>
+        <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Codice Prenotazione</th>
+                <th scope="col">Codice volo</th>
+                <th scope="col">Aeroporto di Partenza</th>
+                <th scope="col">Orario</th>
+                <th scope="col">Aeroporto di Arrivo</th>
+                <th scope="col">Orario</th>
+                <th scope="col">Codice Aereo</th>
+                <th scope="col">Numero Posto da Sedere</th>
+                <th scope="col">Prezzo Volo</th>
+                <th scope="col">Prezzo Bagaglio</th>
+                <th scope="col">Descrizione</th>
+                <th scope="col">Prezzo Totale</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for volo in voli %}
+                <tr>
+                    <td>{{ volo[0] }}</td>
+                    <td>{{ volo[1] }}</td>
+                    <td>{{ volo[2] }}</td>
+                    <td>{{ volo[3] }}</td>
+                    <td>{{ volo[4] }}</td>
+                    <td>{{ volo[5] }}</td>
+                    <td>{{ volo[6] }}</td>
+                    <td>{{ volo[7] }}</td>
+                    <td>{{ volo[8] }}</td>
+                    <td>{{ volo[9] }}</td>
+                    <td>{{ volo[10] }}</td>
+                    <td>{{ volo[11] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </div>
+{% endblock content %}
