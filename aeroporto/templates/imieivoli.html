@@ -2,7 +2,7 @@
 {% block content %}
     <div class="content-section">
         <h2 class="mt-5">I miei voli</h3>
-        <table class="table">
+        <table class="table table-hover">
         <thead>
             <tr>
                 <th scope="col">Codice Prenotazione</th>
@@ -17,25 +17,106 @@
                 <th scope="col">Prezzo Bagaglio</th>
                 <th scope="col">Descrizione</th>
                 <th scope="col">Prezzo Totale</th>
+                <th scope="col">Azioni</th>
             </tr>
         </thead>
         <tbody>
             {% for volo in voli %}
-                <tr>
-                    <td>{{ volo[0] }}</td>
-                    <td>{{ volo[1] }}</td>
-                    <td>{{ volo[2] }}</td>
-                    <td>{{ volo[3] }}</td>
-                    <td>{{ volo[4] }}</td>
-                    <td>{{ volo[5] }}</td>
-                    <td>{{ volo[6] }}</td>
-                    <td>{{ volo[7] }}</td>
-                    <td>{{ volo[8] }}</td>
-                    <td>{{ volo[9] }}</td>
-                    <td>{{ volo[10] }}</td>
-                    <td>{{ volo[11] }}</td>
-                </tr>
+                {% if volo[3] < time %}
+                    <tr class="table-dark">
+                        <td>{{ volo[0] }}</td>
+                        <td>{{ volo[1] }}</td>
+                        <td>{{ volo[2] }}</td>
+                        <td>{{ volo[3] }}</td>
+                        <td>{{ volo[4] }}</td>
+                        <td>{{ volo[5] }}</td>
+                        <td>{{ volo[6] }}</td>
+                        <td>{{ volo[7] }}</td>
+                        <td>{{ volo[8] }}</td>
+                        <td>{{ volo[9] }}</td>
+                        <td>{{ volo[10] }}</td>
+                        <td>{{ volo[11] }}</td>
+                        <td>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#reviewModal">
+                              Aggioungi Recensione
+                            </button>
+                        </td>
+                    </tr>
+
+                        <!-- Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reviewModalLabel">Inserisci una recensione</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+        <form action="{{ url_for('review_fly', fly_id=volo[0]) }}" method="POST">
+                                <input class="btn btn-primary" type="submit" value="Inserisi">
+                            </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+                {% else %}
+                    <tr>
+                        <td>{{ volo[0] }}</td>
+                        <td>{{ volo[1] }}</td>
+                        <td>{{ volo[2] }}</td>
+                        <td>{{ volo[3] }}</td>
+                        <td>{{ volo[4] }}</td>
+                        <td>{{ volo[5] }}</td>
+                        <td>{{ volo[6] }}</td>
+                        <td>{{ volo[7] }}</td>
+                        <td>{{ volo[8] }}</td>
+                        <td>{{ volo[9] }}</td>
+                        <td>{{ volo[10] }}</td>
+                        <td>{{ volo[11] }}</td>
+                        <td> 
+                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+                              Elimina
+                            </button>
+                        </td>
+                    </tr>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Elimina Prenotazione</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Sei sicuro di voler eliminare la tua prenotazione?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+        <form action="{{ url_for('delete_fly', fly_id=volo[0]) }}" method="POST">
+                                <input class="btn btn-danger" type="submit" value="Elimina">
+                            </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+                    
+                {% endif %}
             {% endfor %}
         </tbody>
     </div>
+
+
+
+
 {% endblock content %}

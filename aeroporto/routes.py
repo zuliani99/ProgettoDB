@@ -296,8 +296,37 @@ def user_fly():
     conn = engine.connect()
     voli = conn.execute("SELECT p.id, p.id_volo, v.aeroportoPartenza, v.oraPartenza, v.aeroportoArrivo, v.oraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo WHERE p.id_user= %s", current_user.id).fetchall()
     conn.close()
-    return render_template('imieivoli.html', voli=voli)
+    time = datetime.now()
+    print(time)
+    return render_template('imieivoli.html', voli=voli, time=time)
 
+@app.route("/delete_fly<int:fly_id>", methods=['GET', 'POST'])
+@login_required(role="customer")
+def delete_fly(fly_id):
+    #post = Post.query.get_or_404(post_id)
+    conn = engine.connect()
+    f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
+    if f is None:
+        abort(404)
+    
+
+    if f[1] != current_user.id:
+        abort(403)
+    trans = conn.begin()
+    try:
+    	conn.execute("DELETE FROM prenotazioni WHERE id = %s", fly_id)
+    except:
+    	trans.rollback()
+    	flash("Prenotazione già cancellata o non presente", 'warning')
+    conn.close()
+
+    flash('Il volo ' + str(f[0]) + ' da te prenotato è stato calnellato con successo', 'success')
+    return redirect(url_for('user_fly'))
+
+@app.route("/review_fly<int:fly_id>", methods=['GET', 'POST'])
+@login_required(role="customer")
+def review_fly(fly_id):
+	return redirect(url_for('user_fly'))
 
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required(role="admin")
