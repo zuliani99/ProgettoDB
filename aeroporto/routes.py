@@ -4,7 +4,7 @@ import os
 from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request, abort, current_app #import necessari per il funzionamento dell'applicazione
 from aeroporto import app, bcrypt, mail
-from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, AddPlaneForm,  AddFlyForm, AddAirportForm
+from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, AddPlaneForm,  AddFlyForm, AddAirportForm, AddReviw
 from flask_login import login_user, current_user, logout_user
 from aeroporto.table import User, users, engine, metadata, load_user, voli, aerei, aeroporti
 from flask_mail import Message
@@ -290,15 +290,19 @@ def volo(volo_id):
 
 
 
+
+
 @app.route("/user_fly", methods=['GET', 'POST'])
 @login_required(role="customer")
 def user_fly():
+    form = AddReviw()
     conn = engine.connect()
-    voli = conn.execute("SELECT p.id, p.id_volo, v.aeroportoPartenza, v.oraPartenza, v.aeroportoArrivo, v.oraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo WHERE p.id_user= %s", current_user.id).fetchall()
+    voli = conn.execute("SELECT p.id, p.id_volo, v.aeroportoPartenza, v.oraPartenza, v.aeroportoArrivo, v.oraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale, p.valutazione FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo WHERE p.id_user= %s ORDER BY v.oraPartenza", current_user.id).fetchall()
     conn.close()
     time = datetime.now()
-    print(time)
-    return render_template('imieivoli.html', voli=voli, time=time)
+    if form.validate_on_submit():
+    	return redirect(url_for('review_fly', fly_id=form.idnascosto.data, val=form.valutazione.data, crit=form.critiche.data))
+    return render_template('imieivoli.html', voli=voli, time=time, form=form)
 
 @app.route("/delete_fly<int:fly_id>", methods=['GET', 'POST'])
 @login_required(role="customer")
@@ -310,23 +314,52 @@ def delete_fly(fly_id):
         abort(404)
     
 
+
+
+
+@app.route("/delete_fly<int:fly_id>", methods=['GET', 'POST'])
+@login_required(role="customer")
+def delete_fly(fly_id):
+    conn = engine.connect()
+    f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
+    if f is None:
+        abort(404)
     if f[1] != current_user.id:
         abort(403)
-    trans = conn.begin()
-    try:
-    	conn.execute("DELETE FROM prenotazioni WHERE id = %s", fly_id)
-    except:
-    	trans.rollback()
-    	flash("Prenotazione già cancellata o non presente", 'warning')
+   
+    conn.execute("DELETE FROM prenotazioni WHERE id = %s", fly_id)
+    flash('Il volo ' + str(f[0]) + ' da te prenotato è stato cancellato con successo', 'success')
     conn.close()
-
-    flash('Il volo ' + str(f[0]) + ' da te prenotato è stato calnellato con successo', 'success')
     return redirect(url_for('user_fly'))
 
-@app.route("/review_fly<int:fly_id>", methods=['GET', 'POST'])
+
+
+
+
+@app.route("/review_fly<fly_id>,<val>,<crit>", methods=['GET', 'POST'])
 @login_required(role="customer")
-def review_fly(fly_id):
-	return redirect(url_for('user_fly'))
+def review_fly(fly_id, val, crit):
+    conn = engine.connect()
+    f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
+    if f is None:
+        abort(404)
+    if f[1] != current_user.id:
+        abort(403)
+
+    r = conn.execute("SELECT valutazione FROM prenotazioni WHERE id = %s", fly_id).fetchone()
+    if r[0] is None: 
+    	conn.execute("UPDATE prenotazioni SET valutazione = %s , critiche = %s WHERE id = %s", val, crit, fly_id)
+    	conn.close()
+    	flash("Recensione inserita con successo", "success")
+    else:
+    	flash("Recensione già inserita con successo", "warning")
+    return redirect(url_for('user_fly'))
+
+
+
+
+
+
 
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required(role="admin")

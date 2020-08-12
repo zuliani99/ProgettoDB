@@ -100,6 +100,12 @@ class AddBooking(FlaskForm):
     submit = SubmitField('Conferma Aquisto')
 
 
+class AddReviw(FlaskForm):
+    valutazione = SelectField(u'Valutazione Volo', choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])
+    critiche = TextAreaField('Critica', validators=[Length(max=200),DataRequired()])
+    idnascosto = StringField('Id nascosto', validators=[DataRequired()])  
+    submit = SubmitField('Inserisci')
+
 
 #DASHBOARD
 class AddFlyForm(FlaskForm):
