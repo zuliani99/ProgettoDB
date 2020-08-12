@@ -359,11 +359,11 @@ def dashboard():
 			conn = engine.connect()
 			conn.execute(voli.insert(),
 				[{
-				"aeroportoPartenza": flyForm.aeroportoPartenza.data[0],
+				"aeroportoPartenza": flyForm.aeroportoPartenza.data,
 				"oraPartenza": oraPartenza,
-				"aeroportoArrivo": flyForm.aeroportoArrivo.data[0],
+				"aeroportoArrivo": flyForm.aeroportoArrivo.data,
 				"oraArrivo": oraArrivo,
-				"aereo": flyForm.aereo.data[0],
+				"aereo": flyForm.aereo.data,
 				"prezzo": flyForm.prezzo.data
 				}])
 			conn.close()
