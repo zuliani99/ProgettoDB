@@ -65,37 +65,9 @@ try:
 except:
 	trans.rollback()
 
-trans = conn.begin()
-try:
-	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Roma', 'asc')")
-	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Milano', 'asc')")
-	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Treviso', 'asc')")
-	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Bologna', 'asc')")
-	conn.execute("INSERT INTO aeroporti (name, indirizzo) VALUES ('Aeroporto di Firenze', 'asc')")
-except:
-	trans.rollback()
-
-trans = conn.begin()
-try:
-	conn.execute("INSERT INTO aerei (numeroPosti) VALUES (50)")
-	conn.execute("INSERT INTO aerei (numeroPosti) VALUES (60)")
-	conn.execute("INSERT INTO aerei (numeroPosti) VALUES (100)")
-except:
-	trans.rollback()
-
-trans = conn.begin()
-try:
-	conn.execute("INSERT INTO voli (aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo) VALUES (3, '2020/08/31 14:00:00.000000', 1, '2020/08/31 15:00:00.000000', 1, 30)")
-except:
-	trans.rollback()
-
-trans = conn.begin()
-try:
-	conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (0, 'Standard - Borsa piccola ( + 0€ )')")
-	conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (20, 'Plus - Bagaglio a mano da 10 Kg e borsa piccola ( + 20€ )')")
-	conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (40, 'Deluxe - Bagaglio a mano da 20Kg e borsa piccola ( + 40€ )'")
-except:
-	trans.rollback()
+conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (0, 'Standard - Borsa piccola ( + 0€ )')")
+conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (20, 'Plus - Bagaglio a mano da 10 Kg e borsa piccola ( + 20€ )')")
+conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (40, 'Deluxe - Bagaglio a mano da 20Kg e borsa piccola ( + 40€ )')")
 
 conn.close()
 
