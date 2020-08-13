@@ -73,7 +73,7 @@ def register():
 		conn.close()
 
 
-		flash('Il tuo account è stato creato! YOra puoi effettuare il log in', 'success') # messaggio di avvenuto sing up al blog
+		flash('Il tuo account è stato creato! Ora puoi effettuare il log in', 'success') # messaggio di avvenuto sing up al blog
 		return redirect(url_for('login')) # redirect alla funzione home
 	return render_template('register.html', title='Register', form=form)
 
@@ -263,7 +263,7 @@ def volo(volo_id):
     form.posto.choices = available_groups
     conn = engine.connect()
 
-    res = conn.execute("SELECT * FROM bagagli").fetchall()
+    res = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
     form.bagaglio.choices = [(r[0], r[1]) for r in res]
     conn.close()
 
@@ -275,7 +275,7 @@ def volo(volo_id):
                 conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo[0], form.posto.data, form.bagaglio.data)
                 b = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglio.data).fetchone()
 
-                send_ticket_notify(volo, form.posto.data, b)
+                #send_ticket_notify(volo, form.posto.data, b)
 
                 flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
                 return redirect(url_for('account'))
@@ -303,18 +303,6 @@ def user_fly():
     if form.validate_on_submit():
     	return redirect(url_for('review_fly', fly_id=form.idnascosto.data, val=form.valutazione.data, crit=form.critiche.data))
     return render_template('imieivoli.html', voli=voli, time=time, form=form)
-
-@app.route("/delete_fly<int:fly_id>", methods=['GET', 'POST'])
-@login_required(role="customer")
-def delete_fly(fly_id):
-    #post = Post.query.get_or_404(post_id)
-    conn = engine.connect()
-    f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
-    if f is None:
-        abort(404)
-    
-
-
 
 
 @app.route("/delete_fly<int:fly_id>", methods=['GET', 'POST'])
@@ -358,6 +346,18 @@ def review_fly(fly_id, val, crit):
 
 
 
+@app.route("/delete_volo<int:fly_id>", methods=['GET', 'POST'])
+@login_required(role="admin")
+def delete_volo(fly_id):
+    conn = engine.connect()
+    f = conn.execute("SELECT * FROM voli WHERE id = %s",fly_id).fetchone()
+    if f is None:
+        abort(404)
+   
+    conn.execute("DELETE FROM voli WHERE id = %s", fly_id)
+    flash('Il volo ' + str(f[0]) + 'è stato cancellato con successo', 'success')
+    conn.close()
+    return redirect(url_for('dashboard'))
 
 
 
@@ -371,6 +371,7 @@ def dashboard():
 	conn = engine.connect()
 	aeroporti = conn.execute("SELECT id, name, indirizzo FROM aeroporti").fetchall()
 	aerei = conn.execute("SELECT id, name FROM aerei").fetchall()
+	voli = conn.execute("SELECT * FROM voli").fetchall()
 	conn.close()
 
 	opzioniAeroporti = [(str(choice[0]), str(choice[1]+", "+choice[2])) for choice in aeroporti]
@@ -381,6 +382,8 @@ def dashboard():
 	opzioniAerei = [(str(choice[0]), str(choice[1])) for choice in aerei]
 	flyForm.aereo.choices = [('','')]  + opzioniAerei
 	
+	time = datetime.now()
+
 	if flyForm.is_submitted() and flyForm.submitFly.data:
 		if flyForm.validate():
 			oraPartenza = datetime.combine(flyForm.dataPartenza.data, flyForm.oraPartenza.data)
@@ -434,6 +437,7 @@ def dashboard():
 		else:
 			flash('Qualcosa nell\'inserimento dell\'aeroporto è andato storto :(', 'danger')
 
-	return render_template('dashboard.html', title='Dashboard', flyForm=flyForm, planeForm=planeForm, airportForm=airportForm )
+	return render_template('dashboard.html', title='Dashboard', flyForm=flyForm, planeForm=planeForm, airportForm=airportForm, voli=voli, time=time)
 
 ##aerei.insert(),[{"name": planeForm.nome.data, "numeroPosti": planeForm.nPosti.data}])
+

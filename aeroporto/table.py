@@ -67,28 +67,11 @@ try:
 except:
 	trans.rollback()
 
-conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (0, 'Standard - Borsa piccola ( + 0€ )')")
-conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (20, 'Plus - Bagaglio a mano da 10 Kg e borsa piccola ( + 20€ )')")
-conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (40, 'Deluxe - Bagaglio a mano da 20Kg e borsa piccola ( + 40€ )')")
+#conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (0, 'Standard - Borsa piccola ( + 0€ )')")
+#conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (20, 'Plus - Bagaglio a mano da 10 Kg e borsa piccola ( + 20€ )')")
+#conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (40, 'Deluxe - Bagaglio a mano da 20Kg e borsa piccola ( + 40€ )')")
 
 conn.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class User(UserMixin):
     def __init__(self, id, username, email, image_file, password, role):

@@ -15,7 +15,17 @@
         	$('select').selectize({
           		sortField: 'text'
         	});
+
+        	$(".table tbody").on('click','#btndel',function(){
+	            // get the current row
+	            var currentRow=$(this).closest("tr"); 
+	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
+	            var newURL = flask_util.url_for('delete_volo', {fly_id: col1});
+	            $('#formdel').attr('action', newURL);
+	             
+	        });
         });
+
     </script>
 
 	<div class="content-section">
@@ -226,8 +236,76 @@
 			</div>
     	</div>	
     	<!-- END BLOCK ADD AIRPORT-->
+
+    	{{ flask_util_js.js }}
     	
-    	
+    	<div class="content-section">
+	        <h2 class="mt-5">Voli</h2>
+	        <table class="table table-hover">
+	            <thead>
+	                <tr>
+	                	<th scope="col">Codice volo</th>
+	                    <th scope="col">Aeroporto di Partenza</th>
+	                    <th scope="col">Data e Ora partenza</th>
+	                    <th scope="col">Aeroporto di Arrivo</th>
+	                    <th scope="col">Data e Ora arrivo</th>
+	                    <th scope="col">Codice Aereo</th>
+	                    <th scope="col">Prezzo Volo</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	            	{% for volo in voli %}
+	            		{% if volo[2] < time %}
+	            			<!-- EVIDENZIARE GLI ORDINI PASSATI IN QUALCHE MODO -->
+	            			<tr class="table-dark">
+	                            <td>{{ volo[0] }}</td>
+	                            <td>{{ volo[1] }}</td>
+	                            <td>{{ volo[2] }}</td>
+	                            <td>{{ volo[3] }}</td>
+	                            <td>{{ volo[4] }}</td>
+	                            <td>{{ volo[5] }}</td>
+	                            <td>{{ volo[6] }}</td>
+                        	</tr>
+	            		{% else %}
+	            			<tr>
+	                            <td>{{ volo[0] }}</td>
+	                            <td>{{ volo[1] }}</td>
+	                            <td>{{ volo[2] }}</td>
+	                            <td>{{ volo[3] }}</td>
+	                            <td>{{ volo[4] }}</td>
+	                            <td>{{ volo[5] }}</td>
+	                            <td>{{ volo[6] }}</td>
+                        	
+                        		<td><button id="btndel" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Elimina</button></td>
+                        		<td><button id="btndel" type="button" class="btn btn-warning" data-toggle="modal" data-target="#deleteModal">Modifica</button></td>
+                       		</tr>
+	            		{% endif %}
+	            	{% endfor %}
+	            </tbody>
+	        </table>
+	        <!-- Modal -->
+			<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="deleteModalLabel">Elimina volo</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							Sei sicuro di voler eliminare il volo?
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+							<form id="formdel" action="" method="POST">
+								<input class="btn btn-danger" type="submit" value="Elimina">
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 {% endblock content %}
 
