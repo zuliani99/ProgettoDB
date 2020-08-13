@@ -17,8 +17,8 @@ login_manager.login_message_category = 'info'
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'noreplayblogprova@gmail.com' # mail che utilizzaimo per l'invio dei messaggi
-app.config['MAIL_PASSWORD'] = 'blogprova4852' # questa è la password
+app.config['MAIL_USERNAME'] = 'takeaflyspa@gmail.com' # mail che utilizzaimo per l'invio dei messaggi
+app.config['MAIL_PASSWORD'] = 'Cj$Eos&dXCp3pcc#!zF!HJ7faVfSUf' # questa è la password
 mail = Mail(app)
 
 fujs = FlaskUtilJs(app)

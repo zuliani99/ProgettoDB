@@ -212,7 +212,7 @@ def reset_token(token):
 
 
 def send_ticket_notify(volo, nposto, b):
-	msg = Message('Conferma di Acquisto Tiket: ' + str(volo[0]), sender='noreplay@demo.com', recipients=[current_user.email])
+	msg = Message('Conferma di Acquisto Tiket: ' + str(volo[0]), sender='akeaflyspa@gmail.com', recipients=[current_user.email])
 	msg.body = f'''Grazie per aver acuistato dal nostro sito, ecco tutto ciò che ti serve per l'imbarco:
 
 Dettagli volo
@@ -271,17 +271,16 @@ def volo(volo_id):
         if current_user.is_authenticated:
             conn = engine.connect()
             trans = conn.begin()
-            try:
-                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo[0], form.posto.data, form.bagaglio.data)
-                b = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglio.data).fetchone()
-
-                #send_ticket_notify(volo, form.posto.data, b)
-
-                flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
-                return redirect(url_for('account'))
-            except:
-                trans.rollback()
-                flash("Posto da sedere acquistato poco fa, scegliene un altro", 'warning')
+            r = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volo_id, form.posto.data).fetchone()
+            if r is None:
+	            conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo[0], form.posto.data, form.bagaglio.data)
+	            b = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglio.data).fetchone()
+	            #send_ticket_notify(volo, form.posto.data, b)
+	            flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
+	            return redirect(url_for('user_fly'))
+	            #possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
+            else:
+	            flash("Posto da sedere appena acquistato, scegliene un altro", 'warning')
             conn.close()
         else:
             flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
@@ -303,7 +302,7 @@ def user_fly():
     if form.validate_on_submit():
     	return redirect(url_for('review_fly', fly_id=form.idnascosto.data, val=form.valutazione.data, crit=form.critiche.data))
     return render_template('imieivoli.html', voli=voli, time=time, form=form)
-
+    
 
 @app.route("/delete_fly<int:fly_id>", methods=['GET', 'POST'])
 @login_required(role="customer")
