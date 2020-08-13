@@ -264,7 +264,7 @@ def volo(volo_id):
     conn = engine.connect()
 
     res = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
-    form.bagaglio.choices = [(r[0], r[1]) for r in res]
+    form.bagaglio.choices = [(str(r[0]), str(r[1])) for r in res]
     conn.close()
 
     if form.validate_on_submit():
@@ -393,15 +393,8 @@ def dashboard():
 				oraArrivo = datetime.combine(flyForm.dataPartenza.data, flyForm.oraArrivo.data)
 
 			conn = engine.connect()
-			conn.execute(voli.insert(),
-				[{
-				"aeroportoPartenza": flyForm.aeroportoPartenza.data,
-				"oraPartenza": oraPartenza,
-				"aeroportoArrivo": flyForm.aeroportoArrivo.data,
-				"oraArrivo": oraArrivo,
-				"aereo": flyForm.aereo.data,
-				"prezzo": flyForm.prezzo.data
-				}])
+			#conn.execute(voli.insert(),[{"aeroportoPartenza": flyForm.aeroportoPartenza.data,"oraPartenza": oraPartenza,"aeroportoArrivo": flyForm.aeroportoArrivo.data,"oraArrivo": oraArrivo,"aereo": flyForm.aereo.data,"prezzo": flyForm.prezzo.data}])
+			conn.execute("INSERT INTO voli (aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo,prezzo) VALUES (%s,%s,%s,%s,%s,%s)", flyForm.aeroportoPartenza.data, oraPartenza, flyForm.aeroportoArrivo.data, oraArrivo, flyForm.aereo.data,flyForm.prezzo.data)
 			conn.close()
 		   
 			flash('Aggiunta volo completata con successo :D', 'success')

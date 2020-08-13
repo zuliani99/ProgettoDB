@@ -90,6 +90,7 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField('Reset Password')
 
 
+
 class AddBooking(FlaskForm):
     bagaglio = SelectField(u'Tipo Bagaglio')
     posto = SelectField(u'Posto da Sedere')
