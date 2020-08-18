@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+{% block content %}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+
+    <link rel="stylesheet" href="https://formden.com/static/cdn/bootstrap-iso.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+
+
+     <script type="text/javascript">
+     	$(document).ready(function () {
+        	$('select').selectize({
+          		sortField: 'text'
+        	});
+        });
+	</script>
+	<div class="content-section">
+		<h1>Volo #{{volo[0]}}</h1>
+		<form method="POST" action="" enctype="multipart/form-data">
+			{{ flyForm.hidden_tag() }}
+			<fieldset class="form-group">
+				<legend class="border-bottom mb-4">Info volo</legend>
+				<div class="form-group">
+					{{ flyForm.aeroportoPartenza.label(class="form-control-label") }}
+					{% if flyForm.aeroportoPartenza.errors %}
+						{{ flyForm.aeroportoPartenza(id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
+						<div class="invalid-feedback">
+							{% for error in flyForm.aeroportoPartenza.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ flyForm.aeroportoPartenza( id="select-state") }}
+					{% endif %}
+				</div>
+				<div class="form-group">
+					{{ flyForm.timePartenza.label(class="form-control-label") }}
+					{% if flyForm.timePartenza.errors %}
+						{{ flyForm.timePartenza(class="form-control form-control-lg is-invalid", type="datetime-local") }}
+						<div class="invalid-feedback">
+							{% for error in flyForm.timePartenza.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ flyForm.timePartenza(class="form-control", type="datetime-local") }}
+					{% endif %}
+
+				</div>
+				<div class="form-group">
+					{{ flyForm.aeroportoArrivo.label(class="form-control-label") }}
+					{% if flyForm.aeroportoArrivo.errors %}
+						{{ flyForm.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
+						<div class="invalid-feedback">
+							{% for error in flyForm.aeroportoArrivo.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ flyForm.aeroportoArrivo( id="select-state") }}
+					{% endif %}
+				</div>
+				<div class="form-group">
+					{{ flyForm.timeArrivo.label(class="form-control-label") }}
+					{% if flyForm.timeArrivo.errors %}
+						{{ flyForm.timeArrivo(class="form-control form-control-lg is-invalid", type="datetime-local") }}
+						<div class="invalid-feedback">
+							{% for error in flyForm.timeArrivo.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ flyForm.timeArrivo(class="form-control", type="datetime-local") }}
+					{% endif %}
+
+				</div>
+				<div class="form-group">
+					{{ flyForm.aereo.label(class="form-control-label") }}
+					{% if flyForm.aereo.errors %}
+						{{ flyForm.aereo(class="form-control is-invalid", id="select-state") }}
+						<div class="invalid-feedback">
+							{% for error in flyForm.aereo.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ flyForm.aereo( id="select-state") }}
+					{% endif %}
+				</div>
+				<div class="form-group">
+					{{ flyForm.prezzo.label(class="form-control-label") }}
+					{{ flyForm.prezzo(class="form-control amount", type="number", min="0", step="0.01") }}         
+				</div>
+			</fieldset>
+			<div class="form-group">
+				{{ flyForm.updateFly(class="btn btn-outline-info", form="addFly") }}
+			</div>
+		</form>
+	</div>
+
+{% endblock content %}
+
+<!--
+	TODO: passare il volo con id, aeroportoA, aeroportoB, oraA, oraB, aereo, (numero posti se si vuole), prezzo
+		non serve ricalcolare tutti i dati in quanto verranno passati da dashboard
+		il default su ogni campo saranno i dati del volo
+		se viene modificato anche solo un campo si modifica tutta la linea 
+		tasto save, non fa nulla se non è cambiato niente
+		servira anche qui il tasto delete
+		adess vae in let
+
+-->

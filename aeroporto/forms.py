@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, DecimalField, DateField, TimeField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, DecimalField, DateField, DateTimeField,TimeField, IntegerField
 #from wtforms.fields.html5 import DateTimeLocalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange, ValidationError
 from aeroporto.table import User, users, engine, metadata
@@ -107,7 +107,8 @@ class AddReviw(FlaskForm):
 #DASHBOARD
 class AddFlyForm(FlaskForm):
     tomorrowDate = datetime.date.today() + datetime.timedelta(days=1)
-    aeroportoPartenza = SelectField('Aeroporto di partenza', default='', validators=[DataRequired()])
+
+    aeroportoPartenza = SelectField('Aeroporto di partenza', validators=[DataRequired()])
     dataPartenza = DateField('Data partenza', default=tomorrowDate, validators=[DataRequired()])
     oraPartenza = TimeField('Ora partenza', validators=[DataRequired()])
     aeroportoArrivo = SelectField('Aeroporto di arrivo', validators=[DataRequired()])
@@ -135,3 +136,24 @@ class AddAirportForm(FlaskForm):
     indirizzo = StringField('Indirizzo',validators=[DataRequired()])
 
     submitAirport= SubmitField('Aggiungi')
+
+
+#NON SERVE FORSE, PROVO AD USARE L'ALTRO FORM
+class UpdateFlyForm(FlaskForm):
+    tomorrowDate = datetime.date.today() + datetime.timedelta(days=1)
+    
+    aeroportoPartenza = SelectField('Aeroporto di partenza', default='', validators=[DataRequired()])
+    timePartenza = DateTimeField('Data e ora di partenza', validators=[DataRequired()])
+    aeroportoArrivo = SelectField('Aeroporto di arrivo', validators=[DataRequired()])
+    timeArrivo = DateTimeField('Data e ora di arrivo previste', validators=[DataRequired()])
+    aereo = SelectField('Aereo', validators=[DataRequired()])
+    prezzo = DecimalField('Prezzo base', validators=[DataRequired()])
+
+    updateFly = SubmitField('Aggiungi')
+
+    def validate_dataPartenza(self, dataPartenza):
+        if dataPartenza.data < self.tomorrowDate:
+            raise ValidationError('La data deve essere futura')
+    def validate_aeroportoArrivo(self, aeroportoArrivo):
+        if aeroportoArrivo.data == self.aeroportoPartenza.data:
+            raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')

@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block content %}
-
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
@@ -32,12 +31,12 @@
     	<h1>Dashboard</h1>
 
     	<!-- Trigger the modal with a button -->
-    	<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addFlyModal">Aggiungi volo</button>
+    	
    		<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addPlaneModal">Aggiungi aereo</button>
    		<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addAirportModal">Aggiungi aeroporto</button>
    		<!--DEBUG-->
    		
-		<h4>Ciavo el mondo</h4>
+		<h1><br></h1>
 
     	<!-- ADD FLY -->
     	<div id="addFlyModal" class="modal fade" role="dialog">
@@ -237,74 +236,95 @@
     	</div>	
     	<!-- END BLOCK ADD AIRPORT-->
 
-    	{{ flask_util_js.js }}
-    	
-    	<div class="content-section">
-	        <h2 class="mt-5">Voli</h2>
-	        <table class="table table-hover">
-	            <thead>
-	                <tr>
-	                	<th scope="col">Codice volo</th>
-	                    <th scope="col">Aeroporto di Partenza</th>
-	                    <th scope="col">Data e Ora partenza</th>
-	                    <th scope="col">Aeroporto di Arrivo</th>
-	                    <th scope="col">Data e Ora arrivo</th>
-	                    <th scope="col">Codice Aereo</th>
-	                    <th scope="col">Prezzo Volo</th>
-	                </tr>
-	            </thead>
-	            <tbody>
-	            	{% for volo in voli %}
-	            		{% if volo[2] < time %}
-	            			<!-- EVIDENZIARE GLI ORDINI PASSATI IN QUALCHE MODO -->
-	            			<tr class="table-dark">
-	                            <td>{{ volo[0] }}</td>
-	                            <td>{{ volo[1] }}</td>
-	                            <td>{{ volo[2] }}</td>
-	                            <td>{{ volo[3] }}</td>
-	                            <td>{{ volo[4] }}</td>
-	                            <td>{{ volo[5] }}</td>
-	                            <td>{{ volo[6] }}</td>
-                        	</tr>
-	            		{% else %}
-	            			<tr>
-	                            <td>{{ volo[0] }}</td>
-	                            <td>{{ volo[1] }}</td>
-	                            <td>{{ volo[2] }}</td>
-	                            <td>{{ volo[3] }}</td>
-	                            <td>{{ volo[4] }}</td>
-	                            <td>{{ volo[5] }}</td>
-	                            <td>{{ volo[6] }}</td>
-                        	
-                        		<td><button id="btndel" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Elimina</button></td>
-                        		<td><button id="btndel" type="button" class="btn btn-warning" data-toggle="modal" data-target="#deleteModal">Modifica</button></td>
-                       		</tr>
-	            		{% endif %}
-	            	{% endfor %}
-	            </tbody>
-	        </table>
-	        <!-- Modal -->
-			<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-				<div class="modal-dialog" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="deleteModalLabel">Elimina volo</h5>
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-						</div>
-						<div class="modal-body">
-							Sei sicuro di voler eliminare il volo?
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
-							<form id="formdel" action="" method="POST">
-								<input class="btn btn-danger" type="submit" value="Elimina">
-							</form>
+    	<ul class="nav nav-tabs" id="myTab" role="tablist">
+  			<li class="nav-item">
+    			<a class="nav-link active" id="home-tab" data-toggle="tab" href="#voli" role="tab" aria-controls="home" aria-selected="true">Voli</a>
+  			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Aeroporti</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Aerei</a>
+			</li>
+		</ul>
+		<div class="tab-content" id="myTabContent">
+			<div class="tab-pane fade show active" id="voli" role="tabpanel" aria-labelledby="home-tab">
+		    	{{ flask_util_js.js }}
+		    	
+		    	<div class="content-section">
+		    		<div id="titleVoli">
+				        <h2 class="mt-5">Voli </h2>
+				        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addFlyModal">add</button>   
+			    	</div>
+			        <table class="table table-hover">
+			            <thead>
+			                <tr>
+			                	<th scope="col">Codice volo</th>
+			                    <th scope="col">Aeroporto di Partenza</th>
+			                    <th scope="col">Data e Ora partenza</th>
+			                    <th scope="col">Aeroporto di Arrivo</th>
+			                    <th scope="col">Data e Ora arrivo</th>
+			                    <th scope="col">Codice Aereo</th>
+			                    <th scope="col">Prezzo Volo</th>
+			                </tr>
+			            </thead>
+			            <tbody>
+			            	{% for volo in voli %}
+			            		{% if volo[2] < time %}
+			            			<!-- EVIDENZIARE GLI ORDINI PASSATI IN QUALCHE MODO -->
+			            			<tr class="table-dark">
+			                            <td>{{ volo[0] }}</td>
+			                            <td>{{ volo[1] }}</td>
+			                            <td>{{ volo[2] }}</td>
+			                            <td>{{ volo[3] }}</td>
+			                            <td>{{ volo[4] }}</td>
+			                            <td>{{ volo[5] }}</td>
+			                            <td>{{ volo[6] }}</td>
+		                        	</tr>
+			            		{% else %}
+			            			<tr>
+			                            <td>{{ volo[0] }}</td>
+			                            <td>{{ volo[1] }}</td>
+			                            <td>{{ volo[2] }}</td>
+			                            <td>{{ volo[3] }}</td>
+			                            <td>{{ volo[4] }}</td>
+			                            <td>{{ volo[5] }}</td>
+			                            <td>{{ volo[6] }}</td>
+		                        	
+		                        		<td><button id="btndel" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Elimina</button></td>
+		                        		<td><button id="btndel" type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('configVolo', volo_id=volo[0]) }}'">Modifica</button></td>
+		                       		</tr>
+			            		{% endif %}
+			            	{% endfor %}
+			            </tbody>
+			        </table>
+		        </div>
+		        <!-- Modal Conferma eliminazione-->
+				<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="deleteModalLabel">Elimina volo</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<p>Sei sicuro di voler eliminare il volo?</p>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+								<form id="formdel" action="" method="POST">
+									<input class="btn btn-danger" type="submit" value="Elimina">
+								</form>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+
+			<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
+		  	<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
 		</div>
 	</div>
 {% endblock content %}
