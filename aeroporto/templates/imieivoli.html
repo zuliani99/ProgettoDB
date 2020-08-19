@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
     {{ flask_util_js.js }}
-    <div class="content-section">
-        <h2 class="mt-5">I miei voli</h2>
+    <div>
+        <h2 class="mt-5 ml-3">I miei voli</h2>
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -25,6 +25,9 @@
                 {% for volo in voli %}
                     {% if volo[3] < time %}
                         <tr class="table-dark">
+                    {% else %}
+                        <tr>
+                    {% endif %}
                             <td>{{ volo[0] }}</td>
                             <td>{{ volo[1] }}</td>
                             <td>{{ volo[2] }}</td>
@@ -38,45 +41,27 @@
                             <td>{{ volo[10] }}</td>
                             <td>{{ volo[11] }}</td>
                             <td>
-                                {% if volo[12] == null %}
-                                    <button id="btnrev" type="button" class="btn btn-primary" data-toggle="modal" data-target="#reviewModal">
-                                      Aggioungi Recensione
-                                    </button>
+                                {% if volo[3] < time %}
+                                    {% if volo[12] == null %}
+                                        <button id="btnrev" type="button" class="btn btn-primary" data-toggle="modal" data-target="#reviewModal">
+                                          Aggioungi Recensione
+                                        </button>
+                                    {% else %}
+                                        <button id="btnrev" type="button" class="btn btn-primary" data-toggle="modal" data-target="#reviewModal" disabled>
+                                          Aggioungi Recensione
+                                        </button>
+                                    {% endif %}
                                 {% else %}
-                                    <button id="btnrev" type="button" class="btn btn-primary" data-toggle="modal" data-target="#reviewModal" disabled>
-                                      Aggioungi Recensione
-                                    </button>
+                                    <td> 
+                                        <button id="btndel" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+                                          Elimina
+                                        </button>
+                                    </td>
                                 {% endif %}
                             </td>
                         </tr>
-
-                        
-
-                    {% else %}
-                        <tr>
-                            <td>{{ volo[0] }}</td>
-                            <td>{{ volo[1] }}</td>
-                            <td>{{ volo[2] }}</td>
-                            <td>{{ volo[3] }}</td>
-                            <td>{{ volo[4] }}</td>
-                            <td>{{ volo[5] }}</td>
-                            <td>{{ volo[6] }}</td>
-                            <td>{{ volo[7] }}</td>
-                            <td>{{ volo[8] }}</td>
-                            <td>{{ volo[9] }}</td>
-                            <td>{{ volo[10] }}</td>
-                            <td>{{ volo[11] }}</td>
-                            <td> 
-                                <button id="btndel" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
-                                  Elimina
-                                </button>
-                            </td>
-                        </tr>
-
-
-                        
-                    {% endif %}
                 {% endfor %}
+                
             </tbody>
         </table>
     </div>

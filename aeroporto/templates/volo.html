@@ -22,6 +22,22 @@
 	    	</tr>
       	</tbody>
     </table>
+
+    <style type="text/css">
+    	tr.border_bottom td {
+		  border-bottom: 1px solid black;
+		}
+		tr.border_top td {
+		  border-top: 1px solid black;
+		}
+		tr.spaceUnder>td {
+		  padding-bottom: 1em;
+		}
+    </style>
+
+
+	
+
     <div class="content-section">
 	    <form method="POST" action="">
 	        {{ form.hidden_tag() }}
@@ -32,7 +48,25 @@
 	            </div>
 	            <div class="form-group">
 	                {{ form.posto.label(class="form-control-label") }}
-					{{ form.posto(class="form-control form-control-lg") }}
+					{{ form.posto(**{'id':'idnascosto', 'type':'hidden', 'value':''}) }}
+					<table class="table table-bordered" id="postiliberi">
+					{% set ran = ((volo[6]+1)//4)%}
+					{% for i in range(1,5) %}
+						{% if i == 2 %}
+						<tr class="border_bottom">
+						{% elif i == 3 %}
+						<tr class="border_top">
+						{% endif %}
+						{% for j in range (0,ran) %}
+							{% if j*4+i in free %}
+								<td><input type="button" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
+							{% else %}
+								<td><input type="button" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
+							{% endif %}
+						{% endfor %}
+						</tr>
+					{% endfor %}
+					</table>
 	            </div>
 	        </fieldset>
 	        <button id="buyticket" type="button" class="btn btn-primary" data-toggle="modal" data-target="#buyTiketModal">Acquista Biglietto Ora</button>
@@ -71,13 +105,21 @@
 
 		</form>
 	</div>
-    
 
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#buyticket").click(function(){
-			var p = $("#posto").val()
-			$("#nposto").text("Numero posto da sedere: " + p);
+			var p = $('#idnascosto').attr('value')
+			console.log(p);
+			if (p == ""){
+				$("#confirmbuy").prop('disabled', true)
+				$("#nposto").css("color", "red", "font-weight","bold");
+				$("#nposto").text("Scegliere un posto nella mappa");
+			}else{
+				$("#confirmbuy").prop('disabled', false); 
+				$("#nposto").css("color", "#333333", "font-weight: normal");
+				$("#nposto").text("Numero posto da sedere: " + p);
+			}
 			var b = parseFloat($("#bagaglio").val());
 			var pb = parseFloat('{{ volo[5] }}' + "€");
 			var sum = b+pb
@@ -86,6 +128,21 @@
 		$("#confirmbuy").click(function(){
 			window.location.replace("volo.html");
 		});
+	});
+
+	$("input:button").click(function() {
+		var posto = $(this).val();
+		var form = $('#idnascosto').attr('value')
+		if(posto == form){
+			$(this).prop("class", "");
+			$('#idnascosto').prop('value', '');
+		}else{
+			$("input:button").prop("class", "");
+			$("#idnascosto").val(posto);
+			$(this).prop("class", "btn-outline-primary");
+		}
+
+		
 	});
 </script>
 {% endblock content %}

@@ -93,7 +93,7 @@ class ResetPasswordForm(FlaskForm):
 
 class AddBooking(FlaskForm):
     bagaglio = SelectField(u'Tipo Bagaglio')
-    posto = SelectField(u'Posto da Sedere')
+    posto = StringField('Posto da Sedere', validators=[DataRequired()])
     submit = SubmitField('Conferma Aquisto')
 
 

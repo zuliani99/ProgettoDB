@@ -249,18 +249,18 @@ def volo(volo_id):
     except:
         trans.rollback()
     volo = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volo_id).fetchone()
-    pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volo[0]).fetchall()
+    print("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = "+volo_id)
+    pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volo_id).fetchall()
     conn.close()
-
     l = []
     for p in pocc:
         l.append(p[0])
     available_groups = []
-    for count in range(1,volo[6]+1):
+    for count in range(1,int(volo[6])+1):
         if count not in l:
             available_groups.append(count)
     map(str(),available_groups)
-    form.posto.choices = available_groups
+    #form.posto.choices = available_groups
     conn = engine.connect()
 
     res = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
@@ -270,14 +270,16 @@ def volo(volo_id):
     if form.validate_on_submit():
         if current_user.is_authenticated:
             conn = engine.connect()
-            trans = conn.begin()
             r = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volo_id, form.posto.data).fetchone()
             if r is None:
-	            conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo[0], form.posto.data, form.bagaglio.data)
-	            b = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglio.data).fetchone()
-	            #send_ticket_notify(volo, form.posto.data, b)
-	            flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
-	            return redirect(url_for('user_fly'))
+                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo_id, form.posto.data, form.bagaglio.data)
+                print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volo[0])+","+ form.posto.data+","+ form.bagaglio.data+")")
+                b = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglio.data).fetchone()
+	            
+                #send_ticket_notify(volo, form.posto.data, b)
+	            
+                flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
+                return redirect(url_for('user_fly'))
 	            #possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
             else:
 	            flash("Posto da sedere appena acquistato, scegliene un altro", 'warning')
@@ -285,7 +287,7 @@ def volo(volo_id):
         else:
             flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
             return redirect(url_for('login'))
-    return render_template('volo.html', title=volo_id, volo=volo, form=form)
+    return render_template('volo.html', title=volo_id, volo=volo, form=form, free=available_groups)
 
 
 

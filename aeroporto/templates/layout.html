@@ -51,7 +51,9 @@
 					  		{% if current_user.is_authenticated %}
 								<!-- Se ho fatto l'accesso mi displaya le sezioini Account e Logout -->
 								<a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
-								<a class="nav-item nav-link" href="{{ url_for('user_fly') }}">I miei voli</a>
+								{% if current_user.role != 'admin' %}
+									<a class="nav-item nav-link" href="{{ url_for('user_fly') }}">I miei voli</a>
+								{% endif %}
 								<a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
 					  		{% else %}
 								<!-- Se NON ho fatto l'accesso mi displaya le sezioini Login e Register -->
