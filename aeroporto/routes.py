@@ -4,7 +4,7 @@ import os
 from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request, abort, current_app #import necessari per il funzionamento dell'applicazione
 from aeroporto import app, bcrypt, mail
-from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, AddPlaneForm,  AddFlyForm, AddAirportForm, AddReviw
+from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, AddPlaneForm,  AddFlyForm, AddAirportForm, AddReviw, UpdateFlyForm
 from flask_login import login_user, current_user, logout_user
 from aeroporto.table import User, users, engine, metadata, load_user, voli, aerei, aeroporti
 from flask_mail import Message
@@ -12,24 +12,24 @@ from sqlalchemy.sql import *
 from functools import wraps
 from flask_principal import identity_changed, Identity, AnonymousIdentity
 from flask_mysqldb import MySQL
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 def login_required(role="ANY"):
-    def wrapper(fn):
-        @wraps(fn)
-        def wrap(*args, **kwargs):
-            if not current_user.is_authenticated:
-               	#return current_app.login_manager.unauthorized()
-               	flash("Devi accedere al tuo account per visitare la pagina", 'danger')
-                return redirect(url_for('login'))
-            urole = load_user(current_user.id).get_urole()
-            if ((urole != role) and (role != "ANY")):
-                #return current_app.login_manager.unauthorized()
-                flash("Devi essere un admin per visualizzare la pagina", 'danger')
-                return redirect(url_for('home'))
-            return fn(*args, **kwargs)
-        return wrap
-    return wrapper
+	def wrapper(fn):
+		@wraps(fn)
+		def wrap(*args, **kwargs):
+			if not current_user.is_authenticated:
+				#return current_app.login_manager.unauthorized()
+				flash("Devi accedere al tuo account per visitare la pagina", 'danger')
+				return redirect(url_for('login'))
+			urole = load_user(current_user.id).get_urole()
+			if ((urole != role) and (role != "ANY")):
+				#return current_app.login_manager.unauthorized()
+				flash("Devi essere un admin per visualizzare la pagina", 'danger')
+				return redirect(url_for('home'))
+			return fn(*args, **kwargs)
+		return wrap
+	return wrapper
 
 
 @app.route("/")
@@ -127,35 +127,35 @@ def save_pictures(form_picture): # funzione di salvataggio nel filesystem
 @app.route("/account", methods=['GET', 'POST'])
 @login_required(role="ANY") # necessario se vogliaomo ch la pagina sia visitabile solo se l'utente ha eseguito l'accesso alla piattaforma
 def account(): # funzione di account
-    form = UpdateAccountForm()  # from di updaTE
-    if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
-        if form.picture.data: # se abbiao aggiornato l'immagine
-            picture_file = save_pictures(form.picture.data)
-            current_user.image_file = picture_file
+	form = UpdateAccountForm()  # from di updaTE
+	if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
+		if form.picture.data: # se abbiao aggiornato l'immagine
+			picture_file = save_pictures(form.picture.data)
+			current_user.image_file = picture_file
 			
-            conn = engine.connect()
-            conn.execute(users.update().values(image_file=current_user.image_file).where(users.c.id==current_user.id))
-            conn.close()
+			conn = engine.connect()
+			conn.execute(users.update().values(image_file=current_user.image_file).where(users.c.id==current_user.id))
+			conn.close()
 
 
-        current_user.username = form.username.data
-        current_user.email = form.email.data
+		current_user.username = form.username.data
+		current_user.email = form.email.data
 		
 
 		#db.session.commit()
-        conn = engine.connect()
-        u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
-        conn.execute(u)
-        conn.close()
+		conn = engine.connect()
+		u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
+		conn.execute(u)
+		conn.close()
 
-        flash('Il tuo account è stato aggionato', 'success')
-        return redirect(url_for('account')) # non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
-    elif request.method == 'GET':
-        form.username.data = current_user.username
-        form.email.data = current_user.email
-    
-    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='Account', image_file=image_file, form=form) # mi porta alla pagina accout con titolo='Account'
+		flash('Il tuo account è stato aggionato', 'success')
+		return redirect(url_for('account')) # non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
+	elif request.method == 'GET':
+		form.username.data = current_user.username
+		form.email.data = current_user.email
+	
+	image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+	return render_template('account.html', title='Account', image_file=image_file, form=form) # mi porta alla pagina accout con titolo='Account'
 
 
 
@@ -263,9 +263,9 @@ def volo(volo_id):
     #form.posto.choices = available_groups
     conn = engine.connect()
 
-    res = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
-    form.bagaglio.choices = [(str(r[0]), str(r[1])) for r in res]
-    conn.close()
+	res = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
+	form.bagaglio.choices = [(str(r[0]), str(r[1])) for r in res]
+	conn.close()
 
     if form.validate_on_submit():
         if current_user.is_authenticated:
@@ -296,30 +296,30 @@ def volo(volo_id):
 @app.route("/user_fly", methods=['GET', 'POST'])
 @login_required(role="customer")
 def user_fly():
-    form = AddReviw()
-    conn = engine.connect()
-    voli = conn.execute("SELECT p.id, p.id_volo, v.aeroportoPartenza, v.oraPartenza, v.aeroportoArrivo, v.oraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale, p.valutazione FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo WHERE p.id_user= %s ORDER BY v.oraPartenza", current_user.id).fetchall()
-    conn.close()
-    time = datetime.now()
-    if form.validate_on_submit():
-    	return redirect(url_for('review_fly', fly_id=form.idnascosto.data, val=form.valutazione.data, crit=form.critiche.data))
-    return render_template('imieivoli.html', voli=voli, time=time, form=form)
-    
+	form = AddReviw()
+	conn = engine.connect()
+	voli = conn.execute("SELECT p.id, p.id_volo, v.aeroportoPartenza, v.oraPartenza, v.aeroportoArrivo, v.oraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale, p.valutazione FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo WHERE p.id_user= %s ORDER BY v.oraPartenza", current_user.id).fetchall()
+	conn.close()
+	time = datetime.now()
+	if form.validate_on_submit():
+		return redirect(url_for('review_fly', fly_id=form.idnascosto.data, val=form.valutazione.data, crit=form.critiche.data))
+	return render_template('imieivoli.html', voli=voli, time=time, form=form)
+	
 
 @app.route("/delete_fly<int:fly_id>", methods=['GET', 'POST'])
 @login_required(role="customer")
 def delete_fly(fly_id):
-    conn = engine.connect()
-    f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
-    if f is None:
-        abort(404)
-    if f[1] != current_user.id:
-        abort(403)
+	conn = engine.connect()
+	f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
+	if f is None:
+		abort(404)
+	if f[1] != current_user.id:
+		abort(403)
    
-    conn.execute("DELETE FROM prenotazioni WHERE id = %s", fly_id)
-    flash('Il volo ' + str(f[0]) + ' da te prenotato è stato cancellato con successo', 'success')
-    conn.close()
-    return redirect(url_for('user_fly'))
+	conn.execute("DELETE FROM prenotazioni WHERE id = %s", fly_id)
+	flash('Il volo ' + str(f[0]) + ' da te prenotato è stato cancellato con successo', 'success')
+	conn.close()
+	return redirect(url_for('user_fly'))
 
 
 
@@ -328,21 +328,21 @@ def delete_fly(fly_id):
 @app.route("/review_fly<fly_id>,<val>,<crit>", methods=['GET', 'POST'])
 @login_required(role="customer")
 def review_fly(fly_id, val, crit):
-    conn = engine.connect()
-    f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
-    if f is None:
-        abort(404)
-    if f[1] != current_user.id:
-        abort(403)
+	conn = engine.connect()
+	f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
+	if f is None:
+		abort(404)
+	if f[1] != current_user.id:
+		abort(403)
 
-    r = conn.execute("SELECT valutazione FROM prenotazioni WHERE id = %s", fly_id).fetchone()
-    if r[0] is None: 
-    	conn.execute("UPDATE prenotazioni SET valutazione = %s , critiche = %s WHERE id = %s", val, crit, fly_id)
-    	conn.close()
-    	flash("Recensione inserita con successo", "success")
-    else:
-    	flash("Recensione già inserita con successo", "warning")
-    return redirect(url_for('user_fly'))
+	r = conn.execute("SELECT valutazione FROM prenotazioni WHERE id = %s", fly_id).fetchone()
+	if r[0] is None: 
+		conn.execute("UPDATE prenotazioni SET valutazione = %s , critiche = %s WHERE id = %s", val, crit, fly_id)
+		conn.close()
+		flash("Recensione inserita con successo", "success")
+	else:
+		flash("Recensione già inserita con successo", "warning")
+	return redirect(url_for('user_fly'))
 
 
 
@@ -350,16 +350,15 @@ def review_fly(fly_id, val, crit):
 @app.route("/delete_volo<int:fly_id>", methods=['GET', 'POST'])
 @login_required(role="admin")
 def delete_volo(fly_id):
-    conn = engine.connect()
-    f = conn.execute("SELECT * FROM voli WHERE id = %s",fly_id).fetchone()
-    if f is None:
-        abort(404)
+	conn = engine.connect()
+	f = conn.execute("SELECT * FROM voli WHERE id = %s",fly_id).fetchone()
+	if f is None:
+		abort(404)
    
-    conn.execute("DELETE FROM voli WHERE id = %s", fly_id)
-    flash('Il volo ' + str(f[0]) + 'è stato cancellato con successo', 'success')
-    conn.close()
-    return redirect(url_for('dashboard'))
-
+	conn.execute("DELETE FROM voli WHERE id = %s", fly_id)
+	flash('Il volo ' + str(f[0]) + 'è stato cancellato con successo', 'success')
+	conn.close()
+	return redirect(url_for('dashboard'))
 
 
 @app.route("/dashboard", methods=['GET', 'POST'])
@@ -370,20 +369,21 @@ def dashboard():
 	airportForm = AddAirportForm()
 
 	conn = engine.connect()
+	volo = conn.execute("SELECT id, aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo FROM voli WHERE id=41").fetchone()
 	aeroporti = conn.execute("SELECT id, name, indirizzo FROM aeroporti").fetchall()
 	aerei = conn.execute("SELECT id, name FROM aerei").fetchall()
 	voli = conn.execute("SELECT * FROM voli").fetchall()
 	conn.close()
 
-	opzioniAeroporti = [(str(choice[0]), str(choice[1]+", "+choice[2])) for choice in aeroporti]
+	opzioniAeroporti = [(str(choice[0]), str(choice[1]+", "+choice[2]+" #"+str(choice[0]))) for choice in aeroporti]
 	flyForm.aeroportoPartenza.choices = [('','')] + opzioniAeroporti
 	flyForm.aeroportoArrivo.choices = [('','')] + opzioniAeroporti
-	
 
-	opzioniAerei = [(str(choice[0]), str(choice[1])) for choice in aerei]
+	opzioniAerei = [(str(choice[0]), str(choice[1]+" #"+str(choice[0]))) for choice in aerei]
 	flyForm.aereo.choices = [('','')]  + opzioniAerei
 	
 	time = datetime.now()
+
 
 	if flyForm.is_submitted() and flyForm.submitFly.data:
 		if flyForm.validate():
@@ -432,6 +432,37 @@ def dashboard():
 			flash('Qualcosa nell\'inserimento dell\'aeroporto è andato storto :(', 'danger')
 
 	return render_template('dashboard.html', title='Dashboard', flyForm=flyForm, planeForm=planeForm, airportForm=airportForm, voli=voli, time=time)
+
+
+@app.route("/dashboard_volo<volo_id>", methods=['GET', 'POST'])
+@login_required(role="admin") 
+def configVolo(volo_id): 
+	updateform = UpdateFlyForm() 
+
+	conn = engine.connect()
+	volo = conn.execute("SELECT id, aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo FROM voli WHERE id=%s", volo_id).fetchone()
+	aeroporti = conn.execute("SELECT id, name, indirizzo FROM aeroporti").fetchall()
+	aerei = conn.execute("SELECT id, name FROM aerei").fetchall()
+	voli = conn.execute("SELECT * FROM voli").fetchall()
+	conn.close()
+
+	opzioniAeroporti = [(str(choice[0]), str(choice[1]+", "+choice[2]+" #"+str(choice[0]))) for choice in aeroporti]
+	updateform.aeroportoPartenza.choices = [('','')] + opzioniAeroporti
+	updateform.aeroportoArrivo.choices = [('','')] + opzioniAeroporti
+
+
+	opzioniAerei = [(str(choice[0]), str(choice[1]+" #"+str(choice[0]))) for choice in aerei]
+	updateform.aereo.choices = [('','')]  + opzioniAerei
+
+	#Set the informations of the fly in each field 
+	#updateform.aeroportoPartenza.default = volo[1]
+	updateform.timePartenza.default = volo[2]
+	updateform.aeroportoArrivo.default = volo[3]
+	updateform.timeArrivo.default = volo[4]
+	updateform.aereo.default = volo[5]
+	updateform.prezzo.default = volo[6]
+	
+	return render_template('dashboard_volo.html', volo=volo, flyForm=updateform)
 
 ##aerei.insert(),[{"name": planeForm.nome.data, "numeroPosti": planeForm.nPosti.data}])
 
