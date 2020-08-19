@@ -95,7 +95,7 @@
 				</div>
 			</fieldset>
 			<div class="form-group">
-				{{ flyForm.updateFly(class="btn btn-outline-info", form="addFly") }}
+				{{ flyForm.updateFly(class="btn btn-outline-info") }}
 			</div>
 		</form>
 	</div>
@@ -103,7 +103,7 @@
 {% endblock content %}
 
 <!--
-	TODO: passare il volo con id, aeroportoA, aeroportoB, oraA, oraB, aereo, (numero posti se si vuole), prezzo
+	TODO: passare il volo con id, aeroportoA, aeroportoB, oraA, oraB, aereo, (numero posti occupati se si vuole), prezzo
 		non serve ricalcolare tutti i dati in quanto verranno passati da dashboard
 		il default su ogni campo saranno i dati del volo
 		se viene modificato anche solo un campo si modifica tutta la linea 

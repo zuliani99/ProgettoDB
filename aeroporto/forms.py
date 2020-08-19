@@ -127,9 +127,13 @@ class AddFlyForm(FlaskForm):
 
 class AddPlaneForm(FlaskForm):
     nome = StringField('Nome aereo', validators=[DataRequired()])
-    nPosti = IntegerField('Numero di posti', validators=[DataRequired(), NumberRange(1, None,"L'aereo deve avere almeno un posto ")])
+    nPosti = IntegerField('Numero di posti', validators=[DataRequired(), NumberRange(1, None,"L'aereo deve avere almeno quattro posti ")])
 
     submitPlane = SubmitField('Aggiungi')
+
+    def validate_nPosti(self, nPosti):
+        if nPosti.data % 4 != 0:
+            raise ValidationError('Il numero dei posti deve essere divisibile per quattro')
 
 class AddAirportForm(FlaskForm):
     nome = StringField('Nome aeroporto', validators=[DataRequired()])
@@ -149,7 +153,7 @@ class UpdateFlyForm(FlaskForm):
     aereo = SelectField('Aereo', validators=[DataRequired()])
     prezzo = DecimalField('Prezzo base', validators=[DataRequired()])
 
-    updateFly = SubmitField('Aggiungi')
+    updateFly = SubmitField('Aggiorna')
 
     def validate_dataPartenza(self, dataPartenza):
         if dataPartenza.data < self.tomorrowDate:

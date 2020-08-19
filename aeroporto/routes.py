@@ -241,53 +241,53 @@ Lo staff Take a Fly
 
 @app.route("/volo<volo_id>", methods=['GET', 'POST'])
 def volo(volo_id):
-    form = AddBooking()
-    conn = engine.connect()
-    trans = conn.begin()
-    try:
-        conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
-    except:
-        trans.rollback()
-    volo = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volo_id).fetchone()
-    print("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = "+volo_id)
-    pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volo_id).fetchall()
-    conn.close()
-    l = []
-    for p in pocc:
-        l.append(p[0])
-    available_groups = []
-    for count in range(1,int(volo[6])+1):
-        if count not in l:
-            available_groups.append(count)
-    map(str(),available_groups)
-    #form.posto.choices = available_groups
-    conn = engine.connect()
+	form = AddBooking()
+	conn = engine.connect()
+	trans = conn.begin()
+	try:
+		conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
+	except:
+		trans.rollback()
+	volo = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volo_id).fetchone()
+	print("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = "+volo_id)
+	pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volo_id).fetchall()
+	conn.close()
+	l = []
+	for p in pocc:
+		l.append(p[0])
+	available_groups = []
+	for count in range(1,int(volo[6])+1):
+		if count not in l:
+			available_groups.append(count)
+	map(str(),available_groups)
+	#form.posto.choices = available_groups
+	conn = engine.connect()
 
 	res = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
 	form.bagaglio.choices = [(str(r[0]), str(r[1])) for r in res]
 	conn.close()
 
-    if form.validate_on_submit():
-        if current_user.is_authenticated:
-            conn = engine.connect()
-            r = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volo_id, form.posto.data).fetchone()
-            if r is None:
-                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo_id, form.posto.data, form.bagaglio.data)
-                print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volo[0])+","+ form.posto.data+","+ form.bagaglio.data+")")
-                b = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglio.data).fetchone()
-	            
-                #send_ticket_notify(volo, form.posto.data, b)
-	            
-                flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
-                return redirect(url_for('user_fly'))
-	            #possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
-            else:
-	            flash("Posto da sedere appena acquistato, scegliene un altro", 'warning')
-            conn.close()
-        else:
-            flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
-            return redirect(url_for('login'))
-    return render_template('volo.html', title=volo_id, volo=volo, form=form, free=available_groups)
+	if form.validate_on_submit():
+		if current_user.is_authenticated:
+			conn = engine.connect()
+			r = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volo_id, form.posto.data).fetchone()
+			if r is None:
+				conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volo_id, form.posto.data, form.bagaglio.data)
+				print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volo[0])+","+ form.posto.data+","+ form.bagaglio.data+")")
+				b = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglio.data).fetchone()
+				
+				#send_ticket_notify(volo, form.posto.data, b)
+				
+				flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
+				return redirect(url_for('user_fly'))
+				#possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
+			else:
+				flash("Posto da sedere appena acquistato, scegliene un altro", 'warning')
+			conn.close()
+		else:
+			flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
+			return redirect(url_for('login'))
+	return render_template('volo.html', title=volo_id, volo=volo, form=form, free=available_groups)
 
 
 
@@ -455,14 +455,29 @@ def configVolo(volo_id):
 	updateform.aereo.choices = [('','')]  + opzioniAerei
 
 	#Set the informations of the fly in each field 
-	#updateform.aeroportoPartenza.default = volo[1]
-	updateform.timePartenza.default = volo[2]
-	updateform.aeroportoArrivo.default = volo[3]
-	updateform.timeArrivo.default = volo[4]
-	updateform.aereo.default = volo[5]
-	updateform.prezzo.default = volo[6]
-	
+	if updateform.validate_on_submit():
+		conn = engine.connect()
+		
+		conn.execute("UPDATE voli SET aeroportoPartenza=%s, oraPartenza=%s,aeroportoArrivo=%s,oraArrivo=%s,aereo=%s,prezzo=%s WHERE id = %s", 
+			updateform.aeroportoPartenza.data,
+			updateform.timePartenza.data,
+			updateform.aeroportoArrivo.data,
+			updateform.timeArrivo.data,
+			updateform.aereo.data,
+			updateform.prezzo.data,
+			volo_id
+		)
+		conn.close()
+		flash('Aggiornamento volo completato con successo :D', 'success')
+		return redirect('dashboard')
+	elif request.method == 'GET':
+		updateform.aeroportoPartenza.data = str(volo[1])
+		updateform.timePartenza.data = volo[2]
+		updateform.aeroportoArrivo.data = str(volo[3])
+		updateform.timeArrivo.data = volo[4]
+		updateform.aereo.data = str(volo[5])
+		updateform.prezzo.data = volo[6]
+		
 	return render_template('dashboard_volo.html', volo=volo, flyForm=updateform)
 
 ##aerei.insert(),[{"name": planeForm.nome.data, "numeroPosti": planeForm.nPosti.data}])
-
