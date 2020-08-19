@@ -15,12 +15,20 @@
           		sortField: 'text'
         	});
 
-        	$(".table tbody").on('click','#btndel',function(){
+        	$(".table tbody").on('click','#btndelFly',function(){
 	            // get the current row
 	            var currentRow=$(this).closest("tr"); 
 	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
 	            var newURL = flask_util.url_for('delete_volo', {fly_id: col1});
-	            $('#formdel').attr('action', newURL);
+	            $('#formdelFly').attr('action', newURL);
+	             
+	        });
+	        $(".table tbody").on('click','#btndelAirport',function(){
+	            // get the current row
+	            var currentRow=$(this).closest("tr"); 
+	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
+	            var newURL = flask_util.url_for('delete_aeroporto', {aeroporto_id: col1});
+	            $('#formdelAirport').attr('action', newURL);
 	             
 	        });
         });
@@ -33,7 +41,6 @@
     	<!-- Trigger the modal with a button -->
     	
    		<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addPlaneModal">Aggiungi aereo</button>
-   		<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addAirportModal">Aggiungi aeroporto</button>
    		<!--DEBUG-->
    		
 		<h1><br></h1>
@@ -238,17 +245,17 @@
 
     	<ul class="nav nav-tabs" id="myTab" role="tablist">
   			<li class="nav-item">
-    			<a class="nav-link active" id="home-tab" data-toggle="tab" href="#voli" role="tab" aria-controls="home" aria-selected="true">Voli</a>
+    			<a class="nav-link active" id="fly-tab" data-toggle="tab" href="#voli" role="tab" aria-controls="fly" aria-selected="true">Voli</a>
   			</li>
 			<li class="nav-item">
-				<a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Aeroporti</a>
+				<a class="nav-link" id="airport-tab" data-toggle="tab" href="#areoporti" role="tab" aria-controls="airport" aria-selected="false">Aeroporti</a>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Aerei</a>
+				<a class="nav-link" id="planes-tab" data-toggle="tab" href="#aerei" role="tab" aria-controls="plane" aria-selected="false">Aerei</a>
 			</li>
 		</ul>
 		<div class="tab-content" id="myTabContent">
-			<div class="tab-pane fade show active" id="voli" role="tabpanel" aria-labelledby="home-tab">
+			<div class="tab-pane fade show active" id="voli" role="tabpanel" aria-labelledby="fly-tab">
 		    	{{ flask_util_js.js }}
 		    	
 		    	<div class="content-section">
@@ -291,16 +298,16 @@
 			                            <td>{{ volo[5] }}</td>
 			                            <td>{{ volo[6] }}</td>
 		                        	
-		                        		<td><button id="btndel" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Elimina</button></td>
-		                        		<td><button id="btndel" type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('configVolo', volo_id=volo[0]) }}'">Modifica</button></td>
+		                        		<td><button id="btndelFly" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalFly">Elimina</button></td>
+		                        		<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('configVolo', volo_id=volo[0]) }}'">Modifica</button></td>
 		                       		</tr>
 			            		{% endif %}
 			            	{% endfor %}
 			            </tbody>
 			        </table>
 		        </div>
-		        <!-- Modal Conferma eliminazione-->
-				<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+		        <!-- Modal Conferma eliminazione VOLO-->
+				<div class="modal fade" id="deleteModalFly" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
 					<div class="modal-dialog" role="document">
 						<div class="modal-content">
 							<div class="modal-header">
@@ -314,7 +321,7 @@
 							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
-								<form id="formdel" action="" method="POST">
+								<form id="formdelFly" action="" method="POST">
 									<input class="btn btn-danger" type="submit" value="Elimina">
 								</form>
 							</div>
@@ -323,8 +330,65 @@
 				</div>
 			</div>
 
-			<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
-		  	<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
+			<div class="tab-pane fade" id="areoporti" role="tabpanel" aria-labelledby="airport-tab">
+				{{ flask_util_js.js }}
+		    	
+		    	<div class="content-section">
+		    		<div id="titleAeroporti">
+				        <h2 class="mt-5">Aeroporti</h2>
+				        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addAirportModal">add</button>   
+			    	</div>
+			        <table class="table table-hover">
+			            <thead>
+			                <tr>
+			                	<th scope="col">Codice Aeroporto</th>
+			                    <th scope="col">Nome</th>
+			                    <th scope="col">indirizzo</th>
+			                </tr>
+			            </thead>
+			            <tbody>
+			            	{% for aeroporto in aeroporti %}
+			            		<tr>
+				            		<td>{{ aeroporto[0] }}</td>
+				                    <td>{{ aeroporto[1] }}</td>
+				                    <td>{{ aeroporto[2] }}</td>
+		                        
+		                        	<td><button id="btndelAirport" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalAiport">Elimina</button></td>
+		  
+		                       		
+		                       	</tr>
+			            	{% endfor %}
+			            </tbody>
+			        </table>
+		        </div>
+		        <!-- Modal Conferma eliminazione-->
+				<div class="modal fade" id="deleteModalAiport" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="deleteModalLabel">Elimina aeroporto</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<p>Sei sicuro di voler eliminare l'aeroporto? tutti i voli collegati verranno cancellati</p>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+								<form id="formdelAirport" action="" method="POST">
+									<input class="btn btn-danger" type="submit" value="Elimina">
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		  	<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="planes-tab">
+		  		
+
+		  	</div>
 		</div>
 	</div>
 {% endblock content %}

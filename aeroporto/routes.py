@@ -360,6 +360,20 @@ def delete_volo(fly_id):
 	conn.close()
 	return redirect(url_for('dashboard'))
 
+@app.route("/delete_aeroporto<int:aeroporto_id>", methods=['GET', 'POST'])
+@login_required(role="admin")
+def delete_aeroporto(aeroporto_id):
+	conn = engine.connect()
+	f = conn.execute("SELECT * FROM aeroporti WHERE id = %s",aeroporto_id).fetchone()
+	if f is None:
+		abort(404)
+   
+	conn.execute("DELETE FROM aeroporti WHERE id = %s", aeroporto_id)
+	flash('l\'aeroporto ' + str(f[0]) + 'è stato cancellato con successo', 'success')
+	conn.close()
+	return redirect(url_for('dashboard'))
+
+
 
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required(role="admin")
@@ -431,7 +445,7 @@ def dashboard():
 		else:
 			flash('Qualcosa nell\'inserimento dell\'aeroporto è andato storto :(', 'danger')
 
-	return render_template('dashboard.html', title='Dashboard', flyForm=flyForm, planeForm=planeForm, airportForm=airportForm, voli=voli, time=time)
+	return render_template('dashboard.html', title='Dashboard', flyForm=flyForm, planeForm=planeForm, airportForm=airportForm, voli=voli, aeroporti=aeroporti, time=time)
 
 
 @app.route("/dashboard_volo<volo_id>", methods=['GET', 'POST'])
