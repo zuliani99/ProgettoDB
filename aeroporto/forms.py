@@ -135,11 +135,11 @@ class AddPlaneForm(FlaskForm):
         if nPosti.data % 4 != 0:
             raise ValidationError('Il numero dei posti deve essere divisibile per quattro')
 
-class AddAirportForm(FlaskForm):
+class AirportForm(FlaskForm):
     nome = StringField('Nome aeroporto', validators=[DataRequired()])
     indirizzo = StringField('Indirizzo',validators=[DataRequired()])
 
-    submitAirport= SubmitField('Aggiungi')
+    submitAirport= SubmitField()
 
 
 #NON SERVE FORSE, PROVO AD USARE L'ALTRO FORM

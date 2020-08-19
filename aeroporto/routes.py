@@ -4,7 +4,7 @@ import os
 from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request, abort, current_app #import necessari per il funzionamento dell'applicazione
 from aeroporto import app, bcrypt, mail
-from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, AddPlaneForm,  AddFlyForm, AddAirportForm, AddReviw, UpdateFlyForm
+from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, AddPlaneForm,  AddFlyForm, AirportForm, AddReviw, UpdateFlyForm
 from flask_login import login_user, current_user, logout_user
 from aeroporto.table import User, users, engine, metadata, load_user, voli, aerei, aeroporti
 from flask_mail import Message
@@ -380,7 +380,7 @@ def delete_aeroporto(aeroporto_id):
 def dashboard():
 	flyForm = AddFlyForm()
 	planeForm = AddPlaneForm()
-	airportForm = AddAirportForm()
+	airportForm = AirportForm()
 
 	conn = engine.connect()
 	volo = conn.execute("SELECT id, aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo FROM voli WHERE id=41").fetchone()
@@ -493,5 +493,32 @@ def configVolo(volo_id):
 		updateform.prezzo.data = volo[6]
 		
 	return render_template('dashboard_volo.html', volo=volo, flyForm=updateform)
+
+@app.route("/dashboard_aeroporto<aeroporto_id>", methods=['GET', 'POST'])
+@login_required(role="admin")
+def configAeroporto(aeroporto_id):
+	updateform = AirportForm()
+
+	conn = engine.connect()
+	aeroporto = conn.execute("SELECT id, name, indirizzo FROM aeroporti WHERE id = %s", aeroporto_id).fetchone()
+	conn.close()
+
+	if updateform.validate_on_submit():
+		conn = engine.connect()
+		conn.execute("UPDATE aeroporti SET name=%s, indirizzo=%s WHERE id = %s",
+			updateform.nome.data,
+			updateform.indirizzo.data,
+			aeroporto_id
+		)
+		conn.close()
+		flash('Aggiornamento aeroporto completato con successo :D', 'success')
+		return redirect('dashboard')
+	elif request.method == 'GET':
+		updateform.nome.data = aeroporto[1]
+		updateform.indirizzo.data = aeroporto[2]
+		#updateform.submitAirport.label = "Aggiorna"
+
+	return render_template('dashboard_aeroporto.html', aeroporto=aeroporto, airportForm=updateform)
+
 
 ##aerei.insert(),[{"name": planeForm.nome.data, "numeroPosti": planeForm.nPosti.data}])

@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block content %}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+
+	<link rel="stylesheet" href="https://formden.com/static/cdn/bootstrap-iso.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('select').selectize({
+				sortField: 'text'
+			});
+		});
+	</script>
+	<div class="content-section">
+		<h1>Aeroporto #{{aeroporto[0]}}</h1>
+		<form method="POST" action="" enctype="multipart/form-data">
+			{{ airportForm.hidden_tag() }}
+			<fieldset class="form-group">
+				<legend class="border-bottom mb-4">Info aeroporto</legend>
+				<div class="form-group">
+					{{ airportForm.nome.label(class="form-control-label") }}
+					{% if airportForm.nome.errors %}
+						{{ airportForm.nome(class="form-control is-invalid") }}
+						<div class="invalid-feedback">
+							{% for error in airportForm.nome.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ airportForm.nome(class= "form-control" ) }}
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ airportForm.indirizzo.label(class="form-control-label") }}
+					{% if airportForm.indirizzo.errors %}
+						{{ airportForm.indirizzo(class="form-control is-invalid") }}
+						<div class="invalid-feedback">
+							{% for error in airportForm.indirizzo.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ airportForm.indirizzo(class= "form-control" ) }}
+					{% endif %}
+				</div>
+			</fieldset>
+			<div class="form-group">
+				{{ airportForm.submitAirport(class="btn btn-outline-info", value="Aggiorna") }}
+			</div>
+		</form>
+	</div>
+
+{% endblock content %}
+
+<!--
+	TODO: passare il volo con id, aeroportoA, aeroportoB, oraA, oraB, aereo, (numero posti occupati se si vuole), prezzo
+		non serve ricalcolare tutti i dati in quanto verranno passati da dashboard
+		il default su ogni campo saranno i dati del volo
+		se viene modificato anche solo un campo si modifica tutta la linea 
+		tasto save, non fa nulla se non è cambiato niente
+		servira anche qui il tasto delete
+		adess vae in let
+
+-->
