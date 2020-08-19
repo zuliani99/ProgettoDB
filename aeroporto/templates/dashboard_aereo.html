@@ -17,41 +17,41 @@
 		});
 	</script>
 	<div class="content-section">
-		<h1>Aeroporto #{{aeroporto[0]}}</h1>
+		<h1>Aereo #{{aereo[0]}}</h1>
 		<form method="POST" action="" enctype="multipart/form-data">
-			{{ airportForm.hidden_tag() }}
+			{{ planeForm.hidden_tag() }}
 			<fieldset class="form-group">
 				<legend class="border-bottom mb-4">Info aeroporto</legend>
 				<div class="form-group">
-					{{ airportForm.nome.label(class="form-control-label") }}
-					{% if airportForm.nome.errors %}
-						{{ airportForm.nome(class="form-control is-invalid") }}
+					{{ planeForm.nome.label(class="form-control-label") }}
+					{% if planeForm.nome.errors %}
+						{{ planeForm.nome(class="form-control is-invalid") }}
 						<div class="invalid-feedback">
-							{% for error in airportForm.nome.errors %}
+							{% for error in planeForm.nome.errors %}
 								<span>{{ error }}</span>
 							{% endfor %}
 						</div>
 					{% else %}
-						{{ airportForm.nome(class= "form-control" ) }}
+						{{ planeForm.nome(class= "form-control" ) }}
 					{% endif %}
 				</div>
 
 				<div class="form-group">
-					{{ airportForm.indirizzo.label(class="form-control-label") }}
-					{% if airportForm.indirizzo.errors %}
-						{{ airportForm.indirizzo(class="form-control is-invalid") }}
+					{{ planeForm.nPosti.label(class="form-control-label") }}
+					{% if planeForm.nPosti.errors %}
+						{{ planeForm.nPosti(class="form-control is-invalid") }}
 						<div class="invalid-feedback">
-							{% for error in airportForm.indirizzo.errors %}
+							{% for error in planeForm.nPosti.errors %}
 								<span>{{ error }}</span>
 							{% endfor %}
 						</div>
 					{% else %}
-						{{ airportForm.indirizzo(class= "form-control" ) }}
+						{{ planeForm.nPosti(class= "form-control" ) }}
 					{% endif %}
 				</div>
 			</fieldset>
 			<div class="form-group">
-				{{ airportForm.submitAirport(class="btn btn-outline-info", value="Aggiorna") }}
+				{{ planeForm.submitPlane(class="btn btn-outline-info", value="Aggiorna") }}
 			</div>
 		</form>
 	</div>

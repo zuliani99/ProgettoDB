@@ -4,7 +4,7 @@ import os
 from PIL import Image #pip install Pillow
 from flask import render_template, url_for, flash, redirect, request, abort, current_app #import necessari per il funzionamento dell'applicazione
 from aeroporto import app, bcrypt, mail
-from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, AddPlaneForm,  AddFlyForm, AirportForm, AddReviw, UpdateFlyForm
+from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, PlaneForm,  AddFlyForm, AirportForm, AddReviw, UpdateFlyForm
 from flask_login import login_user, current_user, logout_user
 from aeroporto.table import User, users, engine, metadata, load_user, voli, aerei, aeroporti
 from flask_mail import Message
@@ -353,11 +353,12 @@ def delete_volo(fly_id):
 	conn = engine.connect()
 	f = conn.execute("SELECT * FROM voli WHERE id = %s",fly_id).fetchone()
 	if f is None:
+		conn.close()
 		abort(404)
    
 	conn.execute("DELETE FROM voli WHERE id = %s", fly_id)
-	flash('Il volo ' + str(f[0]) + 'è stato cancellato con successo', 'success')
 	conn.close()
+	flash('Il volo ' + str(f[0]) + 'è stato cancellato con successo', 'success')
 	return redirect(url_for('dashboard'))
 
 @app.route("/delete_aeroporto<int:aeroporto_id>", methods=['GET', 'POST'])
@@ -366,26 +367,41 @@ def delete_aeroporto(aeroporto_id):
 	conn = engine.connect()
 	f = conn.execute("SELECT * FROM aeroporti WHERE id = %s",aeroporto_id).fetchone()
 	if f is None:
+		conn.close()
 		abort(404)
    
 	conn.execute("DELETE FROM aeroporti WHERE id = %s", aeroporto_id)
-	flash('l\'aeroporto ' + str(f[0]) + 'è stato cancellato con successo', 'success')
 	conn.close()
+	flash('l\'aeroporto ' + str(f[0]) + 'è stato cancellato con successo', 'success')
+	
 	return redirect(url_for('dashboard'))
 
+@app.route("/delete_aereo<int:aereo_id>", methods=['GET','POST'])
+@login_required(role="admin")
+def delete_aereo(aereo_id):
+	conn = engine.connect()
+	f = conn.execute("SELECT * FROM aerei WHERE id = %s",aereo_id).fetchone()
+	if f is None:
+		conn.close()
+		abort(404)
 
+	conn.execute("DELETE FROM aerei WHERE id = %s", aereo_id)
+	conn.close()
+	flash('l\'aereo è stato cancellato con successo', 'success')
+	
+	return redirect(url_for('dashboard'))
 
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required(role="admin")
 def dashboard():
 	flyForm = AddFlyForm()
-	planeForm = AddPlaneForm()
+	planeForm = PlaneForm()
 	airportForm = AirportForm()
 
 	conn = engine.connect()
 	volo = conn.execute("SELECT id, aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo FROM voli WHERE id=41").fetchone()
 	aeroporti = conn.execute("SELECT id, name, indirizzo FROM aeroporti").fetchall()
-	aerei = conn.execute("SELECT id, name FROM aerei").fetchall()
+	aerei = conn.execute("SELECT id, name, numeroPosti FROM aerei").fetchall()
 	voli = conn.execute("SELECT * FROM voli").fetchall()
 	conn.close()
 
@@ -445,7 +461,7 @@ def dashboard():
 		else:
 			flash('Qualcosa nell\'inserimento dell\'aeroporto è andato storto :(', 'danger')
 
-	return render_template('dashboard.html', title='Dashboard', flyForm=flyForm, planeForm=planeForm, airportForm=airportForm, voli=voli, aeroporti=aeroporti, time=time)
+	return render_template('dashboard.html', title='Dashboard', flyForm=flyForm, planeForm=planeForm, airportForm=airportForm, voli=voli, aeroporti=aeroporti, aerei=aerei,time=time)
 
 
 @app.route("/dashboard_volo<volo_id>", methods=['GET', 'POST'])
@@ -520,5 +536,29 @@ def configAeroporto(aeroporto_id):
 
 	return render_template('dashboard_aeroporto.html', aeroporto=aeroporto, airportForm=updateform)
 
+@app.route("/dashboard_aereo<aereo_id>", methods=['GET', 'POST'])
+@login_required(role="admin")
+def configAereo(aereo_id):
+	updateform = PlaneForm()
 
-##aerei.insert(),[{"name": planeForm.nome.data, "numeroPosti": planeForm.nPosti.data}])
+	conn = engine.connect()
+	aereo = conn.execute("SELECT id, name, numeroPosti FROM aerei WHERE id = %s", aereo_id).fetchone()
+	conn.close()
+
+	if updateform.validate_on_submit():
+		conn = engine.connect()
+		conn.execute("UPDATE aerei SET name=%s, numeroPosti=%s WHERE id = %s",
+			updateform.nome.data,
+			updateform.nPosti.data,
+			aereo_id
+		)
+		conn.close()
+		flash('Aggiornamento aereo completato con successo :D', 'success')
+		return redirect('dashboard')
+	elif request.method == 'GET':
+		updateform.nome.data = aereo[1]
+		updateform.nPosti.data = aereo[2]
+		#updateform.submitAirport.label = "Aggiorna"
+
+	return render_template('dashboard_aereo.html', aereo=aereo, planeForm=updateform)
+

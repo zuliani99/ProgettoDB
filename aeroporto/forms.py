@@ -125,11 +125,11 @@ class AddFlyForm(FlaskForm):
         if aeroportoArrivo.data == self.aeroportoPartenza.data:
             raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')
 
-class AddPlaneForm(FlaskForm):
+class PlaneForm(FlaskForm):
     nome = StringField('Nome aereo', validators=[DataRequired()])
     nPosti = IntegerField('Numero di posti', validators=[DataRequired(), NumberRange(1, None,"L'aereo deve avere almeno quattro posti ")])
 
-    submitPlane = SubmitField('Aggiungi')
+    submitPlane = SubmitField()
 
     def validate_nPosti(self, nPosti):
         if nPosti.data % 4 != 0:
