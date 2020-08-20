@@ -116,7 +116,7 @@ class AddFlyForm(FlaskForm):
     aereo = SelectField('Aereo', validators=[DataRequired()])
     prezzo = DecimalField('Prezzo base', validators=[DataRequired()])
 
-    submitFly = SubmitField('Aggiungi')
+    submitFly = SubmitField()
 
     def validate_dataPartenza(self, dataPartenza):
         if dataPartenza.data < self.tomorrowDate:

@@ -407,7 +407,7 @@ def dashboard():
 		if flyForm.validate():
 			oraPartenza = datetime.combine(flyForm.dataPartenza.data, flyForm.oraPartenza.data)
 			if flyForm.oraPartenza.data > flyForm.oraArrivo.data:
-				oraArrivo = datetime.combine(flyForm.dataPartenza.date + datetime.timedelta(days=1), flyForm.oraArrivo.data)
+				oraArrivo = datetime.combine(flyForm.dataPartenza.data + timedelta(days=1), flyForm.oraArrivo.data)
 			else:
 				oraArrivo = datetime.combine(flyForm.dataPartenza.data, flyForm.oraArrivo.data)
 
