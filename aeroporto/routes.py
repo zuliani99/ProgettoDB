@@ -6,7 +6,7 @@ from flask import render_template, url_for, flash, redirect, request, abort, cur
 from aeroporto import app, bcrypt, mail
 from aeroporto.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm, AddBooking, PlaneForm,  AddFlyForm, AirportForm, AddReviw, UpdateFlyForm
 from flask_login import login_user, current_user, logout_user
-from aeroporto.table import User, users, engine, metadata, load_user, voli, aerei, aeroporti
+from aeroporto.table import User, users, engine, metadata, load_user, voli, aerei, aeroporti, deleteElementByID
 from flask_mail import Message
 from sqlalchemy.sql import *
 from functools import wraps
@@ -347,47 +347,36 @@ def review_fly(fly_id, val, crit):
 
 
 
-@app.route("/delete_volo<int:fly_id>", methods=['GET', 'POST'])
+#DASHBOARD
+
+@app.route("/delete_volo<int:volo_id>", methods=['GET', 'POST'])
 @login_required(role="admin")
-def delete_volo(fly_id):
-	conn = engine.connect()
-	f = conn.execute("SELECT * FROM voli WHERE id = %s",fly_id).fetchone()
-	if f is None:
-		conn.close()
-		abort(404)
-   
-	conn.execute("DELETE FROM voli WHERE id = %s", fly_id)
-	conn.close()
-	flash('Il volo ' + str(f[0]) + 'è stato cancellato con successo', 'success')
+def delete_volo(volo_id):
+
+	result = deleteElementByID("id", volo_id, "voli")
+	if result:
+		flash('Il volo ' + str(volo_id) + ' è stato cancellato con successo', 'success')
+
 	return redirect(url_for('dashboard'))
 
 @app.route("/delete_aeroporto<int:aeroporto_id>", methods=['GET', 'POST'])
 @login_required(role="admin")
+
 def delete_aeroporto(aeroporto_id):
-	conn = engine.connect()
-	f = conn.execute("SELECT * FROM aeroporti WHERE id = %s",aeroporto_id).fetchone()
-	if f is None:
-		conn.close()
-		abort(404)
-   
-	conn.execute("DELETE FROM aeroporti WHERE id = %s", aeroporto_id)
-	conn.close()
-	flash('l\'aeroporto ' + str(f[0]) + 'è stato cancellato con successo', 'success')
 	
+	result = deleteElementByID("id", aeroporto_id, "aeroporti")
+	if result:
+		flash('l\'aeroporto ' + str(aeroporto_id) + ' è stato cancellato con successo', 'success')
+		
 	return redirect(url_for('dashboard'))
 
 @app.route("/delete_aereo<int:aereo_id>", methods=['GET','POST'])
 @login_required(role="admin")
 def delete_aereo(aereo_id):
-	conn = engine.connect()
-	f = conn.execute("SELECT * FROM aerei WHERE id = %s",aereo_id).fetchone()
-	if f is None:
-		conn.close()
-		abort(404)
 
-	conn.execute("DELETE FROM aerei WHERE id = %s", aereo_id)
-	conn.close()
-	flash('l\'aereo è stato cancellato con successo', 'success')
+	result = deleteElementByID("id", aereo_id, "aerei")
+	if result:
+		flash('l \'aereo ' + str(aereo_id) + ' è stato cancellato con successo', 'success')
 	
 	return redirect(url_for('dashboard'))
 
@@ -399,7 +388,6 @@ def dashboard():
 	airportForm = AirportForm()
 
 	conn = engine.connect()
-	volo = conn.execute("SELECT id, aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo FROM voli WHERE id=41").fetchone()
 	aeroporti = conn.execute("SELECT id, name, indirizzo FROM aeroporti").fetchall()
 	aerei = conn.execute("SELECT id, name, numeroPosti FROM aerei").fetchall()
 	voli = conn.execute("SELECT * FROM voli").fetchall()
@@ -425,7 +413,14 @@ def dashboard():
 
 			conn = engine.connect()
 			#conn.execute(voli.insert(),[{"aeroportoPartenza": flyForm.aeroportoPartenza.data,"oraPartenza": oraPartenza,"aeroportoArrivo": flyForm.aeroportoArrivo.data,"oraArrivo": oraArrivo,"aereo": flyForm.aereo.data,"prezzo": flyForm.prezzo.data}])
-			conn.execute("INSERT INTO voli (aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo,prezzo) VALUES (%s,%s,%s,%s,%s,%s)", flyForm.aeroportoPartenza.data, oraPartenza, flyForm.aeroportoArrivo.data, oraArrivo, flyForm.aereo.data,flyForm.prezzo.data)
+			conn.execute("INSERT INTO voli (aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo,prezzo) VALUES (%s,%s,%s,%s,%s,%s)", 
+				flyForm.aeroportoPartenza.data, 
+				oraPartenza, 
+				flyForm.aeroportoArrivo.data, 
+				oraArrivo, 
+				flyForm.aereo.data,
+				flyForm.prezzo.data
+			)
 			conn.close()
 		   
 			flash('Aggiunta volo completata con successo :D', 'success')

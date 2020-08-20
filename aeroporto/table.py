@@ -120,3 +120,17 @@ def load_user(user_id):
 	if s is None:
 		return None
 	return User(s.id, s.username, s.email, s.image_file, s.password, s.role)
+
+
+def deleteElementByID(nameAttribute, idValue, nameTable):
+	query = "SELECT * FROM "+nameTable+" WHERE "+nameAttribute+" = %s"
+	conn = engine.connect()
+	f = conn.execute(query, idValue).fetchone()
+	if f is None:
+		conn.close()
+		abort(404)
+		return False
+	query = "DELETE FROM "+nameTable+" WHERE "+nameAttribute+" = %s"
+	conn.execute(query, idValue)
+	conn.close()
+	return True
