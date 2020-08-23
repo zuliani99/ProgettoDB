@@ -49,7 +49,7 @@
 	            <div class="form-group">
 	                {{ form.posto.label(class="form-control-label") }}
 					{{ form.posto(**{'id':'idnascosto', 'type':'hidden', 'value':''}) }}
-					<table class="table table-bordered" id="postiliberi">
+					<table class="table table-responsive table-bordered" id="postiliberi">
 					{% set ran = ((volo[6]+1)//4)%}
 					{% for i in range(1,5) %}
 						{% if i == 2 %}
@@ -110,7 +110,6 @@
 	$(document).ready(function(){
 		$("#buyticket").click(function(){
 			var p = $('#idnascosto').attr('value')
-			console.log(p);
 			if (p == ""){
 				$("#confirmbuy").prop('disabled', true)
 				$("#nposto").css("color", "red", "font-weight","bold");
