@@ -61,9 +61,9 @@
 						{% endif %}
 						{% for j in range (0,ran) %}
 							{% if j*4+i in freegone %}
-								<td><input type="button" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
+								<td><input type="button" class="btnand" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
 							{% else %}
-								<td><input type="button" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
+								<td><input type="button" class="btnand" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
 							{% endif %}
 						{% endfor %}
 						</tr>
@@ -104,7 +104,7 @@
 
 	
 
-    <div class="content-section">
+    <div>
 	    <form method="POST" action="">
 	        {{ form.hidden_tag() }}
 			<fieldset class="form-group">
@@ -125,9 +125,9 @@
 						{% endif %}
 						{% for j in range (0,ran) %}
 							{% if j*4+i in freereturn %}
-								<td><input type="button" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
+								<td><input type="button" class="btnrit" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
 							{% else %}
-								<td><input type="button" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
+								<td><input type="button" class="btnrit" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
 							{% endif %}
 						{% endfor %}
 						</tr>
@@ -194,7 +194,7 @@
 	$(document).ready(function(){
 		$("#buyticket").click(function(){
 			var pAndata = $('#idnascostoAndata').attr('value')
-			var pRitorno = $('#idnascostoRitrono').attr('value')
+			var pRitorno = $('#idnascostoRitorno').attr('value')
 			if (pAndata == "" || pRitorno ==""){
 				$("#confirmbuy").prop('disabled', true)
 			}else{
@@ -231,7 +231,7 @@
 		});
 	});
 
-	$("#postiliberiAndata input:button").click(function() {
+	$(".btnand").click(function() {
 		var posto = $(this).val();
 		var form = $('#idnascostoAndata').attr('value')
 		if(posto == form){
@@ -244,7 +244,7 @@
 		}
 	});
 
-	$("#postiliberiRitorno input:button").click(function() {
+	$(".btnrit").click(function() {
 		var posto = $(this).val();
 		var form = $('#idnascostoRitorno').attr('value')
 		if(posto == form){

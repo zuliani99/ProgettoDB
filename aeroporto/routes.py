@@ -341,11 +341,11 @@ def volo(volopart):
     return render_template('volo.html', title=volopart, volo=volo, form=form, free=available_groups)
 
 
-@app.route("/voli", methods=['GET', 'POST'])
+@app.route("/voli/<volopart>/<volorit>", methods=['GET', 'POST'])
 def voli(volopart, volorit):
     form = AddBookingReturn()
-    volopart = request.args.get('volopart',1,type=int)
-    volorit = request.args.get('volorit',1,type=int)
+    #olopart = request.args.get('volopart',1,type=int)
+    #volorit = request.args.get('volorit',1,type=int)
     conn = engine.connect()
     trans = conn.begin()
     try:
@@ -362,7 +362,7 @@ def voli(volopart, volorit):
     available_groups_gone = []
     for count in range(1,int(andata[6])+1):
         if count not in l:
-            available_groups.append(count)
+            available_groups_gone.append(count)
     map(str(),available_groups_gone)
 
 
@@ -372,13 +372,13 @@ def voli(volopart, volorit):
     
 
     l = []
-    for p in poccritrono:
+    for p in poccritorno:
         l.append(p[0])
     available_groups_return = []
-    for count in range(1,int(ritrono[6])+1):
+    for count in range(1,int(ritorno[6])+1):
         if count not in l:
-            available_groups.append(count)
-    map(str(),available_groups_retrun)
+            available_groups_return.append(count)
+    map(str(),available_groups_return)
 
 
 
@@ -393,13 +393,14 @@ def voli(volopart, volorit):
             r1 = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volopart, form.postoAndata.data).fetchone()
             r2 = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volorit, form.postoRitorno.data).fetchone()
             if r1 is None and r2 is None:
-                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volopart, form.postoAndata.data, form.bagaglioAndatadata)
-                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volorit, form.postoRitorno.data, form.bagaglioRitorno.data)
-                #print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volo[0])+","+ form.posto.data+","+ form.bagaglio.data+")")
+                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, andata[0], form.postoAndata.data, form.bagaglioAndata.data)
+                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, ritorno[0], form.postoRitorno.data, form.bagaglioRitorno.data)
+                print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(andata[0])+","+ form.postoAndata.data+","+ form.bagaglioAndata.data+")")
+                print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(ritorno[0])+","+ form.postoRitorno.data+","+ form.bagaglioRitorno.data+")")
                 bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioAndata.data).fetchone()
-                bagRitrono = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioARitornodata).fetchone()
+                bagRitrono = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioRitorno.data).fetchone()
                 
-                #send_ticket_notify(volopart, form.postoAndata.data, bagAndata, volorit, form.postoRitrono.data, bagRitorno)
+                #send_ticket_notify(volopart, form.postoAndata.data, bagAndata, volorit, form.postoRitorno.data, bagRitorno)
                 
                 flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
                 return redirect(url_for('user_fly'))
@@ -413,7 +414,7 @@ def voli(volopart, volorit):
         else:
             flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
             return redirect(url_for('login'))
-    return render_template('volo.html', title=volopart + volorit, volopart=volopart, volorit=volorit, form=form, freegone=available_groups_gone, freereturn=available_groups_retrun)
+    return render_template('voli.html', title=volopart + volorit, volopart=andata, volorit=ritorno, form=form, freegone=available_groups_gone, freereturn=available_groups_return)
 
 
 @app.route("/user_fly", methods=['GET', 'POST'])

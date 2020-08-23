@@ -76,9 +76,9 @@
 					window.location.href=newURL;
 				}else{
 					var colrit = parseInt($(".activerit").find("td:eq(0)").text());
-					//var newURL = flask_util.url_for('voli', {volopart: coland, volorit: colrit});
-					var newURL = "voli?volopart="+str(coland)+"&volorit="+str(colrit)
-					indow.location.href=newURL;
+					var newURL = flask_util.url_for('voli', {volopart: coland, volorit: colrit});
+					//ar newURL = "voli?volopart="+coland+"&volorit="+colrit;
+					window.location.href=newURL;
 				}
 				
 			});

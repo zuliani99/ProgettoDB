@@ -191,6 +191,6 @@ class SearchFlyForm(FlaskForm):
 class AddBookingReturn(FlaskForm):
     bagaglioAndata = SelectField(u'Tipo Bagaglio')
     postoAndata = StringField('Posto da Sedere', validators=[DataRequired()])
-    bagaglioRitrono = SelectField(u'Tipo Bagaglio')
-    postoRitrono = StringField('Posto da Sedere', validators=[DataRequired()])
+    bagaglioRitorno = SelectField(u'Tipo Bagaglio')
+    postoRitorno = StringField('Posto da Sedere', validators=[DataRequired()])
     submit = SubmitField('Conferma Aquisto')
