@@ -315,19 +315,19 @@ def volo(volopart):
     conn = engine.connect()
 
     res = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
-    form.bagaglio.choices = [(str(r[0]), str(r[1])) for r in res]
+    form.bagaglioAndata.choices = [(str(r[0]), str(r[1])) for r in res]
     conn.close()
 
     if form.validate_on_submit():
         if current_user.is_authenticated:
             conn = engine.connect()
-            r = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volopart, form.posto.data).fetchone()
+            r = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volopart, form.postoAndata.data).fetchone()
             if r is None:
-                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volopart, form.posto.data, form.bagaglio.data)
-                print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volo[0])+","+ form.posto.data+","+ form.bagaglio.data+")")
-                bagAndata= conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglio.data).fetchone()
+                conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volopart, form.postoAndata.data, form.bagaglioAndata.data)
+                print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volo[0])+","+ form.postoAndata.data+","+ form.bagaglioAndata.data+")")
+                bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioAndata.data).fetchone()
                 
-                #send_ticket_notify(volopart, form.postoAndata.data, bagAndata, 0, 0, 0)
+                send_ticket_notify(volo, form.postoAndata.data, bagAndata, 0, 0, 0)
                 
                 flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
                 return redirect(url_for('user_fly'))
@@ -398,9 +398,9 @@ def voli(volopart, volorit):
                 print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(andata[0])+","+ form.postoAndata.data+","+ form.bagaglioAndata.data+")")
                 print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(ritorno[0])+","+ form.postoRitorno.data+","+ form.bagaglioRitorno.data+")")
                 bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioAndata.data).fetchone()
-                bagRitrono = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioRitorno.data).fetchone()
+                bagRitorno = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioRitorno.data).fetchone()
                 
-                #send_ticket_notify(volopart, form.postoAndata.data, bagAndata, volorit, form.postoRitorno.data, bagRitorno)
+                send_ticket_notify(andata, form.postoAndata.data, bagAndata, ritorno, form.postoRitorno.data, bagRitorno)
                 
                 flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
                 return redirect(url_for('user_fly'))

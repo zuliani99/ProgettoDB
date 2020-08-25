@@ -6,7 +6,9 @@
 	</style>
     <script type="text/javascript">
     	$(document).ready(function () {
-    		$('#collapse').prop("hidden", true);
+    		{% if flyForm.checkAndataRitorno.data == False %}
+    			$('#collapse').prop("hidden", true);
+    		{% endif %}
 
         	$('select').selectize({
           		sortField: 'text'
@@ -77,7 +79,7 @@
 				}else{
 					var colrit = parseInt($(".activerit").find("td:eq(0)").text());
 					var newURL = flask_util.url_for('voli', {volopart: coland, volorit: colrit});
-					//ar newURL = "voli?volopart="+coland+"&volorit="+colrit;
+
 					window.location.href=newURL;
 				}
 				

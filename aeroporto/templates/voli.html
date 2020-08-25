@@ -40,38 +40,41 @@
 
 	
 
-    <div class="content-section">
+    <div>
 	    <form method="POST" action="">
 	        {{ form.hidden_tag() }}
-			<fieldset class="form-group">
-	            <div class="form-group">
-	                {{ form.bagaglioAndata.label(class="form-control-label") }}
-	                {{ form.bagaglioAndata(class="form-control form-control-lg") }}
-	            </div>
-	            <div class="form-group">
-	                {{ form.postoAndata.label(class="form-control-label") }}
-					{{ form.postoAndata(**{'id':'idnascostoAndata', 'type':'hidden', 'value':''}) }}
-					<table class="table table-responsive table-bordered" id="postiliberiAndata">
-					{% set ran = ((volopart[6]+1)//4)%}
-					{% for i in range(1,5) %}
-						{% if i == 2 %}
-						<tr class="border_bottom">
-						{% elif i == 3 %}
-						<tr class="border_top">
-						{% endif %}
-						{% for j in range (0,ran) %}
-							{% if j*4+i in freegone %}
-								<td><input type="button" class="btnand" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
+	        <div class="content-section">
+				<fieldset class="form-group">
+		            <div class="form-group">
+		                {{ form.bagaglioAndata.label(class="form-control-label") }}
+		                {{ form.bagaglioAndata(class="form-control form-control-lg") }}
+		            </div>
+		            <div class="form-group">
+		                {{ form.postoAndata.label(class="form-control-label") }}
+						{{ form.postoAndata(**{'id':'idnascostoAndata', 'type':'hidden', 'value':''}) }}
+						<table class="table table-responsive table-bordered" id="postiliberiAndata">
+						{% set ran = ((volopart[6]+1)//4)%}
+						{% for i in range(1,5) %}
+							{% if i == 2 %}
+							<tr class="border_bottom">
+							{% elif i == 3 %}
+							<tr class="border_top">
 							{% else %}
-								<td><input type="button" class="btnand" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
+							<tr>
 							{% endif %}
+							{% for j in range (0,ran) %}
+								{% if j*4+i in freegone %}
+									<td><input type="button" class="" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
+								{% else %}
+									<td><input type="button" class="" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
+								{% endif %}
+							{% endfor %}
+							</tr>
 						{% endfor %}
-						</tr>
-					{% endfor %}
-					</table>
-	            </div>
-	        </fieldset>
-
+						</table>
+		            </div>
+		        </fieldset>
+	    	</div>
 
 
 
@@ -103,10 +106,7 @@
 
 
 	
-
-    <div>
-	    <form method="POST" action="">
-	        {{ form.hidden_tag() }}
+    	<div class="content-section">
 			<fieldset class="form-group">
 	            <div class="form-group">
 	                {{ form.bagaglioRitorno.label(class="form-control-label") }}
@@ -122,12 +122,14 @@
 						<tr class="border_bottom">
 						{% elif i == 3 %}
 						<tr class="border_top">
+						{% else %}
+						<tr>
 						{% endif %}
 						{% for j in range (0,ran) %}
 							{% if j*4+i in freereturn %}
-								<td><input type="button" class="btnrit" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
+								<td><input type="button" class="" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
 							{% else %}
-								<td><input type="button" class="btnrit" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
+								<td><input type="button" class="" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
 							{% endif %}
 						{% endfor %}
 						</tr>
@@ -135,7 +137,7 @@
 					</table>
 	            </div>
 	        </fieldset>
-
+	    </div>
 
 
 
@@ -143,6 +145,10 @@
 	        <button id="buyticket" type="button" class="btn btn-primary" data-toggle="modal" data-target="#buyTiketModal">Acquistia Biglietti Ora</button>
 
 			<!-- Modal -->
+			
+
+
+
 			<div class="modal fade" id="buyTiketModal" tabindex="-1" aria-labelledby="buyTiketModalLabel" aria-hidden="true">
 			  <div class="modal-dialog">
 			    <div class="modal-content">
@@ -185,6 +191,10 @@
 			    	</div>
 			  	</div>
 			</div>
+
+
+
+
 
 
 		</form>
@@ -231,31 +241,33 @@
 		});
 	});
 
-	$(".btnand").click(function() {
+	$("#postiliberiAndata input:button").click(function() {
 		var posto = $(this).val();
 		var form = $('#idnascostoAndata').attr('value')
 		if(posto == form){
 			$(this).prop("class", "");
 			$('#idnascostoAndata').prop('value', '');
 		}else{
-			$("input:button").prop("class", "");
+			$("#postiliberiAndata input:button").prop("class", "");
 			$("#idnascostoAndata").val(posto);
 			$(this).prop("class", "btn-outline-primary");
 		}
 	});
 
-	$(".btnrit").click(function() {
+	$("#postiliberiRitorno input:button").click(function() {
 		var posto = $(this).val();
 		var form = $('#idnascostoRitorno').attr('value')
 		if(posto == form){
 			$(this).prop("class", "");
 			$('#idnascostoRitorno').prop('value', '');
 		}else{
-			$("input:button").prop("class", "");
+			$("#postiliberiRitorno input:button").prop("class", "");
 			$("#idnascostoRitorno").val(posto);
 			$(this).prop("class", "btn-outline-primary");
 		}
 	});
+
+	
 </script>
 {% endblock content %}
 
