@@ -509,7 +509,7 @@ def delete_aereo(aereo_id):
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required(role="admin")
 def dashboard():
-	flyForm = AddFlyForm()
+	flightForm = FlightForm()
 	planeForm = PlaneForm()
 	airportForm = AirportForm()
 
@@ -520,33 +520,33 @@ def dashboard():
 	conn.close()
 
 	opzioniAeroporti = [(str(choice[0]), str(choice[1]+", "+choice[2]+" #"+str(choice[0]))) for choice in aeroporti]
-	flyForm.aeroportoPartenza.choices = [('','')] + opzioniAeroporti
-	flyForm.aeroportoArrivo.choices = [('','')] + opzioniAeroporti
+	flightForm.aeroportoPartenza.choices = [('','')] + opzioniAeroporti
+	flightForm.aeroportoArrivo.choices = [('','')] + opzioniAeroporti
 
 	opzioniAerei = [(str(choice[0]), str(choice[1]+" #"+str(choice[0]))) for choice in aerei]
-	flyForm.aereo.choices = [('','')]  + opzioniAerei
+	flightForm.aereo.choices = [('','')]  + opzioniAerei
 	
 	time = datetime.now()
 
 	flightForm.check = False;
 
-	if flyForm.is_submitted() and flyForm.submitFly.data:
-		if flyForm.validate():
-			oraPartenza = datetime.combine(flyForm.dataPartenza.data, flyForm.oraPartenza.data)
-			if flyForm.oraPartenza.data > flyForm.oraArrivo.data:
-				oraArrivo = datetime.combine(flyForm.dataPartenza.data + timedelta(days=1), flyForm.oraArrivo.data)
+	if flightForm.is_submitted() and flightForm.submitFlight.data:
+		if flightForm.validate():
+			oraPartenza = datetime.combine(flightForm.dataPartenza.data, flightForm.oraPartenza.data)
+			if flightForm.oraPartenza.data > flightForm.oraArrivo.data:
+				oraArrivo = datetime.combine(flightForm.dataPartenza.data + timedelta(days=1), flightForm.oraArrivo.data)
 			else:
-				oraArrivo = datetime.combine(flyForm.dataPartenza.data, flyForm.oraArrivo.data)
+				oraArrivo = datetime.combine(flightForm.dataPartenza.data, flightForm.oraArrivo.data)
 
 			conn = engine.connect()
-			#conn.execute(voli.insert(),[{"aeroportoPartenza": flyForm.aeroportoPartenza.data,"oraPartenza": oraPartenza,"aeroportoArrivo": flyForm.aeroportoArrivo.data,"oraArrivo": oraArrivo,"aereo": flyForm.aereo.data,"prezzo": flyForm.prezzo.data}])
+			#conn.execute(voli.insert(),[{"aeroportoPartenza": flightForm.aeroportoPartenza.data,"oraPartenza": oraPartenza,"aeroportoArrivo": flightForm.aeroportoArrivo.data,"oraArrivo": oraArrivo,"aereo": flightForm.aereo.data,"prezzo": flightForm.prezzo.data}])
 			conn.execute("INSERT INTO voli (aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo,prezzo) VALUES (%s,%s,%s,%s,%s,%s)", 
-				flyForm.aeroportoPartenza.data, 
+				flightForm.aeroportoPartenza.data, 
 				oraPartenza, 
-				flyForm.aeroportoArrivo.data, 
+				flightForm.aeroportoArrivo.data, 
 				oraArrivo, 
-				flyForm.aereo.data,
-				flyForm.prezzo.data
+				flightForm.aereo.data,
+				flightForm.prezzo.data
 			)
 			conn.close()
 		   
@@ -583,13 +583,13 @@ def dashboard():
 		else:
 			flash('Qualcosa nell\'inserimento dell\'aeroporto è andato storto :(', 'danger')
 
-	return render_template('dashboard.html', title='Dashboard', flyForm=flyForm, planeForm=planeForm, airportForm=airportForm, voli=voli, aeroporti=aeroporti, aerei=aerei,time=time)
+	return render_template('dashboard.html', title='Dashboard', flightForm=flightForm, planeForm=planeForm, airportForm=airportForm, voli=voli, aeroporti=aeroporti, aerei=aerei,time=time)
 
 
 @app.route("/dashboard_volo<volo_id>", methods=['GET', 'POST'])
 @login_required(role="admin") 
 def configVolo(volo_id): 
-	updateform = UpdateFlyForm() 
+	updateForm = FlightForm() 
 
 	conn = engine.connect()
 	volo = conn.execute("SELECT id, aeroportoPartenza, oraPartenza, aeroportoArrivo, oraArrivo, aereo, prezzo FROM voli WHERE id=%s", volo_id).fetchone()
@@ -599,38 +599,38 @@ def configVolo(volo_id):
 	conn.close()
 
 	opzioniAeroporti = [(str(choice[0]), str(choice[1]+", "+choice[2]+" #"+str(choice[0]))) for choice in aeroporti]
-	updateform.aeroportoPartenza.choices = [('','')] + opzioniAeroporti
-	updateform.aeroportoArrivo.choices = [('','')] + opzioniAeroporti
+	updateForm.aeroportoPartenza.choices = [('','')] + opzioniAeroporti
+	updateForm.aeroportoArrivo.choices = [('','')] + opzioniAeroporti
 
 
 	opzioniAerei = [(str(choice[0]), str(choice[1]+" #"+str(choice[0]))) for choice in aerei]
-	updateform.aereo.choices = [('','')]  + opzioniAerei
+	updateForm.aereo.choices = [('','')]  + opzioniAerei
 
 	#Set the informations of the fly in each field 
-	if updateform.validate_on_submit():
+	if updateForm.validate_on_submit():
 		conn = engine.connect()
 		
 		conn.execute("UPDATE voli SET aeroportoPartenza=%s, oraPartenza=%s,aeroportoArrivo=%s,oraArrivo=%s,aereo=%s,prezzo=%s WHERE id = %s", 
-			updateform.aeroportoPartenza.data,
-			updateform.timePartenza.data,
-			updateform.aeroportoArrivo.data,
-			updateform.timeArrivo.data,
-			updateform.aereo.data,
-			updateform.prezzo.data,
+			updateForm.aeroportoPartenza.data,
+			updateForm.timePartenza.data,
+			updateForm.aeroportoArrivo.data,
+			updateForm.timeArrivo.data,
+			updateForm.aereo.data,
+			updateForm.prezzo.data,
 			volo_id
 		)
 		conn.close()
 		flash('Aggiornamento volo completato con successo :D', 'success')
 		return redirect('dashboard')
 	elif request.method == 'GET':
-		updateform.aeroportoPartenza.data = str(volo[1])
-		updateform.timePartenza.data = volo[2]
-		updateform.aeroportoArrivo.data = str(volo[3])
-		updateform.timeArrivo.data = volo[4]
-		updateform.aereo.data = str(volo[5])
-		updateform.prezzo.data = volo[6]
+		updateForm.aeroportoPartenza.data = str(volo[1])
+		updateForm.timePartenza.data = volo[2]
+		updateForm.aeroportoArrivo.data = str(volo[3])
+		updateForm.timeArrivo.data = volo[4]
+		updateForm.aereo.data = str(volo[5])
+		updateForm.prezzo.data = volo[6]
 		
-	return render_template('dashboard_volo.html', volo=volo, flyForm=updateform)
+	return render_template('dashboard_volo.html', volo=volo, flightForm=updateForm)
 
 @app.route("/dashboard_aeroporto<aeroporto_id>", methods=['GET', 'POST'])
 @login_required(role="admin")
