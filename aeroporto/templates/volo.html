@@ -43,13 +43,13 @@
 	        {{ form.hidden_tag() }}
 			<fieldset class="form-group">
 	            <div class="form-group">
-	                {{ form.bagaglio.label(class="form-control-label") }}
-	                {{ form.bagaglio(class="form-control form-control-lg") }}
+	                {{ form.bagaglioAndata.label(class="form-control-label") }}
+	                {{ form.bagaglioAndata(class="form-control form-control-lg", id="bagaglio") }}
 	            </div>
 	            <div class="form-group">
-	                {{ form.posto.label(class="form-control-label") }}
-					{{ form.posto(**{'id':'idnascosto', 'type':'hidden', 'value':''}) }}
-					<table class="table table-bordered" id="postiliberi">
+	                {{ form.postoAndata.label(class="form-control-label") }}
+					{{ form.postoAndata(**{'id':'idnascosto', 'type':'hidden', 'value':''}) }}
+					<table class="table table-responsive table-bordered" id="postiliberi">
 					{% set ran = ((volo[6]+1)//4)%}
 					{% for i in range(1,5) %}
 						{% if i == 2 %}
@@ -110,7 +110,6 @@
 	$(document).ready(function(){
 		$("#buyticket").click(function(){
 			var p = $('#idnascosto').attr('value')
-			console.log(p);
 			if (p == ""){
 				$("#confirmbuy").prop('disabled', true)
 				$("#nposto").css("color", "red", "font-weight","bold");
@@ -121,7 +120,7 @@
 				$("#nposto").text("Numero posto da sedere: " + p);
 			}
 			var b = parseFloat($("#bagaglio").val());
-			var pb = parseFloat('{{ volo[5] }}' + "€");
+			var pb = parseFloat('{{ volo[5] }}');
 			var sum = b+pb
 			$("#prezzobagaglio").text("Prezzo Totale: " + pb + "€ + " + b + "€ = " + sum + "€");
 		});

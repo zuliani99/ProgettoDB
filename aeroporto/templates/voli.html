@@ -1,0 +1,273 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <style type="text/css">
+    	tr.border_bottom td {
+		  border-bottom: 1px solid black;
+		}
+		tr.border_top td {
+		  border-top: 1px solid black;
+		}
+		tr.spaceUnder>td {
+		  padding-bottom: 1em;
+		}
+    </style>
+
+<h3>Volo di Andata</h3>
+	<table class="table">
+	  	<thead>
+	    	<tr>
+	      		<th scope="col">Aeroporto di Partenza</th>
+	      		<th scope="col">Orario</th>
+	      		<th scope="col">Aeroporto di Arrivo</th>
+	      		<th scope="col">Orario</th>
+	      		<th scope="col">Prezzo</th>
+	      		<th scope="col">Posti Disponibili</th>
+	    	</tr>
+	  	</thead>
+	  	<tbody>
+	    	<tr>
+	        	<td>{{ volopart[1] }}</td>
+	        	<td>{{ volopart[2] }}</td>
+	        	<td>{{ volopart[3] }}</td>
+	        	<td>{{ volopart[4] }}</td>
+	        	<td>{{ volopart[5] }} €</td>
+	        	<td>{{ volopart[7]}}/{{volopart[6] }}</td>
+	    	</tr>
+      	</tbody>
+    </table>
+
+
+	
+
+    <div>
+	    <form method="POST" action="">
+	        {{ form.hidden_tag() }}
+	        <div class="content-section">
+				<fieldset class="form-group">
+		            <div class="form-group">
+		                {{ form.bagaglioAndata.label(class="form-control-label") }}
+		                {{ form.bagaglioAndata(class="form-control form-control-lg") }}
+		            </div>
+		            <div class="form-group">
+		                {{ form.postoAndata.label(class="form-control-label") }}
+						{{ form.postoAndata(**{'id':'idnascostoAndata', 'type':'hidden', 'value':''}) }}
+						<table class="table table-responsive table-bordered" id="postiliberiAndata">
+						{% set ran = ((volopart[6]+1)//4)%}
+						{% for i in range(1,5) %}
+							{% if i == 2 %}
+							<tr class="border_bottom">
+							{% elif i == 3 %}
+							<tr class="border_top">
+							{% else %}
+							<tr>
+							{% endif %}
+							{% for j in range (0,ran) %}
+								{% if j*4+i in freegone %}
+									<td><input type="button" class="" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
+								{% else %}
+									<td><input type="button" class="" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
+								{% endif %}
+							{% endfor %}
+							</tr>
+						{% endfor %}
+						</table>
+		            </div>
+		        </fieldset>
+	    	</div>
+
+
+
+
+
+<h3>Volo di Ritorno</h3>
+	<table class="table">
+	  	<thead>
+	    	<tr>
+	      		<th scope="col">Aeroporto di Partenza</th>
+	      		<th scope="col">Orario</th>
+	      		<th scope="col">Aeroporto di Arrivo</th>
+	      		<th scope="col">Orario</th>
+	      		<th scope="col">Prezzo</th>
+	      		<th scope="col">Posti Disponibili</th>
+	    	</tr>
+	  	</thead>
+	  	<tbody>
+	    	<tr>
+	        	<td>{{ volorit[1] }}</td>
+	        	<td>{{ volorit[2] }}</td>
+	        	<td>{{ volorit[3] }}</td>
+	        	<td>{{ volorit[4] }}</td>
+	        	<td>{{ volorit[5] }} €</td>
+	        	<td>{{ volorit[7]}}/{{volorit[6] }}</td>
+	    	</tr>
+      	</tbody>
+    </table>
+
+
+	
+    	<div class="content-section">
+			<fieldset class="form-group">
+	            <div class="form-group">
+	                {{ form.bagaglioRitorno.label(class="form-control-label") }}
+	                {{ form.bagaglioRitorno(class="form-control form-control-lg") }}
+	            </div>
+	            <div class="form-group">
+	                {{ form.postoRitorno.label(class="form-control-label") }}
+					{{ form.postoRitorno(**{'id':'idnascostoRitorno', 'type':'hidden', 'value':''}) }}
+					<table class="table table-responsive table-bordered" id="postiliberiRitorno">
+					{% set ran = ((volorit[6]+1)//4)%}
+					{% for i in range(1,5) %}
+						{% if i == 2 %}
+						<tr class="border_bottom">
+						{% elif i == 3 %}
+						<tr class="border_top">
+						{% else %}
+						<tr>
+						{% endif %}
+						{% for j in range (0,ran) %}
+							{% if j*4+i in freereturn %}
+								<td><input type="button" class="" style="width: 100%" name="postolib" value="{{ j*4+i }}"></td>
+							{% else %}
+								<td><input type="button" class="" style="width: 100%; background-color: #808080;" name="postoocc" value="{{ j*4+i }}" disabled></td>
+							{% endif %}
+						{% endfor %}
+						</tr>
+					{% endfor %}
+					</table>
+	            </div>
+	        </fieldset>
+	    </div>
+
+
+
+
+	        <button id="buyticket" type="button" class="btn btn-primary" data-toggle="modal" data-target="#buyTiketModal">Acquistia Biglietti Ora</button>
+
+			<!-- Modal -->
+			
+
+
+
+			<div class="modal fade" id="buyTiketModal" tabindex="-1" aria-labelledby="buyTiketModalLabel" aria-hidden="true">
+			  <div class="modal-dialog">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="buyTiketModalLabel">Resoconto Biglietti</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			      	<div>
+				      	<h4>Volo di Andata</h4>
+				        <div>Codice Volo: {{ volopart[0] }}</div>
+							        <div>Aeroporto di Partenza: {{ volopart[1] }}</div>
+							        <div>Orario: {{ volopart[2] }}</div>
+							        <div>Aeroporto di Arrivo: {{ volopart[3] }}</div>
+							        <div>Orario: {{ volopart[4] }}</div>
+							        <div id="npostoAndata"></div>
+							        <div id="prezzobagaglioAndata"></div>
+					</div>
+					<div>
+						<h4>Volo di Ritorno</h4>
+				        <div>Codice Volo: {{ volorit[0] }}</div>
+							        <div>Aeroporto di Partenza: {{ volorit[1] }}</div>
+							        <div>Orario: {{ volorit[2] }}</div>
+							        <div>Aeroporto di Arrivo: {{ volorit[3] }}</div>
+							        <div>Orario: {{ volorit[4] }}</div>
+							        <div id="npostoRitorno"></div>
+							        <div id="prezzobagaglioRitorno"></div>
+					</div>
+			      </div>
+			      <div class="modal-footer">
+			      	
+			        <div class="form-group">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+						{{ form.submit(class="btn btn-success", **{'id':'confirmbuy'})}}
+					</div>
+						    
+			    		</div>
+			    	</div>
+			  	</div>
+			</div>
+
+
+
+
+
+
+		</form>
+	</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#buyticket").click(function(){
+			var pAndata = $('#idnascostoAndata').attr('value')
+			var pRitorno = $('#idnascostoRitorno').attr('value')
+			if (pAndata == "" || pRitorno ==""){
+				$("#confirmbuy").prop('disabled', true)
+			}else{
+				$("#confirmbuy").prop('disabled', false); 
+			}
+			if (pAndata == ""){
+				
+				$("#npostoAndata").css("color", "red", "font-weight","bold");
+				$("#npostoAndata").text("Scegliere un posto nella mappa");
+			}else{
+				
+				$("#npostoAndata").css("color", "#333333", "font-weight: normal");
+				$("#npostoAndata").text("Numero posto da sedere: " + pAndata);
+			}
+			if (pRitorno == ""){
+				$("#npostoRitorno").css("color", "red", "font-weight","bold");
+				$("#npostoRitorno").text("Scegliere un posto nella mappa");
+			}else{
+				$("#npostoRitorno").css("color", "#333333", "font-weight: normal");
+				$("#npostoRitorno").text("Numero posto da sedere: " + pRitorno);
+			}
+			var b = parseFloat($("#bagaglioAndata").val());
+			var pb = parseFloat('{{ volopart[5] }}' + "€");
+			var sum = b+pb;
+			$("#prezzobagaglioAndata").text("Prezzo Totale: " + pb + "€ + " + b + "€ = " + sum + "€");
+
+			b = parseFloat($("#bagaglioRitorno").val());
+			pb = parseFloat('{{ volorit[5] }}' + "€");
+			sum = b+pb;
+			$("#prezzobagaglioRitorno").text("Prezzo Totale: " + pb + "€ + " + b + "€ = " + sum + "€");
+		});
+		$("#confirmbuy").click(function(){
+			window.location.replace("voli.html");
+		});
+	});
+
+	$("#postiliberiAndata input:button").click(function() {
+		var posto = $(this).val();
+		var form = $('#idnascostoAndata').attr('value')
+		if(posto == form){
+			$(this).prop("class", "");
+			$('#idnascostoAndata').prop('value', '');
+		}else{
+			$("#postiliberiAndata input:button").prop("class", "");
+			$("#idnascostoAndata").val(posto);
+			$(this).prop("class", "btn-outline-primary");
+		}
+	});
+
+	$("#postiliberiRitorno input:button").click(function() {
+		var posto = $(this).val();
+		var form = $('#idnascostoRitorno').attr('value')
+		if(posto == form){
+			$(this).prop("class", "");
+			$('#idnascostoRitorno').prop('value', '');
+		}else{
+			$("#postiliberiRitorno input:button").prop("class", "");
+			$("#idnascostoRitorno").val(posto);
+			$(this).prop("class", "btn-outline-primary");
+		}
+	});
+
+	
+</script>
+{% endblock content %}
+
