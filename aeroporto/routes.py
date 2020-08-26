@@ -37,7 +37,7 @@ def login_required(role="ANY"):
 def home():
     searchForm = SearchFlyForm()
 
-    andata=ritorno=[[]]
+    andata=ritorno=[]
     is_return = False
 
     conn = engine.connect()
@@ -67,7 +67,7 @@ def home():
     else:
         andata = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and v.oraPartenza > %s ORDER BY v.oraPartenza ASC", datetime.utcnow()).fetchall()
         
-    print(str(is_return))
+    #print(str(is_return))
     conn.close()
     return render_template('home.html', voliand=andata, volirit=ritorno, flyForm=searchForm, is_return=is_return)
     #, page=page, mp=math.ceil(m[0]/5))
@@ -256,7 +256,7 @@ Lo staff Take a Fly
         msg = Message('Conferma di Acquisto Tiket: ' + str(volopart[0]) + " / " + str(volorit[0]), sender='akeaflyspa@gmail.com', recipients=[current_user.email])
         msg.body = f'''Grazie per aver acuistato dal nostro sito, ecco tutto ciò che ti serve per l'imbarco:
 
-Dettagli del volo di ANDATAA
+Dettagli del volo di ANDATA
 Codice Volo: {volopart[0] }
 Aeroporto di Partenza: { volopart[1] }
 Orario: { volopart[2] }

@@ -5,7 +5,19 @@
 		.highlight { background-color: red; }
 	</style>
     <script type="text/javascript">
+		function setdate(){
+			var date = new Date($("#dataPartenza").val());
+			var datenew = new Date(date);
+			var yr      = datenew.getFullYear();
+			var month   = datenew.getMonth() < 10 ? '0' + (datenew.getMonth()+1) : (datenew.getMonth()+1);
+			var day     = datenew.getDate()  < 10 ? '0' + (datenew.getDate()+1) : (datenew.getDate()+1);
+			var newDate = yr + '-' + month + '-' + day;
+			//console.log(newDate);
+			$("#dataRitorno").prop("value", newDate);
+		}
+
     	$(document).ready(function () {
+    		setdate();
     		{% if flyForm.checkAndataRitorno.data == False %}
     			$('#collapse').prop("hidden", true);
     		{% endif %}
@@ -84,6 +96,12 @@
 				}
 				
 			});
+
+
+			$("#dataPartenza").on('change', function() {
+				setdate();
+			});
+
         });  	
 	</script>
     <div id="voli">

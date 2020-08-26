@@ -190,10 +190,11 @@ class SearchFlyForm(FlaskForm):
         if aeroportoArrivo.data == self.aeroportoPartenza.data:
             raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')
     def validate_daraRitorno(self, dataRitorno):
-        if dataRitorno < self.dataPartenza.data:
-            raise ValidationError('La data di ritrono non può essere prima di quella di partenza')
-        if dataRitorno is None and self.cheackAndataRitorno.data == False:
+        if dataRitorno.data is None and self.cheackAndataRitorno.data == True:
             raise ValidationError('Scegliere una data di ritorno')
+        elif dataRitorno.data < self.dataPartenza.data:
+            raise ValidationError('La data di ritrono non può essere prima di quella di partenza')
+        
 
 
 class AddBookingReturn(FlaskForm):
