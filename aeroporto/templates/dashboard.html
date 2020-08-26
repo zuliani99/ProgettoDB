@@ -9,37 +9,37 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
 
 
-     <script type="text/javascript">
-     	$(document).ready(function () {
-        	$('select').selectize({
-          		sortField: 'text'
-        	});
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('select').selectize({
+				sortField: 'text'
+			});
 
-        	$(".table tbody").on('click','#btndelFly',function(){
+			$(".table tbody").on('click','#btndelFlight',function(){
 	            // get the current row
 	            var currentRow=$(this).closest("tr"); 
 	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
-	            var newURL = flask_util.url_for('delete_volo', {fly_id: col1});
-	            $('#formdelFly').attr('action', newURL);
-	             
+	            var newURL = flask_util.url_for('delete_volo', {flight_id: col1});
+	            $('#formdelFlight').attr('action', newURL);
+	            
 	        });
-	        $(".table tbody").on('click','#btndelAirport',function(){
+			$(".table tbody").on('click','#btndelAirport',function(){
 	            // get the current row
 	            var currentRow=$(this).closest("tr"); 
 	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
 	            var newURL = flask_util.url_for('delete_aeroporto', {aeroporto_id: col1});
 	            $('#formdelAirport').attr('action', newURL);
-	             
+	            
 	        });
-	         $(".table tbody").on('click','#btndelPlane',function(){
+			$(".table tbody").on('click','#btndelPlane',function(){
 	            // get the current row
 	            var currentRow=$(this).closest("tr"); 
 	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
 	            var newURL = flask_util.url_for('delete_aereo', {aereo_id: col1});
 	            $('#formdelPlane').attr('action', newURL);
-	             
+	            
 	        });
-        });
+		});
 
     </script>
 
@@ -48,8 +48,8 @@
    		   		
 		<h1><br></h1>
 
-    	<!-- ADD FLY -->
-    	<div id="addFlyModal" class="modal fade" role="dialog">
+    	<!-- ADD Flight -->
+    	<div id="addFlightModal" class="modal fade" role="dialog">
     		<div class="modal-dialog">
     			<!-- Modal content-->
     			<div class="modal-content">
@@ -59,77 +59,97 @@
     				</div>
     				
 	    				<div class="modal-body">
-				        	<form method="POST" action="" id="addFly">
-				        		{{ flyForm.hidden_tag() }}
+				        	<form method="POST" action="" id="addFlight">
+				        		{{ flightForm.hidden_tag() }}
 				        		<fieldset class="form-group">
 				        			<div class="form-group">
-				        				{{ flyForm.aeroportoPartenza.label(class="form-control-label") }}
-    									{% if flyForm.aeroportoPartenza.errors %}
-					                        {{ flyForm.aeroportoPartenza(class="form-control is-invalid", id="select-state") }}
+				        				{{ flightForm.aeroportoPartenza.label(class="form-control-label") }}
+    									{% if flightForm.aeroportoPartenza.errors %}
+					                        {{ flightForm.aeroportoPartenza(class="form-control is-invalid", id="select-state") }}
 					                        <div class="invalid-feedback">
-					                            {% for error in flyForm.aeroportoPartenza.errors %}
+					                            {% for error in flightForm.aeroportoPartenza.errors %}
 					                                <span>{{ error }}</span>
 					                            {% endfor %}
 					                        </div>
 					                    {% else %}
-    										{{ flyForm.aeroportoPartenza( id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
+    										{{ flightForm.aeroportoPartenza( id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
     									{% endif %}
 									</div>
 									<div class="form-group">
-										{{ flyForm.dataPartenza.label(class="form-control-label") }}
-										{% if flyForm.dataPartenza.errors %}
-											{{ flyForm.dataPartenza(class="form-control form-control-lg is-invalid", type="date") }}
+										{{ flightForm.dataPartenza.label(class="form-control-label") }}
+										{% if flightForm.dataPartenza.errors %}
+											{{ flightForm.dataPartenza(class="form-control form-control-lg is-invalid", type="date") }}
 											<div class="invalid-feedback">
-					                            {% for error in form.dataPartenza.errors %}
+					                            {% for error in flightForm.dataPartenza.errors %}
 					                                <span>{{ error }}</span>
 					                            {% endfor %}
 					                        </div>
 										{% else %}
-											{{ flyForm.dataPartenza(class="form-control", type="date") }}
+											{{ flightForm.dataPartenza(class="form-control", type="date") }}
 										{% endif %}
 									  	
 									</div>
 									<div class="form-group">
-										{{ flyForm.oraPartenza.label(class="form-control-label") }}
-									  	{{ flyForm.oraPartenza(class="form-control", type="time") }}
-									</div>
-									<div class="form-group">
-									  	{{ flyForm.aeroportoArrivo.label(class="form-control-label") }}
-									  	{% if flyForm.aeroportoArrivo.errors %}
-					                        {{ flyForm.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
+
+										{{ flightForm.oraPartenza.label(class="form-control-label") }}
+									  	{% if flightForm.oraPartenza.errors %}
+					                        {{ flightForm.oraPartenza(class="form-control is-invalid", type="time") }}
 					                        <div class="invalid-feedback">
-					                            {% for error in flyForm.aeroportoArrivo.errors %}
+					                            {% for error in flightForm.oraPartenza.errors %}
 					                                <span>{{ error }}</span>
 					                            {% endfor %}
 					                        </div>
 					                    {% else %}
-    										{{ flyForm.aeroportoArrivo( id="select-state", placeholder="Seleziona aeroporto di arrivo...") }}
+    										{{ flightForm.oraPartenza(class="form-control", type="time") }}
+    									{% endif %}	
+									</div>
+									<div class="form-group">
+									  	{{ flightForm.aeroportoArrivo.label(class="form-control-label") }}
+									  	{% if flightForm.aeroportoArrivo.errors %}
+					                        {{ flightForm.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
+					                        <div class="invalid-feedback">
+					                            {% for error in flightForm.aeroportoArrivo.errors %}
+					                                <span>{{ error }}</span>
+					                            {% endfor %}
+					                        </div>
+					                    {% else %}
+    										{{ flightForm.aeroportoArrivo( id="select-state", placeholder="Seleziona aeroporto di arrivo...") }}
     									{% endif %}
 									</div>
 									<div class="form-group">
-										{{ flyForm.oraArrivo.label(class="form-control-label") }}
-									  	{{ flyForm.oraArrivo(class="form-control", type="time") }}					
-									</div>
-									<div class="form-group">
-										{{ flyForm.aereo.label(class="form-control-label") }}
-    									{% if flyForm.aereo.errors %}
-					                        {{ flyForm.aereo(class="form-control is-invalid", id="select-state") }}
+
+										{{ flightForm.oraArrivo.label(class="form-control-label") }}
+									  	{% if flightForm.oraArrivo.errors %}
+					                        {{ flightForm.oraArrivo(class="form-control is-invalid", type = "time") }}
 					                        <div class="invalid-feedback">
-					                            {% for error in flyForm.aereo.errors %}
+					                            {% for error in flightForm.oraArrivo.errors %}
 					                                <span>{{ error }}</span>
 					                            {% endfor %}
 					                        </div>
 					                    {% else %}
-    										{{ flyForm.aereo( id="select-state", placeholder="Seleziona aereo...") }}
+    										{{ flightForm.oraArrivo(class="form-control", type="time") }}
+    									{% endif %}			
+									</div>
+									<div class="form-group">
+										{{ flightForm.aereo.label(class="form-control-label") }}
+    									{% if flightForm.aereo.errors %}
+					                        {{ flightForm.aereo(class="form-control is-invalid", id="select-state") }}
+					                        <div class="invalid-feedback">
+					                            {% for error in flightForm.aereo.errors %}
+					                                <span>{{ error }}</span>
+					                            {% endfor %}
+					                        </div>
+					                    {% else %}
+    										{{ flightForm.aereo( id="select-state", placeholder="Seleziona aereo...") }}
     									{% endif %}
 									</div>
 				        			<div class="form-group">
-										{{ flyForm.prezzo.label(class="form-control-label") }}
-									  	{{ flyForm.prezzo(class="form-control amount", type="number", min="0", step="0.01") }}									
+										{{ flightForm.prezzo.label(class="form-control-label") }}
+									  	{{ flightForm.prezzo(class="form-control amount", type="number", min="0", step="0.01") }}									
 									</div>
 				        		</fieldset>
 				        		<div class="form-group">
-				        			{{ flyForm.submitFly(class="btn btn-outline-info", form="addFly", value="Aggiungi") }}
+				        			{{ flightForm.submitFlight(class="btn btn-outline-info", form="addFlight", value="Aggiungi") }}
 				        		</div>
 				        	</form>
 				     	</div>
@@ -140,7 +160,7 @@
 			    </div>
     		</div>
     	</div>
-    	<!-- END BLOCK ADD FLY-->
+    	<!-- END BLOCK ADD flight-->
     	<!-- ADD PLANE -->
     	<div id="addPlaneModal" class="modal fade" role="dialog">
     		<div class="modal-dialog">
@@ -248,7 +268,7 @@
 
     	<ul class="nav nav-tabs" id="myTab" role="tablist">
   			<li class="nav-item">
-    			<a class="nav-link active" id="fly-tab" data-toggle="tab" href="#voli" role="tab" aria-controls="fly" aria-selected="true">Voli</a>
+    			<a class="nav-link active" id="flight-tab" data-toggle="tab" href="#voli" role="tab" aria-controls="flight" aria-selected="true">Voli</a>
   			</li>
 			<li class="nav-item">
 				<a class="nav-link" id="airport-tab" data-toggle="tab" href="#areoporti" role="tab" aria-controls="airport" aria-selected="false">Aeroporti</a>
@@ -258,59 +278,59 @@
 			</li>
 		</ul>
 		<div class="tab-content" id="myTabContent">
-			<div class="tab-pane fade show active" id="voli" role="tabpanel" aria-labelledby="fly-tab">
-		    	{{ flask_util_js.js }}
-		    	
-		    	<div class="content-section">
-		    		<div id="titleVoli">
-				        <h2 class="mt-5">Voli </h2>
-				        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addFlyModal">Aggiungi volo</button>   
-			    	</div>
-			        <table class="table table-hover">
-			            <thead>
-			                <tr>
-			                	<th scope="col">Codice volo</th>
-			                    <th scope="col">Aeroporto di Partenza</th>
-			                    <th scope="col">Data e Ora partenza</th>
-			                    <th scope="col">Aeroporto di Arrivo</th>
-			                    <th scope="col">Data e Ora arrivo</th>
-			                    <th scope="col">Codice Aereo</th>
-			                    <th scope="col">Prezzo Volo</th>
-			                </tr>
-			            </thead>
-			            <tbody>
-			            	{% for volo in voli %}
-			            		{% if volo[2] < time %}
-			            			<!-- EVIDENZIARE GLI ORDINI PASSATI IN QUALCHE MODO -->
-			            			<tr class="table-dark">
-			                            <td>{{ volo[0] }}</td>
-			                            <td>{{ volo[1] }}</td>
-			                            <td>{{ volo[2] }}</td>
-			                            <td>{{ volo[3] }}</td>
-			                            <td>{{ volo[4] }}</td>
-			                            <td>{{ volo[5] }}</td>
-			                            <td>{{ volo[6] }}</td>
-		                        	</tr>
-			            		{% else %}
-			            			<tr>
-			                            <td>{{ volo[0] }}</td>
-			                            <td>{{ volo[1] }}</td>
-			                            <td>{{ volo[2] }}</td>
-			                            <td>{{ volo[3] }}</td>
-			                            <td>{{ volo[4] }}</td>
-			                            <td>{{ volo[5] }}</td>
-			                            <td>{{ volo[6] }}</td>
-		                        	
-		                        		<td><button id="btndelFly" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalFly">Elimina</button></td>
-		                        		<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('configVolo', volo_id=volo[0]) }}'">Modifica</button></td>
-		                       		</tr>
-			            		{% endif %}
-			            	{% endfor %}
-			            </tbody>
-			        </table>
-		        </div>
-		        <!-- Modal Conferma eliminazione VOLO-->
-				<div class="modal fade" id="deleteModalFly" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+			<div class="tab-pane fade show active" id="voli" role="tabpanel" aria-labelledby="flight-tab">
+				{{ flask_util_js.js }}
+				
+				<div class="content-section">
+					<div id="titleVoli">
+						<h2 class="mt-5">Voli </h2>
+						<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addFlightModal">Aggiungi volo</button>   
+					</div>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Codice volo</th>
+								<th scope="col">Aeroporto di Partenza</th>
+								<th scope="col">Data e Ora partenza</th>
+								<th scope="col">Aeroporto di Arrivo</th>
+								<th scope="col">Data e Ora arrivo</th>
+								<th scope="col">Codice Aereo</th>
+								<th scope="col">Prezzo Volo</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for volo in voli %}
+							{% if volo[2] < time %}
+							<!-- EVIDENZIARE GLI ORDINI PASSATI IN QUALCHE MODO -->
+							<tr class="table-dark">
+								<td>{{ volo[0] }}</td><!-- ID -->
+								<td>{{ volo[1] }}</td><!-- AEROPORTO PARTENZA -->
+								<td>{{ volo[2] }}</td><!-- DATA E ORA PARTENZA -->
+								<td>{{ volo[3] }}</td><!-- AEROPORTO ARRIVO -->
+								<td>{{ volo[4] }}</td><!-- DATA E ORA ARRIVO -->
+								<td>{{ volo[5] }}</td><!-- AEREO -->
+								<td>{{ volo[6] }}</td><!-- PREZZO -->
+							</tr>
+							{% else %}
+							<tr>
+								<td>{{ volo[0] }}</td><!-- ID -->
+								<td>{{ volo[1] }}</td><!-- AEROPORTO PARTENZA -->
+								<td>{{ volo[2] }}</td><!-- DATA E ORA PARTENZA -->
+								<td>{{ volo[3] }}</td><!-- AEROPORTO ARRIVO -->
+								<td>{{ volo[4] }}</td><!-- DATA E ORA ARRIVO -->
+								<td>{{ volo[5] }}</td><!-- AEREO -->
+								<td>{{ volo[6] }}</td><!-- PREZZO -->
+								
+								<td><button id="btndelFlight" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalFlight">Elimina</button></td>
+								<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('configVolo', volo_id=volo[0]) }}'">Modifica</button></td>
+							</tr>
+							{% endif %}
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				<!-- Modal Conferma eliminazione VOLO-->
+				<div class="modal fade" id="deleteModalFlight" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
 					<div class="modal-dialog" role="document">
 						<div class="modal-content">
 							<div class="modal-header">
@@ -324,7 +344,7 @@
 							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
-								<form id="formdelFly" action="" method="POST">
+								<form id="formdelFlight" action="" method="POST">
 									<input class="btn btn-danger" type="submit" value="Elimina">
 								</form>
 							</div>

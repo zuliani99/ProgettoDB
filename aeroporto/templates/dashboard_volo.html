@@ -19,83 +19,83 @@
 	<div class="content-section">
 		<h1>Volo #{{volo[0]}}</h1>
 		<form method="POST" action="" enctype="multipart/form-data">
-			{{ flyForm.hidden_tag() }}
+			{{ flightForm.hidden_tag() }}
 			<fieldset class="form-group">
 				<legend class="border-bottom mb-4">Info volo</legend>
 				<div class="form-group">
-					{{ flyForm.aeroportoPartenza.label(class="form-control-label") }}
-					{% if flyForm.aeroportoPartenza.errors %}
-						{{ flyForm.aeroportoPartenza(id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
+					{{ flightForm.aeroportoPartenza.label(class="form-control-label") }}
+					{% if flightForm.aeroportoPartenza.errors %}
+						{{ flightForm.aeroportoPartenza(id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
 						<div class="invalid-feedback">
-							{% for error in flyForm.aeroportoPartenza.errors %}
+							{% for error in flightForm.aeroportoPartenza.errors %}
 								<span>{{ error }}</span>
 							{% endfor %}
 						</div>
 					{% else %}
-						{{ flyForm.aeroportoPartenza( id="select-state") }}
+						{{ flightForm.aeroportoPartenza( id="select-state") }}
 					{% endif %}
 				</div>
 				<div class="form-group">
-					{{ flyForm.timePartenza.label(class="form-control-label") }}
-					{% if flyForm.timePartenza.errors %}
-						{{ flyForm.timePartenza(class="form-control form-control-lg is-invalid", type="datetime-local") }}
+					{{ flightForm.timePartenza.label(class="form-control-label") }}
+					{% if flightForm.timePartenza.errors %}
+						{{ flightForm.timePartenza(class="form-control form-control-lg is-invalid", type="datetime-local") }}
 						<div class="invalid-feedback">
-							{% for error in flyForm.timePartenza.errors %}
+							{% for error in flightForm.timePartenza.errors %}
 								<span>{{ error }}</span>
 							{% endfor %}
 						</div>
 					{% else %}
-						{{ flyForm.timePartenza(class="form-control", type="datetime-local") }}
-					{% endif %}
-
-				</div>
-				<div class="form-group">
-					{{ flyForm.aeroportoArrivo.label(class="form-control-label") }}
-					{% if flyForm.aeroportoArrivo.errors %}
-						{{ flyForm.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
-						<div class="invalid-feedback">
-							{% for error in flyForm.aeroportoArrivo.errors %}
-								<span>{{ error }}</span>
-							{% endfor %}
-						</div>
-					{% else %}
-						{{ flyForm.aeroportoArrivo( id="select-state") }}
-					{% endif %}
-				</div>
-				<div class="form-group">
-					{{ flyForm.timeArrivo.label(class="form-control-label") }}
-					{% if flyForm.timeArrivo.errors %}
-						{{ flyForm.timeArrivo(class="form-control form-control-lg is-invalid", type="datetime-local") }}
-						<div class="invalid-feedback">
-							{% for error in flyForm.timeArrivo.errors %}
-								<span>{{ error }}</span>
-							{% endfor %}
-						</div>
-					{% else %}
-						{{ flyForm.timeArrivo(class="form-control", type="datetime-local") }}
+						{{ flightForm.timePartenza(class="form-control", type="datetime-local") }}
 					{% endif %}
 
 				</div>
 				<div class="form-group">
-					{{ flyForm.aereo.label(class="form-control-label") }}
-					{% if flyForm.aereo.errors %}
-						{{ flyForm.aereo(class="form-control is-invalid", id="select-state") }}
+					{{ flightForm.aeroportoArrivo.label(class="form-control-label") }}
+					{% if flightForm.aeroportoArrivo.errors %}
+						{{ flightForm.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
 						<div class="invalid-feedback">
-							{% for error in flyForm.aereo.errors %}
+							{% for error in flightForm.aeroportoArrivo.errors %}
 								<span>{{ error }}</span>
 							{% endfor %}
 						</div>
 					{% else %}
-						{{ flyForm.aereo( id="select-state") }}
+						{{ flightForm.aeroportoArrivo( id="select-state") }}
 					{% endif %}
 				</div>
 				<div class="form-group">
-					{{ flyForm.prezzo.label(class="form-control-label") }}
-					{{ flyForm.prezzo(class="form-control amount", type="number", min="0", step="0.01") }}         
+					{{ flightForm.timeArrivo.label(class="form-control-label") }}
+					{% if flightForm.timeArrivo.errors %}
+						{{ flightForm.timeArrivo(class="form-control form-control-lg is-invalid", type="datetime-local") }}
+						<div class="invalid-feedback">
+							{% for error in flightForm.timeArrivo.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ flightForm.timeArrivo(class="form-control", type="datetime-local") }}
+					{% endif %}
+
+				</div>
+				<div class="form-group">
+					{{ flightForm.aereo.label(class="form-control-label") }}
+					{% if flightForm.aereo.errors %}
+						{{ flightForm.aereo(class="form-control is-invalid", id="select-state") }}
+						<div class="invalid-feedback">
+							{% for error in flightForm.aereo.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ flightForm.aereo( id="select-state") }}
+					{% endif %}
+				</div>
+				<div class="form-group">
+					{{ flightForm.prezzo.label(class="form-control-label") }}
+					{{ flightForm.prezzo(class="form-control amount", type="number", min="0", step="0.01") }}         
 				</div>
 			</fieldset>
 			<div class="form-group">
-				{{ flyForm.updateFly(class="btn btn-outline-info", value="Aggiorna") }}
+				{{ flightForm.submitFlight(class="btn btn-outline-info", value="Aggiorna") }}
 			</div>
 		</form>
 	</div>
