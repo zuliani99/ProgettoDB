@@ -92,9 +92,9 @@ class ResetPasswordForm(FlaskForm):
 
 
 class AddBookingGone(FlaskForm):
-    bagaglioAndata = SelectField(u'Tipo Bagaglio')
-    postoAndata = StringField('Posto da Sedere', validators=[DataRequired()])
-    submit = SubmitField('Conferma Aquisto')
+	bagaglioAndata = SelectField(u'Tipo Bagaglio')
+	postoAndata = StringField('Posto da Sedere', validators=[DataRequired()])
+	submit = SubmitField('Conferma Aquisto')
 
 
 class AddReviw(FlaskForm):
@@ -160,8 +160,7 @@ class FlightForm(FlaskForm):
 	def validate_oraPartenza(self, oraPartenza):
 		if(oraPartenza.data is None and not self.check):
 			raise ValidationError('This field is required')
-            
-	def validate_oraArrivo(self, oraArrivo):
+			
 	def validate_oraArrivo(self, oraArrivo):
 		if(oraArrivo.data is None and not self.check):
 			raise ValidationError('This field is required')
@@ -169,37 +168,37 @@ class FlightForm(FlaskForm):
 	def validate_aeroportoArrivo(self, aeroportoArrivo):
 		if aeroportoArrivo.data == self.aeroportoPartenza.data:
 			raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')
-			raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')
+
 class SearchFlyForm(FlaskForm):
-    tomorrowDate = datetime.date.today() + datetime.timedelta(days=1)
-    
-    aeroportoPartenza = SelectField('Aeroporto di partenza',validators=[DataRequired()])
-    dataPartenza = DateField('Data partenza', default=tomorrowDate, validators=[DataRequired()])
-    aeroportoArrivo = SelectField('Aeroporto di arrivo', validators=[DataRequired()])
-    dataRitorno = DateField('Data ritrono', validators=[Optional()])
-    checkAndata = BooleanField('Solo Andata', default="checked", validators=[Optional()])
-    checkAndataRitorno = BooleanField('Andata e Ritorno', validators=[Optional()])
+	tomorrowDate = datetime.date.today() + datetime.timedelta(days=1)
+	
+	aeroportoPartenza = SelectField('Aeroporto di partenza',validators=[DataRequired()])
+	dataPartenza = DateField('Data partenza', default=tomorrowDate, validators=[DataRequired()])
+	aeroportoArrivo = SelectField('Aeroporto di arrivo', validators=[DataRequired()])
+	dataRitorno = DateField('Data ritrono', validators=[Optional()])
+	checkAndata = BooleanField('Solo Andata', default="checked", validators=[Optional()])
+	checkAndataRitorno = BooleanField('Andata e Ritorno', validators=[Optional()])
 
-    searchFly = SubmitField('Cerca Volo')
-    #buyStep = SubmitField('Continua')
+	searchFly = SubmitField('Cerca Volo')
+	#buyStep = SubmitField('Continua')
 
-    def validate_dataPartenza(self, dataPartenza):
-        if dataPartenza.data < self.tomorrowDate:
-            raise ValidationError('La data deve essere futura')
-    def validate_aeroportoArrivo(self, aeroportoArrivo):
-        if aeroportoArrivo.data == self.aeroportoPartenza.data:
-            raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')
-    def validate_daraRitorno(self, dataRitorno):
-        if dataRitorno.data is None and self.cheackAndataRitorno.data == True:
-            raise ValidationError('Scegliere una data di ritorno')
-        elif dataRitorno.data < self.dataPartenza.data:
-            raise ValidationError('La data di ritrono non può essere prima di quella di partenza')
-        
+	def validate_dataPartenza(self, dataPartenza):
+		if dataPartenza.data < self.tomorrowDate:
+			raise ValidationError('La data deve essere futura')
+	def validate_aeroportoArrivo(self, aeroportoArrivo):
+		if aeroportoArrivo.data == self.aeroportoPartenza.data:
+			raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')
+	def validate_daraRitorno(self, dataRitorno):
+		if dataRitorno.data is None and self.cheackAndataRitorno.data == True:
+			raise ValidationError('Scegliere una data di ritorno')
+		elif dataRitorno.data < self.dataPartenza.data:
+			raise ValidationError('La data di ritrono non può essere prima di quella di partenza')
+		
 
 
 class AddBookingReturn(FlaskForm):
-    bagaglioAndata = SelectField(u'Tipo Bagaglio')
-    postoAndata = StringField('Posto da Sedere', validators=[DataRequired()])
-    bagaglioRitorno = SelectField(u'Tipo Bagaglio')
-    postoRitorno = StringField('Posto da Sedere', validators=[DataRequired()])
-    submit = SubmitField('Conferma Aquisto')
+	bagaglioAndata = SelectField(u'Tipo Bagaglio')
+	postoAndata = StringField('Posto da Sedere', validators=[DataRequired()])
+	bagaglioRitorno = SelectField(u'Tipo Bagaglio')
+	postoRitorno = StringField('Posto da Sedere', validators=[DataRequired()])
+	submit = SubmitField('Conferma Aquisto')
