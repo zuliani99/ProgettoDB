@@ -175,7 +175,7 @@ class SearchFlyForm(FlaskForm):
 	aeroportoPartenza = SelectField('Aeroporto di partenza',validators=[DataRequired()])
 	dataPartenza = DateField('Data partenza', default=tomorrowDate, validators=[DataRequired()])
 	aeroportoArrivo = SelectField('Aeroporto di arrivo', validators=[DataRequired()])
-	dataRitorno = DateField('Data ritrono', validators=[Optional()])
+	dataRitorno = DateField('Data ritrono', validators=[DataRequired()])
 	checkAndata = BooleanField('Solo Andata', default="checked", validators=[Optional()])
 	checkAndataRitorno = BooleanField('Andata e Ritorno', validators=[Optional()])
 
@@ -188,10 +188,8 @@ class SearchFlyForm(FlaskForm):
 	def validate_aeroportoArrivo(self, aeroportoArrivo):
 		if aeroportoArrivo.data == self.aeroportoPartenza.data:
 			raise ValidationError('Selezionare un aeroporto diverso da quello di partenza')
-	def validate_daraRitorno(self, dataRitorno):
-		if dataRitorno.data is None and self.cheackAndataRitorno.data == True:
-			raise ValidationError('Scegliere una data di ritorno')
-		elif dataRitorno.data < self.dataPartenza.data:
+	def validate_dataRitorno(self, dataRitorno):
+		if dataRitorno.data < self.dataPartenza.data:
 			raise ValidationError('La data di ritrono non può essere prima di quella di partenza')
 		
 

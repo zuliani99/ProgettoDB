@@ -19,13 +19,14 @@ def login_required(role="ANY"):
 		@wraps(fn)
 		def wrap(*args, **kwargs):
 			if not current_user.is_authenticated:
-				#return current_app.login_manager.unauthorized()
 				flash("Devi accedere al tuo account per visitare la pagina", 'danger')
 				return redirect(url_for('login'))
 			urole = load_user(current_user.id).get_urole()
-			if ((urole != role) and (role != "ANY")):
-				#return current_app.login_manager.unauthorized()
+			if ((urole != role) and (role == "admin")):
 				flash("Devi essere un admin per visualizzare la pagina", 'danger')
+				return redirect(url_for('home'))
+			elif ((urole != role) and (role == "customer")):
+				flash("Devi essere un cliente per visualizzare la pagina", 'danger')
 				return redirect(url_for('home'))
 			return fn(*args, **kwargs)
 		return wrap
@@ -54,7 +55,7 @@ def home():
 		dRit = searchForm.dataRitorno.data
 		is_return = searchForm.checkAndataRitorno.data
 
-		print(str(aPart) + " " + str(dPart)  + " " + str(aArr) + " " + str(dRit) + " " + str(is_return))
+		#print(str(aPart) + " " + str(dPart)  + " " + str(aArr) + " " + str(dRit) + " " + str(is_return))
 		queryandata = "SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id AND v.aeroportoPartenza = part.id AND v.aereo = a.id AND part.id = "+str(aPart)+" AND arr.id = "+str(aArr)+" AND v.oraPartenza BETWEEN '"+str(dPart)+" 00:00:00' AND '"+str(dPart)+" 23:59:59'"
 		#print(query)
 		andata = conn.execute(queryandata).fetchall()
@@ -86,7 +87,8 @@ def register():
 		hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8') # criptiamo la password
 
 		conn = engine.connect()
-		conn.execute(users.insert(),[{"username": form.username.data, "email": form.email.data, "password": hashed_password}])
+		#conn.execute(users.insert(),[{"username": form.username.data, "email": form.email.data, "password": hashed_password}])
+		conn.execute("INSERT INTO user (username, email, password) VALUES (%s, %s, %s,)", form.username.data, form.email.data, hashed_password)
 		conn.close()
 
 
@@ -103,7 +105,8 @@ def login():
 	if form.validate_on_submit(): #controlla che tutte le regole del form siano state passate con successo
 		
 		conn = engine.connect()
-		rs = conn.execute(select([users]).where(users.c.email == form.email.data))
+		#rs = conn.execute(select([users]).where(users.c.email == form.email.data))
+		rs = conn.execute("SELECT * FROM users WHERE email = %s",form.email.data)
 		u = rs.fetchone()
 		conn.close()
 		if u is not None:
@@ -140,7 +143,7 @@ def save_pictures(form_picture): # funzione di salvataggio nel filesystem
 
 
 @app.route("/account", methods=['GET', 'POST'])
-@login_required(role="ANY") # necessario se vogliaomo ch la pagina sia visitabile solo se l'utente ha eseguito l'accesso alla piattaforma
+@login_required() # necessario se vogliaomo ch la pagina sia visitabile solo se l'utente ha eseguito l'accesso alla piattaforma
 def account(): # funzione di account
 	form = UpdateAccountForm()  # from di updaTE
 	if form.validate_on_submit():  # se abbiamo cliccato aggiorna profilo
@@ -149,7 +152,8 @@ def account(): # funzione di account
 			current_user.image_file = picture_file
 			
 			conn = engine.connect()
-			conn.execute(users.update().values(image_file=current_user.image_file).where(users.c.id==current_user.id))
+			#conn.execute(users.update().values(image_file=current_user.image_file).where(users.c.id==current_user.id))
+			conn.execute("UPDATE users SET image_file = %s WHERE id = %s", current_user.image_file, current_user.id)
 			conn.close()
 
 
@@ -158,8 +162,9 @@ def account(): # funzione di account
 		
 
 		conn = engine.connect()
-		u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
-		conn.execute(u)
+		#u = users.update().values(username=current_user.username, email=current_user.email).where(users.c.id==current_user.id)
+		#conn.execute(u)
+		conn.execute("UPDATE users SET username = %s, email = %s WHERE id = %s", current_user.username, current_user.email,current_user.id)
 		conn.close()
 
 		flash('Il tuo account è stato aggionato', 'success')
@@ -176,7 +181,7 @@ def account(): # funzione di account
 #funzione per inviare le mail
 def send_reset_email(user):
 	token = user.get_reset_token() #prendiamo il token
-	msg = Message('PRichiesta di Password Reset', sender='noreplay@demo.com', recipients=[user.email]) #header del messaggio
+	msg = Message('Richiesta di Password Reset', sender='takeaflyspa@gmail.com', recipients=[user.email]) #header del messaggio
 	msg.body = f'''Per resettare la password, visita il seguente link: 
 {url_for('reset_token', token=token, _external=True)}
 
@@ -185,6 +190,7 @@ Se non hai fatto questa richiesta, ignora questa mail e nessuna modifica sarà e
 	mail.send(msg)
 
 @app.route("/reset_password", methods=['GET', 'POST']) #route per inserire la mail per il recuper della password
+@login_required()
 def reset_request():
 	if current_user.is_authenticated: 
 		return redirect(url_for('home'))
@@ -192,7 +198,8 @@ def reset_request():
 	if form.validate_on_submit():
 
 		conn = engine.connect()
-		rs = conn.execute(select([users]).where(users.c.email == form.email.data))
+		#rs = conn.execute(select([users]).where(users.c.email == form.email.data))
+		rs = conn.execute("SELECT * FROM users WHERE email = %s", form.email.data)
 		u = rs.fetchone()
 		conn.close()
 		user = User(u.id, u.nome, u.email, u.image_file, u.password, u.role)
@@ -203,6 +210,7 @@ def reset_request():
 	return render_template('reset_request.html', title='Reset Password', form=form)
 
 @app.route("/reset_password<token>", methods=['GET', 'POST'])
+@login_required()
 def reset_token(token):
 	if current_user.is_authenticated: 
 		return redirect(url_for('home'))
@@ -217,7 +225,8 @@ def reset_token(token):
 		
 		#db.session.commit() # e committiamo 
 		conn = engine.connect()
-		conn.execute(users.update().values(password=user.password).where(users.c.id==user.id))
+		#conn.execute(users.update().values(password=user.password).where(users.c.id==user.id))
+		conn.execute("UPDATE users SET password = %s WHERE id = %s", user.password, user.id)
 		conn.close()
 
 		flash('La tua password  stata aggiornata! Ora puoi eseguire il log in', 'success')
@@ -227,7 +236,7 @@ def reset_token(token):
 
 def send_ticket_notify(volopart, npostopart, bagpart, volorit, npostorit, bagrit):
 	if (volorit == 0):
-		msg = Message('Conferma di Acquisto Tiket: ' + str(volopart[0]), sender='akeaflyspa@gmail.com', recipients=[current_user.email])
+		msg = Message('Conferma di Acquisto Tiket: ' + str(volopart[0]), sender='takeaflyspa@gmail.com', recipients=[current_user.email])
 		msg.body = f'''Grazie per aver acuistato dal nostro sito, ecco tutto ciò che ti serve per l'imbarco:
 
 Dettagli volo
@@ -289,9 +298,10 @@ Lo staff Take a Fly
 '''
 		mail.send(msg)
 
-@app.route("/volo<volopart>", methods=['GET', 'POST'])
-def volo(volopart):
-	form = AddBookingGone()
+@app.route("/gone<int:volopart>", methods=['GET', 'POST'])
+#@login_required(role="customer")
+def gone(volopart):
+	formGone = AddBookingGone()
 	conn = engine.connect()
 	trans = conn.begin()
 	try:
@@ -303,49 +313,56 @@ def volo(volopart):
 	pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
 	conn.close()
 	
-	l = []
+	temp = []
 	for p in pocc:
-		l.append(p[0])
-	available_groups = []
+		temp.append(p[0])
+	available_sits = []
 	for count in range(1,int(volo[6])+1):
-		if count not in l:
-			available_groups.append(count)
-	map(str(),available_groups)
+		if count not in temp:
+			available_sits.append(count)
+	map(str(),available_sits)
 
 	conn = engine.connect()
 
-	res = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
-	form.bagaglioAndata.choices = [(str(r[0]), str(r[1])) for r in res]
+	bagagli = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
+	formGone.bagaglioAndata.choices = [(str(bag[0]), str(bag[1])) for bag in bagagli]
 	conn.close()
 
-	if form.validate_on_submit():
+	if formGone.validate_on_submit():
 		if current_user.is_authenticated:
-			conn = engine.connect()
-			r = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volopart, form.postoAndata.data).fetchone()
-			if r is None:
-				conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, volopart, form.postoAndata.data, form.bagaglioAndata.data)
-				print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volo[0])+","+ form.postoAndata.data+","+ form.bagaglioAndata.data+")")
-				bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioAndata.data).fetchone()
-				
-				send_ticket_notify(volo, form.postoAndata.data, bagAndata, 0, 0, 0)
-				
-				flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
-				return redirect(url_for('user_fly'))
-				#possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
+			if load_user(current_user.id).get_urole() == "customer":
+				conn = engine.connect()
+				verposto = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volopart, formGone.postoAndata.data).fetchone()
+				if verposto is None:
+					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)",
+						current_user.id,
+						volopart,
+						formGone.postoAndata.data,
+						formGone.bagaglioAndata.data
+					)
+					#print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volo[0])+","+ form.postoAndata.data+","+ form.bagaglioAndata.data+")")
+					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formGone.bagaglioAndata.data).fetchone()
+					
+					send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
+					
+					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
+					return redirect(url_for('user_fly'))
+					#possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
+				else:
+					flash("Posto da sedere appena acquistato, scegliene un altro", 'warning')
+				conn.close()
 			else:
-				flash("Posto da sedere appena acquistato, scegliene un altro", 'warning')
-			conn.close()
+				flash("Devi essere un cliente acquistare il biglietto", 'warning')
 		else:
 			flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
 			return redirect(url_for('login'))
-	return render_template('volo.html', title=volopart, volo=volo, form=form, free=available_groups)
+	return render_template('volo.html', title=volopart, volo=volo, form=formGone, free=available_sits)
 
 
-@app.route("/voli/<volopart>/<volorit>", methods=['GET', 'POST'])
-def voli(volopart, volorit):
-	form = AddBookingReturn()
-	#olopart = request.args.get('volopart',1,type=int)
-	#volorit = request.args.get('volorit',1,type=int)
+@app.route("/roundtrip/<int:volopart>/<int:volorit>", methods=['GET', 'POST'])
+#@login_required(role="customer")
+def roundtrip(volopart, volorit):
+	formRoundtrip = AddBookingReturn()
 	conn = engine.connect()
 	trans = conn.begin()
 	try:
@@ -356,12 +373,13 @@ def voli(volopart, volorit):
 	#print("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = "+volopart)
 	poccandata = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
 	
-	l = []
+
+	temp = []
 	for p in poccandata:
-		l.append(p[0])
+		temp.append(p[0])
 	available_groups_gone = []
 	for count in range(1,int(andata[6])+1):
-		if count not in l:
+		if count not in temp:
 			available_groups_gone.append(count)
 	map(str(),available_groups_gone)
 
@@ -371,50 +389,60 @@ def voli(volopart, volorit):
 	poccritorno = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volorit).fetchall()
 	
 
-	l = []
+	temp = []
 	for p in poccritorno:
-		l.append(p[0])
+		temp.append(p[0])
 	available_groups_return = []
 	for count in range(1,int(ritorno[6])+1):
-		if count not in l:
+		if count not in temp:
 			available_groups_return.append(count)
 	map(str(),available_groups_return)
 
 
 
-	res = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
-	form.bagaglioAndata.choices = [(str(r[0]), str(r[1])) for r in res]
-	form.bagaglioRitorno.choices = [(str(r[0]), str(r[1])) for r in res]
+	bagagli = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
+	formRoundtrip.bagaglioAndata.choices = [(str(b[0]), str(b[1])) for b in bagagli]
+	formRoundtrip.bagaglioRitorno.choices = [(str(b[0]), str(b[1])) for b in bagagli]
 	conn.close()
 
-	if form.validate_on_submit():
+	if formRoundtrip.validate_on_submit():
 		if current_user.is_authenticated:
-			conn = engine.connect()
-			r1 = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volopart, form.postoAndata.data).fetchone()
-			r2 = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volorit, form.postoRitorno.data).fetchone()
-			if r1 is None and r2 is None:
-				conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, andata[0], form.postoAndata.data, form.bagaglioAndata.data)
-				conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)", current_user.id, ritorno[0], form.postoRitorno.data, form.bagaglioRitorno.data)
-				print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(andata[0])+","+ form.postoAndata.data+","+ form.bagaglioAndata.data+")")
-				print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(ritorno[0])+","+ form.postoRitorno.data+","+ form.bagaglioRitorno.data+")")
-				bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioAndata.data).fetchone()
-				bagRitorno = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", form.bagaglioRitorno.data).fetchone()
-				
-				send_ticket_notify(andata, form.postoAndata.data, bagAndata, ritorno, form.postoRitorno.data, bagRitorno)
-				
-				flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
-				return redirect(url_for('user_fly'))
-				#possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
+			if load_user(current_user.id).get_urole() == "customer":
+				conn = engine.connect()
+				verposto1 = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volopart, formRoundtrip.postoAndata.data).fetchone()
+				verposto2 = conn.execute("SELECT * FROM prenotazioni WHERE id_volo = %s AND numeroPosto = %s", volorit, formRoundtrip.postoRitorno.data).fetchone()
+				if verposto1 is None and verposto2 is None:
+					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s),(%s, %s, %s, %s)", 
+						current_user.id,
+						andata[0],
+						formRoundtrip.postoAndata.data,
+						formRoundtrip.bagaglioAndata.data,
+						current_user.id,
+						ritorno[0],
+						formRoundtrip.postoRitorno.data,
+						formRoundtrip.bagaglioRitorno.data
+					)
+					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioAndata.data).fetchone()
+					bagRitorno = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioRitorno.data).fetchone()
+					
+					send_ticket_notify(andata, formRoundtrip.postoAndata.data, bagAndata, ritorno, formRoundtrip.postoRitorno.data, bagRitorno)
+					
+					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni dei biglietti', 'success')
+					return redirect(url_for('user_fly'))
+					#possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
+				else:
+					if verposto1 is not None:
+						flash("Posto da sedere per l'andata appena acquistato, scegliene un altro", 'warning')
+					if verposto2 is not None:
+						flash("Posto da sedere per il ritorno appena acquistato, scegliene un altro", 'warning')
+				conn.close()
 			else:
-				if r1 is not None:
-					flash("Posto da sedere per l'andata appena acquistato, scegliene un altro", 'warning')
-				if r2 is not None:
-					flash("Posto da sedere per il ritorno appena acquistato, scegliene un altro", 'warning')
-			conn.close()
+				flash("Devi essere un cliente acquistare il biglietto", 'warning')
+				#return redirect(url_for('roundtrip'))
 		else:
 			flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
 			return redirect(url_for('login'))
-	return render_template('voli.html', title=volopart + volorit, volopart=andata, volorit=ritorno, form=form, freegone=available_groups_gone, freereturn=available_groups_return)
+	return render_template('voli.html', title=str(volopart) + " / " + str(volorit), volopart=andata, volorit=ritorno, form=formRoundtrip, freegone=available_groups_gone, freereturn=available_groups_return)
 
 
 @app.route("/user_fly", methods=['GET', 'POST'])
@@ -422,7 +450,7 @@ def voli(volopart, volorit):
 def user_fly():
 	form = AddReviw()
 	conn = engine.connect()
-	voli = conn.execute("SELECT p.id, p.id_volo, v.aeroportoPartenza, v.oraPartenza, v.aeroportoArrivo, v.oraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale, p.valutazione FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo WHERE p.id_user= %s ORDER BY v.oraPartenza", current_user.id).fetchall()
+	voli = conn.execute("SELECT p.id, p.id_volo, a1.name, v.oraPartenza, a2.name, v.oraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale, p.valutazione FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo JOIN aeroporti a1 ON v.aeroportoPartenza=a1.id JOIN aeroporti a2 ON v.aeroportoArrivo=a2.id WHERE p.id_user= %s ORDER BY v.oraPartenza", current_user.id).fetchall()
 	conn.close()
 	time = datetime.now()
 	if form.validate_on_submit():
@@ -436,14 +464,14 @@ def user_fly():
 @login_required(role="customer")
 def delete_fly(fly_id):
 	conn = engine.connect()
-	f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
-	if f is None:
+	pren = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
+	if pren is None:
 		abort(404)
-	if f[1] != current_user.id:
+	if pren[1] != current_user.id:
 		abort(403)
    
 	conn.execute("DELETE FROM prenotazioni WHERE id = %s", fly_id)
-	flash('Il volo ' + str(f[0]) + ' da te prenotato è stato cancellato con successo', 'success')
+	flash('Il volo ' + str(pren[0]) + ' da te prenotato è stato cancellato con successo', 'success')
 	conn.close()
 	return redirect(url_for('user_fly'))
 
@@ -451,18 +479,18 @@ def delete_fly(fly_id):
 
 
 
-@app.route("/review_fly<fly_id>,<val>,<crit>", methods=['GET', 'POST'])
+@app.route("/review_fly<int:fly_id>,<int:val>,<crit>", methods=['GET', 'POST'])
 @login_required(role="customer")
 def review_fly(fly_id, val, crit):
 	conn = engine.connect()
-	f = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
-	if f is None:
+	pren = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
+	if pren is None:
 		abort(404)
-	if f[1] != current_user.id:
+	if pren[1] != current_user.id:
 		abort(403)
 
-	r = conn.execute("SELECT valutazione FROM prenotazioni WHERE id = %s", fly_id).fetchone()
-	if r[0] is None: 
+	val = conn.execute("SELECT valutazione FROM prenotazioni WHERE id = %s", fly_id).fetchone()
+	if val[0] is None: 
 		conn.execute("UPDATE prenotazioni SET valutazione = %s , critiche = %s WHERE id = %s", val, crit, fly_id)
 		conn.close()
 		flash("Recensione inserita con successo", "success")

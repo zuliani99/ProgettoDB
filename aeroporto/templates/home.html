@@ -5,19 +5,24 @@
 		.highlight { background-color: red; }
 	</style>
     <script type="text/javascript">
-		function setdate(){
-			var date = new Date($("#dataPartenza").val());
-			var datenew = new Date(date);
-			var yr      = datenew.getFullYear();
-			var month   = datenew.getMonth() < 10 ? '0' + (datenew.getMonth()+1) : (datenew.getMonth()+1);
-			var day     = datenew.getDate()  < 10 ? '0' + (datenew.getDate()+1) : (datenew.getDate()+1);
-			var newDate = yr + '-' + month + '-' + day;
-			//console.log(newDate);
-			$("#dataRitorno").prop("value", newDate);
+		function setdate(d){
+			if (d == 'None' || d == ''){
+				var date = new Date($("#dataPartenza").val());
+				var datenew = new Date(date);
+				var yr      = datenew.getFullYear();
+				var month   = datenew.getMonth() < 10 ? '0' + (datenew.getMonth()+1) : (datenew.getMonth()+1);
+				var day     = datenew.getDate()  < 10 ? '0' + (datenew.getDate()+1) : (datenew.getDate()+1);
+				var newDate = yr + '-' + month + '-' + day;
+				$("#dataRitorno").prop("value", newDate);
+			}else{
+				$("#dataRitorno").prop("value", d);
+			}
+
+
 		}
 
     	$(document).ready(function () {
-    		setdate();
+    		setdate('{{flyForm.dataRitorno.data}}');
     		{% if flyForm.checkAndataRitorno.data == False %}
     			$('#collapse').prop("hidden", true);
     		{% endif %}
@@ -99,7 +104,7 @@
 
 
 			$("#dataPartenza").on('change', function() {
-				setdate();
+				setdate('');
 			});
 
         });  	
@@ -178,7 +183,14 @@
 							{{ flyForm.searchFly(class="btn btn-primary", form="searchFly", id="searchbtn") }}
 						</div>
 					</form>
-				</div>			
+				</div>
+	{% if flyForm.aeroportoPartenza.errors or flyForm.dataPartenza.errors or flyForm.aeroportoArrivo.errors or flyForm.dataRitorno.errors %}
+
+	<div class="alert alert-danger" role="alert">
+			  	Controllare i campi inseriti
+			</div>
+
+	{% else %}
 	<div id="voliand">
 		<h2>Voli per l'Andata</h2>
 		{% if voliand == [] %}
@@ -253,6 +265,7 @@
 
 
     </div>
+    {% endif %}
 
 {% endblock content %}
 
