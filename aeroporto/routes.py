@@ -298,16 +298,17 @@ Lo staff Take a Fly
 '''
 		mail.send(msg)
 
+
 @app.route("/gone<int:volopart>", methods=['GET', 'POST'])
 #@login_required(role="customer")
 def gone(volopart):
 	formGone = AddBookingGone()
 	conn = engine.connect()
 	trans = conn.begin()
-	try:
-		conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
-	except:
-		trans.rollback()
+#	try:
+#		conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
+#	except:
+#		trans.rollback()
 	volo = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volopart).fetchone()
 	#print("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = "+volopart)
 	pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
@@ -365,10 +366,10 @@ def roundtrip(volopart, volorit):
 	formRoundtrip = AddBookingReturn()
 	conn = engine.connect()
 	trans = conn.begin()
-	try:
-		conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
-	except:
-		trans.rollback()
+#	try:
+#		conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
+#	except:
+#		trans.rollback()
 	andata = conn.execute("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volopart).fetchone()
 	#print("SELECT v.id , part.name, v.oraPartenza, arr.name, v.oraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = "+volopart)
 	poccandata = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
@@ -544,7 +545,7 @@ def dashboard():
 	conn = engine.connect()
 	aeroporti = conn.execute("SELECT id, name, indirizzo FROM aeroporti").fetchall()
 	aerei = conn.execute("SELECT id, name, numeroPosti FROM aerei").fetchall()
-	voli = conn.execute("SELECT * FROM voli").fetchall()
+	voli = conn.execute("SELECT * FROM voli JOIN pren_volo ON pren_volo.id = voli.id").fetchall()
 	conn.close()
 
 	opzioniAeroporti = [(str(choice[0]), str(choice[1]+", "+choice[2]+" #"+str(choice[0]))) for choice in aeroporti]

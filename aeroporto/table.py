@@ -34,11 +34,11 @@ aeroporti = Table('aeroporti', metadata,
 
 voli = Table('voli', metadata,
 	Column('id', Integer, primary_key = True),
-	Column('aeroportoPartenza', Integer, ForeignKey('aeroporti.id'), nullable=False),
+	Column('aeroportoPartenza', Integer, ForeignKey('aeroporti.id', ondelete="CASCADE"), nullable=False),
 	Column('oraPartenza', DateTime, nullable=False),
-	Column('aeroportoArrivo', Integer, ForeignKey('aeroporti.id'), nullable=False),
+	Column('aeroportoArrivo', Integer, ForeignKey('aeroporti.id', ondelete="CASCADE"), nullable=False),
 	Column('oraArrivo', DateTime, nullable=False),
-	Column('aereo', Integer, ForeignKey('aerei.id'), nullable=False),
+	Column('aereo', Integer, ForeignKey('aerei.id', ondelete="CASCADE"),nullable=False),
 	Column('prezzo', Float, nullable=False)
 )
 
@@ -49,8 +49,8 @@ bagagli = Table('bagagli', metadata,
 
 prenotazioni = Table('prenotazioni', metadata,
 	Column('id', Integer, primary_key = True),
-	Column('id_user', Integer, ForeignKey('users.id'), nullable=False),
-	Column('id_volo', Integer, ForeignKey('voli.id'), nullable=False),
+	Column('id_user', Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False),
+	Column('id_volo', Integer, ForeignKey('voli.id', ondelete="CASCADE"), nullable=False),
 	Column('prezzo_bagaglio', Integer, ForeignKey('bagagli.prezzo'), nullable=False),
 	Column('numeroPosto', Integer, nullable=False),
 	Column('valutazione', Integer, nullable=False, default=None),
@@ -66,6 +66,11 @@ try:
 	conn.execute("INSERT INTO users (username, email, image_file, password, role) VALUES ('Administrator', 'administrator@takeafly.com', 'default.jpg', %s, 'admin')",  bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
 except:
 	trans.rollback()
+
+try:
+	conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
+except:
+	rans.rollback()
 
 #conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (0, 'Standard - Borsa piccola ( + 0€ )')")
 #conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (20, 'Plus - Bagaglio a mano da 10 Kg e borsa piccola ( + 20€ )')")
