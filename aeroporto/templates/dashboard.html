@@ -8,41 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
 
-
-	<script type="text/javascript">
-		$(document).ready(function () {
-			$('select').selectize({
-				sortField: 'text'
-			});
-
-			$(".table tbody").on('click','#btndelFlight',function(){
-	            // get the current row
-	            var currentRow=$(this).closest("tr"); 
-	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
-	            var newURL = flask_util.url_for('delete_volo', {flight_id: col1});
-	            $('#formdelFlight').attr('action', newURL);
-	            
-	        });
-			$(".table tbody").on('click','#btndelAirport',function(){
-	            // get the current row
-	            var currentRow=$(this).closest("tr"); 
-	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
-	            var newURL = flask_util.url_for('delete_aeroporto', {aeroporto_id: col1});
-	            $('#formdelAirport').attr('action', newURL);
-	            
-	        });
-			$(".table tbody").on('click','#btndelPlane',function(){
-	            // get the current row
-	            var currentRow=$(this).closest("tr"); 
-	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
-	            var newURL = flask_util.url_for('delete_aereo', {aereo_id: col1});
-	            $('#formdelPlane').attr('action', newURL);
-	            
-	        });
-		});
-
-    </script>
-
 	<div class="content-section">
     	<h1>Dashboard</h1>
    		   		
@@ -296,6 +261,7 @@
 								<th scope="col">Data e Ora arrivo</th>
 								<th scope="col">Codice Aereo</th>
 								<th scope="col">Prezzo Volo</th>
+								<th scope="col">Prenotazioni</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -310,6 +276,8 @@
 								<td>{{ volo[4] }}</td><!-- DATA E ORA ARRIVO -->
 								<td>{{ volo[5] }}</td><!-- AEREO -->
 								<td>{{ volo[6] }}</td><!-- PREZZO -->
+								<td>{{ volo[7] }}</td><!-- NUMERO PRENOTAZIONI -->
+
 							</tr>
 							{% else %}
 							<tr>
@@ -320,6 +288,7 @@
 								<td>{{ volo[4] }}</td><!-- DATA E ORA ARRIVO -->
 								<td>{{ volo[5] }}</td><!-- AEREO -->
 								<td>{{ volo[6] }}</td><!-- PREZZO -->
+								<td>{{ volo[7] }}</td><!-- NUMERO PRENOTAZIONI -->
 								
 								<td><button id="btndelFlight" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalFlight">Elimina</button></td>
 								<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('configVolo', volo_id=volo[0]) }}'">Modifica</button></td>
@@ -340,7 +309,8 @@
 								</button>
 							</div>
 							<div class="modal-body">
-								<p>Sei sicuro di voler eliminare il volo?</p>
+								<div>Sei sicuro di voler eliminare il volo?</div>
+								<div id="prenVolo1"></div>
 							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
@@ -395,7 +365,9 @@
 								</button>
 							</div>
 							<div class="modal-body">
-								<p>Sei sicuro di voler eliminare l'aeroporto? tutti i voli collegati verranno cancellati</p>
+								<div>Sei sicuro di voler eliminare l'aeroporto?</div>
+								<div id="nVoli"></div>
+								<div id="prenVolo2"></div>
 							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
@@ -465,5 +437,54 @@
 			</div>
 		</div>
 	</div>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('select').selectize({
+				sortField: 'text'
+			});
+
+			$(".table tbody").on('click','#btndelFlight',function(){
+	            // get the current row
+	            var currentRow=$(this).closest("tr"); 
+	            var colId = parseInt(currentRow.find("td:eq(0)").text());
+	            var colPren = parseInt(currentRow.find("td:eq(7)").text());
+	            //$("#prenVolo1").css("color", "red");
+	            $('#prenVolo1').text("Andranno cancellate "+ colPren + " prenotazioni");
+	            var newURL = flask_util.url_for('delete_volo', {flight_id: colId});
+	            $('#formdelFlight').attr('action', newURL);
+	            
+	        });
+			$(".table tbody").on('click','#btndelAirport',function(){
+	            // get the current row
+	            var currentRow=$(this).closest("tr"); 
+	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
+	            var sum = 0;
+	            var count = 0;
+	            
+	            {%for volo in voli %}
+	            	{% if volo[1] == col1 or volo[3] == col1 %}
+	            		sum += volo[7];
+	            		count++;
+	            	{% endif %}
+	            {% endfor %}
+	           	
+	           	$('nVoli').text("Andranno eliminati "+ count + " voli")
+	            $('#prenVolo2').text("con un totale di "+ sum + " prenotazioni");
+
+	            var newURL = flask_util.url_for('delete_aeroporto', {aeroporto_id: col1});
+	            $('#formdelAirport').attr('action', newURL);
+	            
+	        });
+			$(".table tbody").on('click','#btndelPlane',function(){
+	            // get the current row
+	            var currentRow=$(this).closest("tr"); 
+	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
+	            var newURL = flask_util.url_for('delete_aereo', {aereo_id: col1});
+	            $('#formdelPlane').attr('action', newURL);
+	            
+	        });
+		});
+
+    </script>
 {% endblock content %}
 
