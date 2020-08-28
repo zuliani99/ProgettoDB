@@ -22,7 +22,7 @@ if res[0] == 0:
 		'Boeing 777', 60,
 		'Boeing 142', 100,
 		'Boeing 777', 100,
-		'Boeing 222', 20
+		'Boeing 222', 8
 	)
 
 res = conn.execute("SELECT COUNT(*) FROM aeroporti").fetchone()
