@@ -48,7 +48,7 @@ def dashboardhome():
 	conn = engine.connect()
 	aeroporti = conn.execute("SELECT id, nome, indirizzo FROM aeroporti").fetchall()
 	aerei = conn.execute("SELECT id, nome, numeroPosti FROM aerei").fetchall()
-	voli = conn.execute("SELECT * FROM voli JOIN pren_volo ON pren_volo.id = voli.id").fetchall()
+	voli = conn.execute("SELECT * FROM voli NATURAL JOIN pren_volo").fetchall()
 	conn.close()
 
 	opzioniAeroporti = [(str(choice[0]), str(choice[1]+", "+choice[2]+" #"+str(choice[0]))) for choice in aeroporti]

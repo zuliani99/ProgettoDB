@@ -19,15 +19,15 @@ users = Table('users', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('username', String(20), unique=True, nullable=False),
 	Column('email', String(120), unique=True, nullable=False),
-	Column('image_file', String(20), nullable=False, default='default.jpg'),
+	Column('image_file', String(20), nullable=False, server_default='default.jpg'),
 	Column('password', String(60), nullable=False),
-	Column('role', String(10), nullable=False, default='customer')
+	Column('role', String(10), nullable=False, server_default='customer')
 )
 
 aerei = Table('aerei', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('nome', String(20), nullable=False, default='Boeing 777'),
-	Column('numeroPosti', Integer, nullable=False, default=50),
+	Column('nome', String(20), nullable=False, server_default='Boeing 777'),
+	Column('numeroPosti', Integer, nullable=False, server_default=50),
 	CheckConstraint('numeroPosti > 0', name='c_nposti')
 )
 
@@ -46,7 +46,7 @@ voli = Table('voli', metadata,
 	Column('aereo', Integer, ForeignKey('aerei.id', ondelete="CASCADE"),nullable=False),
 	Column('prezzo', Float, nullable=False),
 	CheckConstraint('prezzo > 0', name='c_prezzo'),
-	CheckConstraint('dataOraArrivo > dataOraArrivo', name='c_date')
+	CheckConstraint('dataOraArrivo > dataOraPartenza', name='c_date')
 )
 
 bagagli = Table('bagagli', metadata,
@@ -60,8 +60,8 @@ prenotazioni = Table('prenotazioni', metadata,
 	Column('id_volo', Integer, ForeignKey('voli.id', ondelete="CASCADE"), nullable=False, primary_key = True),
 	Column('prezzo_bagaglio', Float, ForeignKey('bagagli.prezzo'), nullable=False),
 	Column('numeroPosto', Integer, nullable=False, primary_key = True),
-	Column('valutazione', Integer, nullable=False, default=None),
-	Column('critiche', String(200), nullable=True, default=None)
+	Column('valutazione', Integer, nullable=False, server_default=None),
+	Column('critiche', String(200), nullable=True, server_default=None)
 )
 
 Index('idpren_index', prenotazioni.c.id)

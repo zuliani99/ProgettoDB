@@ -291,7 +291,7 @@
 								<td>{{ volo[7] }}</td><!-- NUMERO PRENOTAZIONI -->
 								
 								<td><button id="btndelFlight" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalFlight">Elimina</button></td>
-								<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('configVolo', volo_id=volo[0]) }}'">Modifica</button></td>
+								<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('dashboard.configVolo', volo_id=volo[0]) }}'">Modifica</button></td>
 							</tr>
 							{% endif %}
 							{% endfor %}
@@ -347,7 +347,7 @@
 				                    <td>{{ aeroporto[2] }}</td>
 		                        
 		                        	<td><button id="btndelAirport" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalAiport">Elimina</button></td>
-		  							<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('configAeroporto', aeroporto_id=aeroporto[0]) }}'">Modifica</button></td>
+		  							<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('dashboard.configAeroporto', aeroporto_id=aeroporto[0]) }}'">Modifica</button></td>
 		                       		
 		                       	</tr>
 			            	{% endfor %}
@@ -405,7 +405,7 @@
 									<td>{{ aereo[2] }}</td>
 
 									<td><button id="btndelPlane" type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalPlane">Elimina</button></td>
-									<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('configAereo', aereo_id=aereo[0]) }}'">Modifica</button></td>
+									<td><button type="button" class="btn btn-warning" data-toggle="modal" onclick="window.location.href='{{ url_for('dashboard.configAereo', aereo_id=aereo[0]) }}'">Modifica</button></td>
 
 								</tr>
 							{% endfor %}

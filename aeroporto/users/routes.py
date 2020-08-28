@@ -21,7 +21,7 @@ def register():
 
 		conn = engine.connect()
 		#conn.execute(users.insert(),[{"username": form.username.data, "email": form.email.data, "password": hashed_password}])
-		conn.execute("INSERT INTO user (username, email, password) VALUES (%s, %s, %s,)", form.username.data, form.email.data, hashed_password)
+		conn.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", form.username.data, form.email.data, hashed_password)
 		conn.close()
 
 

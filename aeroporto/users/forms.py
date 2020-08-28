@@ -3,7 +3,7 @@ from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange, ValidationError
-from aeroporto.table import User
+from aeroporto.table import User, engine, select, users
 
 class RegistrationForm(FlaskForm):  
 	username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)]) 
