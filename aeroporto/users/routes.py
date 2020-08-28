@@ -14,7 +14,7 @@ users = Blueprint('users', __name__)
 @users.route("/register", methods=['GET', 'POST']) #metodo reguister, in cui dal file form.py inizializza un nuovo RegistrationForm(),
 def register():
 	if current_user.is_authenticated: 
-		return redirect(url_for('home'))
+		return redirect(url_for('main.home'))
 	form = RegistrationForm()
 	if form.validate_on_submit(): #controlla che tutte le regole del form siano state passate con successo
 		hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8') # criptiamo la password
@@ -26,14 +26,14 @@ def register():
 
 
 		flash('Il tuo account è stato creato! Ora puoi effettuare il log in', 'success') # messaggio di avvenuto sing up al blog
-		return redirect(url_for('login')) # redirect alla funzione home
+		return redirect(url_for('users.login')) # redirect alla funzione home
 	return render_template('register.html', title='Register', form=form)
 
 
 @users.route("/login", methods=['GET', 'POST'])  # metodo per la fase di login, in cui da form.py inizializza un nuovo loginform
 def login():
 	if current_user.is_authenticated: 
-		return redirect(url_for('home'))
+		return redirect(url_for('main.home'))
 	form = LoginForm()
 	if form.validate_on_submit(): #controlla che tutte le regole del form siano state passate con successo
 		
@@ -49,7 +49,7 @@ def login():
 				login_user(user, remember=form.remember.data) 
 				identity_changed.send(current_app._get_current_object(), identity=Identity(user.role))
 				next_page = request.args.get('next') # se prima di accedere ho provato ad enbtrarte nella pagina account mi salvo i paramentri del url
-				return redirect(next_page) if next_page else redirect(url_for('home')) # e ritorno a quella pagina altrimenti mi ritorna alla homepage
+				return redirect(next_page) if next_page else redirect(url_for('main.home')) # e ritorno a quella pagina altrimenti mi ritorna alla homepage
 	
 		flash('Login non riuscito. Controlla elìmail e password', 'danger') # messaggio di login incorretta
 	return render_template('login.html', title='Login', form=form)
@@ -59,7 +59,7 @@ def login():
 def logout(): # funzuione di logout
 	logout_user()
 	identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
-	return redirect(url_for('home')) # mi riporta alla homepage
+	return redirect(url_for('main.home')) # mi riporta alla homepage
 
 @users.route("/account", methods=['GET', 'POST'])
 @login_required(role='ANY') # necessario se vogliaomo ch la pagina sia visitabile solo se l'utente ha eseguito l'accesso alla piattaforma
@@ -87,7 +87,7 @@ def account(): # funzione di account
 		conn.close()
 
 		flash('Il tuo account è stato aggionato', 'success')
-		return redirect(url_for('account')) # non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
+		return redirect(url_for('users.account')) # non facciamo il render template, perchè altrienti il browser capirebbe che andremmo a fare un'altra post request
 	elif request.method == 'GET':
 		form.username.data = current_user.username
 		form.email.data = current_user.email
@@ -106,7 +106,7 @@ def user_fly():
 	conn.close()
 	time = datetime.now()
 	if form.validate_on_submit():
-		return redirect(url_for('review_fly', fly_id=form.idnascosto.data, val=form.valutazione.data, crit=form.critiche.data))
+		return redirect(url_for('fly.review_fly', fly_id=form.idnascosto.data, val=form.valutazione.data, crit=form.critiche.data))
 	return render_template('imieivoli.html', voli=voli, time=time, form=form)
 
 
@@ -114,7 +114,7 @@ def user_fly():
 @login_required()
 def reset_request():
 	if current_user.is_authenticated: 
-		return redirect(url_for('home'))
+		return redirect(url_for('main.home'))
 	form = RequestResetForm()
 	if form.validate_on_submit():
 
@@ -127,18 +127,18 @@ def reset_request():
 
 		send_reset_email(user)  # la inviamo
 		flash('Una mial ti è stata inviata con le istruzioni per resettare la password', 'info')
-		return redirect(url_for('login'))
+		return redirect(url_for('users.login'))
 	return render_template('reset_request.html', title='Reset Password', form=form)
 
 @users.route("/reset_password<token>", methods=['GET', 'POST'])
 @login_required()
 def reset_token(token):
 	if current_user.is_authenticated: 
-		return redirect(url_for('home'))
+		return redirect(url_for('main.home'))
 	user = User.verify_reset_token(token)
 	if user is None: # se il token non è valido
 		flash('TTOken invalido o scaduto', 'warning')
-		return redirect(url_for('reset_request'))
+		return redirect(url_for('users.reset_request'))
 	form = ResetPasswordForm() # altrimenti prendiamo la form per il reset della password
 	if form.validate_on_submit(): #controlla che tutte le regole del form siano state passate con successo
 		hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8') # criptiamo la password
@@ -151,5 +151,5 @@ def reset_token(token):
 		conn.close()
 
 		flash('La tua password  stata aggiornata! Ora puoi eseguire il log in', 'success')
-		return redirect(url_for('login')) # redirect alla funzione login
+		return redirect(url_for('users.login')) # redirect alla funzione login
 	return render_template('reset_token.html', title='Reset Password', form=form)

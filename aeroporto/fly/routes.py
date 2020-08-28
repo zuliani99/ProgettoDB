@@ -50,7 +50,7 @@ def gone(volopart):
 					#send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
 						
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
-					return redirect(url_for('user_fly'))
+					return redirect(url_for('users.user_fly'))
 				except:
 					trans.rollback()
 					flash("Posto da sedere appena acquistato, scegliene un altro", 'warning')
@@ -60,7 +60,7 @@ def gone(volopart):
 				flash("Devi essere un cliente acquistare il biglietto", 'warning')
 		else:
 			flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
-			return redirect(url_for('login'))
+			return redirect(url_for('users.login'))
 	return render_template('volo.html', title=volopart, volo=volo, form=formGone, free=available_sits)
 
 
@@ -112,7 +112,7 @@ def roundtrip(volopart, volorit):
 					
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni dei biglietti', 'success')
 					trans.commit()
-					return redirect(url_for('user_fly'))
+					return redirect(url_for('users.user_fly'))
 					#possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
 				##else:
 				except:
@@ -128,7 +128,7 @@ def roundtrip(volopart, volorit):
 				#return redirect(url_for('roundtrip'))
 		else:
 			flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
-			return redirect(url_for('login'))
+			return redirect(url_for('users.login'))
 	return render_template('voli.html', title=str(volopart) + " / " + str(volorit), volopart=andata, volorit=ritorno, form=formRoundtrip, freegone=available_groups_gone, freereturn=available_groups_return)
 
 
@@ -149,7 +149,7 @@ def delete_fly(fly_id):
 	conn.execute("DELETE FROM prenotazioni WHERE id = %s", fly_id)
 	flash('Il volo ' + str(pren[0]) + ' da te prenotato è stato cancellato con successo', 'success')
 	conn.close()
-	return redirect(url_for('user_fly'))
+	return redirect(url_for('users.user_fly'))
 
 
 
@@ -172,4 +172,4 @@ def review_fly(fly_id, val, crit):
 		flash("Recensione inserita con successo", "success")
 	else:
 		flash("Recensione già inserita con successo", "warning")
-	return redirect(url_for('user_fly'))
+	return redirect(url_for('users.user_fly'))

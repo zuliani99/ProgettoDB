@@ -130,7 +130,7 @@
             // get the current row
             var currentRow=$(this).closest("tr"); 
             var col1 = parseInt(currentRow.find("td:eq(0)").text());
-            var newURL = flask_util.url_for('delete_fly', {fly_id: col1});
+            var newURL = flask_util.url_for('fly.delete_fly', {fly_id: col1});
             $('#formdel').attr('action', newURL);
              
         });
