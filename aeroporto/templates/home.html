@@ -91,11 +91,11 @@
 				var coland = parseInt($(".activepart").find("td:eq(0)").text());
 				if (typeof attrandata !== typeof undefined && attrandata !== false) {
 					//questa è solo andata
-					var newURL = flask_util.url_for('volo', {volopart: coland});
+					var newURL = flask_util.url_for('gone', {volopart: coland});
 					window.location.href=newURL;
 				}else{
 					var colrit = parseInt($(".activerit").find("td:eq(0)").text());
-					var newURL = flask_util.url_for('voli', {volopart: coland, volorit: colrit});
+					var newURL = flask_util.url_for('roundtrip', {volopart: coland, volorit: colrit});
 
 					window.location.href=newURL;
 				}

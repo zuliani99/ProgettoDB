@@ -4,11 +4,15 @@ from flask_user import current_user, roles_required, UserManager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from sqlalchemy import *
 
-from aeroporto.routes import bcrypt
 from flask_mysqldb import MySQL
 
 
-engine = create_engine('mysql://admin:admin@localhost/MyDB')
+engine = create_engine('mysql://admin:admin@localhost')
+
+engine.execute("CREATE DATABASE IF NOT EXISTS takeafly")
+
+engine.execute("USE takeafly")
+
 metadata = MetaData()
 
 users = Table('users', metadata,
@@ -22,61 +26,49 @@ users = Table('users', metadata,
 
 aerei = Table('aerei', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('name', String(20), nullable=False, default='Boeing 777'),
-	Column('numeroPosti', Integer, nullable=False, default=50)
+	Column('nome', String(20), nullable=False, default='Boeing 777'),
+	Column('numeroPosti', Integer, nullable=False, default=50),
+	CheckConstraint('numeroPosti > 0', name='c_nposti')
 )
 
 aeroporti = Table('aeroporti', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('name', String(20), nullable = False),
+	Column('nome', String(30), nullable = False),
 	Column('indirizzo', String(60), nullable= False)
 )
 
 voli = Table('voli', metadata,
 	Column('id', Integer, primary_key = True),
 	Column('aeroportoPartenza', Integer, ForeignKey('aeroporti.id', ondelete="CASCADE"), nullable=False),
-	Column('oraPartenza', DateTime, nullable=False),
+	Column('dataOraPartenza', DateTime, nullable=False),
 	Column('aeroportoArrivo', Integer, ForeignKey('aeroporti.id', ondelete="CASCADE"), nullable=False),
-	Column('oraArrivo', DateTime, nullable=False),
+	Column('dataOraArrivo', DateTime, nullable=False),
 	Column('aereo', Integer, ForeignKey('aerei.id', ondelete="CASCADE"),nullable=False),
-	Column('prezzo', Float, nullable=False)
+	Column('prezzo', Float, nullable=False),
+	CheckConstraint('prezzo > 0', name='c_prezzo'),
+	CheckConstraint('dataOraArrivo > dataOraArrivo', name='c_date')
 )
 
 bagagli = Table('bagagli', metadata,
 	Column('prezzo', Float, primary_key=True),
-	Column('descrizione', String(50), nullable=False)
+	Column('descrizione', String(60), nullable=False)
 )
 
 prenotazioni = Table('prenotazioni', metadata,
-	Column('id', Integer, primary_key = True),
+	Column('id', Integer, index = True, autoincrement = True),
 	Column('id_user', Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False),
-	Column('id_volo', Integer, ForeignKey('voli.id', ondelete="CASCADE"), nullable=False),
-	Column('prezzo_bagaglio', Integer, ForeignKey('bagagli.prezzo'), nullable=False),
-	Column('numeroPosto', Integer, nullable=False),
+	Column('id_volo', Integer, ForeignKey('voli.id', ondelete="CASCADE"), nullable=False, primary_key = True),
+	Column('prezzo_bagaglio', Float, ForeignKey('bagagli.prezzo'), nullable=False),
+	Column('numeroPosto', Integer, nullable=False, primary_key = True),
 	Column('valutazione', Integer, nullable=False, default=None),
 	Column('critiche', String(200), nullable=True, default=None)
 )
 
+Index('idpren_index', prenotazioni.c.id)
+
 metadata.create_all(engine)
 
-
-conn = engine.connect()
-trans = conn.begin()
-try:
-	conn.execute("INSERT INTO users (username, email, image_file, password, role) VALUES ('Administrator', 'administrator@takeafly.com', 'default.jpg', %s, 'admin')",  bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
-except:
-	trans.rollback()
-
-try:
-	conn.execute("CREATE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
-except:
-	trans.rollback()
-
-#conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (0, 'Standard - Borsa piccola ( + 0€ )')")
-#conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (20, 'Plus - Bagaglio a mano da 10 Kg e borsa piccola ( + 20€ )')")
-#conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (40, 'Deluxe - Bagaglio a mano da 20Kg e borsa piccola ( + 40€ )')")
-
-conn.close()
+from aeroporto import insert
 
 class User(UserMixin):
     def __init__(self, id, username, email, image_file, password, role):
@@ -120,7 +112,8 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
 	conn = engine.connect()
-	s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
+	#s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
+	s = conn.execute("SELECT * FROM users WHERE id = %s", user_id).fetchone()
 	conn.close()
 	if s is None:
 		return None

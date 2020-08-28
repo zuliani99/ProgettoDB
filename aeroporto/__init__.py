@@ -9,7 +9,7 @@ from flask_util_js import FlaskUtilJs
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'    #chiave necessaria per l'applicazione
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin:admin@localhostMyDB'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin:admin@localhost'
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -29,11 +29,17 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_PORT'] = '3306'
 app.config['MYSQL_USER'] = 'admin'
 app.config['MYSQL_PASSWORD'] = 'admin'
-app.config['MYSQL_DB'] = 'MyDB'
+app.config['MYSQL_DB'] = 'takeafly'
 app.config['MYSQL_DATABASE_CHARSET'] = 'utf-8'
 
 mysql.init_app(app)
 
-from aeroporto import routes
-
+from aeroporto.users.routes import users
+from aeroporto.fly.routes import fly
+from aeroporto.main.routes import main
+from aeroporto.dashboard.routes import dashboard
+app.register_blueprint(users)
+app.register_blueprint(fly)
+app.register_blueprint(main)
+app.register_blueprint(dashboard)
 
