@@ -35,7 +35,7 @@ def gone(volopart):
 		if current_user.is_authenticated:
 			if load_user(current_user.id).get_urole() == "customer":
 				conn = engine.connect()
-				#print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volopart)+","+ formGone.postoAndata.data+","+ formGone.bagaglioAndata.data+")")
+				print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volopart)+","+ formGone.postoAndata.data+","+ formGone.bagaglioAndata.data+")")
 				trans = conn.begin()
 				try:
 					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)",

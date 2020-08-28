@@ -7,6 +7,7 @@ from sqlalchemy.sql import *
 from flask_principal import identity_changed, Identity, AnonymousIdentity
 from datetime import datetime, date, timedelta
 from aeroporto.users.utils import save_pictures, send_reset_email
+from aeroporto.fly.forms import AddReviw
 from aeroporto.main.utils import login_required
 
 users = Blueprint('users', __name__)
