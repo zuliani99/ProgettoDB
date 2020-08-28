@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% block content %}
+	<div class="content-section">
+    	<h1>Statistiche</h1>
+   		   		
+		<h1><br></h1>
+
+    	<h3>Passeggeri totali: {{totPasseggeri}}</h3>    	
+			  
+    	<div id="trattaMigliore">
+    		<!-- qui inserire la tratta con più passeggeri nell'ultimo mese -->
+    	</div>
+    	<div id="trattaPeggiore">
+    		<!-- qui inserire la tratta con meno passeggeri nell'ultimo mese-->
+    	</div>
+
+    	
+    	<ul class="nav nav-tabs" id="myTab" role="tablist">
+  			<li class="nav-item">
+    			<a class="nav-link active" id="aeroporti-tab" data-toggle="tab" href="#aeroporti" role="tab" aria-controls="aeroporti" aria-selected="true">Info aeroporti</a>
+  			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="voli-tab" data-toggle="tab" href="#voli" role="tab" aria-controls="voli" aria-selected="false">Info voli</a>
+			</li>
+		</ul>
+		<div class="tab-content" id="myTabContent">
+			<div class="tab-pane fade show active" id="aeroporti" role="tabpanel" aria-labelledby="aeroporti-tab">
+				<!--{{ flask_util_js.js }}-->
+				
+				<div class="content-section">
+					<div id="titleStatsAirport">
+						<h2 class="mt-5">Numero totale di passeggeri per ogni aeroporto </h2>
+					</div>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Nome aeroporto</th>
+								<th scope="col">Totale passeggeri sbarcati</th>
+								<th scope="col">Totale passeggeri imbarcati</th>	<!-- NOME LABEL DA CONTROLLARE -->
+								<!-- TODO METTERE IL RANGE -->
+							</tr>
+						</thead>
+						<tbody>
+							{% for a in aeroporti %}	<!-- Passare a parametro lista aeroporti con numero totale passeggeri in arrivo e in partenza -->
+								<tr>
+
+									<td>{{ a[0] }}</td><!-- AEROPORTO PARTENZA -->
+									<td>{{ a[1] }}</td><!-- PASSEGGERI TOTALI ARRIVO-->
+									<td>{{ a[1] }}</td><!-- PASSEGGERI TOTALI PARTENZA-->
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<!--
+			<div class="tab-pane fade" id="tratte" role="tabpanel" aria-labelledby="tratte-tab">
+				{{ flask_util_js.js }}
+		    	
+		    	<div class="content-section">
+		    		<div id="titleStatFlight">
+				        <h2 class="mt-5">Info tratte</h2>
+				          
+			    	</div>
+			        <table class="table table-hover">
+			            <thead>
+			                <tr>
+			                	
+			                	<th scope="col">Aeroporto partenza</th>
+			                    <th scope="col">Aeroporto arrivo</th>
+			                    <th scope="col">Passeggeri totali</th>
+
+			                </tr>
+			            </thead>
+			            <tbody>
+			            	{% for t in tratte %}			
+			            		<tr>
+				            		<td>{{ t[0] }}</td>	AEROPORTO PARTENZA 
+				                    <td>{{ t[1] }}</td> AEROPORTO ARRIVO
+				                    <td>{{ t[2] }}</td>	PASSEGGERI TOTALE 	
+		                       	</tr>
+			            	{% endfor %}
+			            </tbody>
+			        </table>
+		        </div>
+		        
+			</div>-->
+			<div class="tab-pane fade" id="voli" role="tabpanel" aria-labelledby="voli-tab">
+
+				<!--{{ flask_util_js.js }}-->
+
+				<div class="content-section">
+					<div id="titleStatsFlight">
+						<h2 class="mt-5">Info voli</h2>
+					</div>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+			                	<th scope="col">Aeroporto partenza</th>
+			                    <th scope="col">Aeroporto arrivo</th>
+			                    <th scope="col">Aereo</th>
+								<th scope="col">Percentuale carico volo</th>
+								<th scope="col">Valutazione media</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for v in voli %}			<!-- passare lista voli con aeroporto partena e arrivo (nome) + aereo (nome) +rapporto posti prenotati/ posti totale -->
+								<tr>
+									<td>{{ v[0] }}</td><!-- AEROPORTO PARTENZA (NOME)--> 
+									<td>{{ v[1] }}</td><!-- AEROPORTO ARRIVO (NOME)--> 
+									<td>{{ v[3] }}</td><!-- AEREO (NOME) --> 
+									<td>{{ v[4] }}</td><!-- PERCENTUALE CARICO --> 
+									<td>{{ v[5] }}</td><!-- MEDIA RECENSIONI --> 
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock content %}
+
