@@ -15,7 +15,7 @@ def delete_volo(volo_id):
 	if result:
 		flash('Il volo ' + str(volo_id) + ' è stato cancellato con successo', 'success')
 
-	return redirect(url_for('dashboard.dashboard'))
+	return redirect(url_for('dashboard.dashboardhome'))
 
 @dashboard.route("/delete_aeroporto<int:aeroporto_id>", methods=['GET', 'POST'])
 @login_required(role="admin")
@@ -26,7 +26,7 @@ def delete_aeroporto(aeroporto_id):
 	if result:
 		flash('l\'aeroporto ' + str(aeroporto_id) + ' è stato cancellato con successo', 'success')
 		
-	return redirect(url_for('dashboard.dashboard'))
+	return redirect(url_for('dashboard.dashboardhome'))
 
 @dashboard.route("/delete_aereo<int:aereo_id>", methods=['GET','POST'])
 @login_required(role="admin")
@@ -36,7 +36,7 @@ def delete_aereo(aereo_id):
 	if result:
 		flash('l \'aereo ' + str(aereo_id) + ' è stato cancellato con successo', 'success')
 	
-	return redirect(url_for('dashboard.dashboard'))
+	return redirect(url_for('dashboard.dashboardhome'))
 
 @dashboard.route("/dashboardhome", methods=['GET', 'POST'])
 @login_required(role="admin")
@@ -83,7 +83,7 @@ def dashboardhome():
 			conn.close()
 		   
 			flash('Aggiunta volo completata con successo :D', 'success')
-			return redirect('dashboard')
+			return redirect('dashboardhome')
 		else:
 			flash('Qualcosa nell\'inserimento del volo è andato storto :(', 'danger')
 	
@@ -98,7 +98,7 @@ def dashboardhome():
 			conn.close()
 
 			flash('Aggiunta aereo completata con successo :)', 'success')
-			return redirect('dashboard')
+			return redirect('dashboardhome')
 		else:
 			flash('Qualcosa nell\'inserimento dell\'aereo è andato storto :(', 'danger')
 	
@@ -111,7 +111,7 @@ def dashboardhome():
 			conn.close()
 
 			flash('Aggiunta aeroporto completata con successo :D', 'success')
-			return redirect('dashboard')
+			return redirect('dashboardhome')
 		else:
 			flash('Qualcosa nell\'inserimento dell\'aeroporto è andato storto :(', 'danger')
 
@@ -139,11 +139,13 @@ def configVolo(volo_id):
 	opzioniAerei = [(str(choice[0]), str(choice[1]+" #"+str(choice[0]))) for choice in aerei]
 	updateForm.aereo.choices = [('','')]  + opzioniAerei
 
+	updateForm.check = True
 	#Set the informations of the fly in each field 
 	if updateForm.validate_on_submit():
+		
 		conn = engine.connect()
 		
-		conn.execute("UPDATE voli SET aeroportoPartenza=%s, dataOraPartenza=%s,aeroportoArrivo=%s,dataOraArrivo=%s,aereo=%s,prezzo=%s WHERE id = %s", 
+		conn.execute("UPDATE voli SET aeroportoPartenza=%s, dataOraPartenza=%s, aeroportoArrivo=%s, dataOraArrivo=%s, aereo=%s, prezzo=%s WHERE id = %s", 
 			updateForm.aeroportoPartenza.data,
 			updateForm.timePartenza.data,
 			updateForm.aeroportoArrivo.data,
@@ -154,7 +156,7 @@ def configVolo(volo_id):
 		)
 		conn.close()
 		flash('Aggiornamento volo completato con successo :D', 'success')
-		return redirect('dashboard')
+		return redirect('dashboardhome')
 	elif request.method == 'GET':
 		updateForm.aeroportoPartenza.data = str(volo[1])
 		updateForm.timePartenza.data = volo[2]
@@ -183,7 +185,7 @@ def configAeroporto(aeroporto_id):
 		)
 		conn.close()
 		flash('Aggiornamento aeroporto completato con successo :D', 'success')
-		return redirect('dashboard')
+		return redirect('dashboardhome')
 	elif request.method == 'GET':
 		updateform.nome.data = aeroporto[1]
 		updateform.indirizzo.data = aeroporto[2]
@@ -209,7 +211,7 @@ def configAereo(aereo_id):
 		)
 		conn.close()
 		flash('Aggiornamento aereo completato con successo :D', 'success')
-		return redirect('dashboard')
+		return redirect('dashboardhome')
 	elif request.method == 'GET':
 		updateform.nome.data = aereo[1]
 		updateform.nPosti.data = aereo[2]

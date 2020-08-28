@@ -5,7 +5,7 @@
    		   		
 		<h1><br></h1>
 
-    	<h4>
+    	<div class="content-section">
     		Passeggeri totali {{totPasseggeri}} <br>
     		Ultimo mese 
     		{% if totPasseggeriMese < 100 %}
@@ -17,7 +17,7 @@
     		Guadagni totali €{{guadagniTot}}
     		<br>
     		Tratta con più guadagni: {{trattaGuadagniMax[0]}} -> {{trattaGuadagniMax[1]}}, guadagni: €{{trattaGuadagniMax[2]}}
-     	</h4>    	
+     	</div>    	
 			  
     	<div id="trattaMigliore">
     		<!-- qui inserire la tratta con più passeggeri nell'ultimo mese -->
@@ -41,7 +41,7 @@
 				
 				<div class="content-section">
 					<div id="titleStatsAirport">
-						<h2 class="mt-5">Numero totale di passeggeri per ogni aeroporto </h2>
+						<h2 class="mt-5">Info aeroporti </h2>
 					</div>
 					<table class="table table-hover">
 						<thead>
@@ -55,7 +55,6 @@
 						<tbody>
 							{% for a in aeroporti %}	<!-- Passare a parametro lista aeroporti con numero totale passeggeri in arrivo e in partenza -->
 								<tr>
-
 									<td>{{ a[0] }}</td><!-- AEROPORTO PARTENZA -->
 									<td>{{ a[1] }}</td><!-- PASSEGGERI TOTALI ARRIVO-->
 									<td>{{ a[1] }}</td><!-- PASSEGGERI TOTALI PARTENZA-->
@@ -112,6 +111,7 @@
 			                    <th scope="col">Aeroporto arrivo</th>
 			                    <th scope="col">Aereo</th>
 								<th scope="col">Percentuale carico volo</th>
+								<th scope="col">Valutazione Media</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -119,8 +119,9 @@
 								<tr>
 									<td>{{ v[0] }}</td><!-- AEROPORTO PARTENZA (NOME)--> 
 									<td>{{ v[1] }}</td><!-- AEROPORTO ARRIVO (NOME)--> 
-									<td>{{ v[3] }}</td><!-- AEREO (NOME) --> 
-									<td>{{ v[4] }}</td><!-- PERCENTUALE CARICO --> 
+									<td>{{ v[2] }}</td><!-- AEREO (NOME) --> 
+									<td>{{ v[3] }}</td><!-- PERCENTUALE CARICO --> 
+									<td>{{ v[4] }}</td><!-- VALUTAZIONE MEDIA--> 
 								</tr>
 							{% endfor %}
 						</tbody>

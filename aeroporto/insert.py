@@ -52,6 +52,8 @@ if res[0] == 0:
 conn.execute("CREATE OR REPLACE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
 conn.execute("ALTER TABLE prenotazioni CHANGE id id INT NOT NULL AUTO_INCREMENT")
 
+conn.execute("CREATE OR REPLACE VIEW guadagniTratte AS SELECT a1.nome AS aeroportoP, a2.nome AS aeroportoA, IFNULL(SUM(voli.prezzo)+SUM(p.prezzo_bagaglio),0) AS guadagniTot FROM aeroporti AS a1 JOIN voli on a1.id = voli.aeroportoPartenza LEFT JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id LEFT JOIN prenotazioni AS p ON voli.id = p.id_volo GROUP BY a1.nome, a2.nome ")
+
 res = conn.execute("SELECT COUNT(*) FROM bagagli").fetchone()
 if res[0] == 0:
 	conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (%s, %s), (%s, %s), (%s, %s)",

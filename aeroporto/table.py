@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from flask_user import current_user, roles_required, UserManager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from sqlalchemy import *
-
+from flask import abort
 from flask_mysqldb import MySQL
 
 

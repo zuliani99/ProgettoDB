@@ -449,6 +449,7 @@
 	            var colId = parseInt(currentRow.find("td:eq(0)").text());
 	            var colPren = parseInt(currentRow.find("td:eq(7)").text());
 	            //$("#prenVolo1").css("color", "red");
+	            
 	            $('#prenVolo1').text("Andranno cancellate "+ colPren + " prenotazioni");
 	            var newURL = flask_util.url_for('dashboard.delete_volo', {volo_id: colId});
 	            $('#formdelFlight').attr('action', newURL);
