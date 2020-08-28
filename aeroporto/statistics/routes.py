@@ -17,13 +17,23 @@ def statisticsHome():
 	conn = conn.execution_options(
     	isolation_level="READ UNCOMMITTED"
 	)
+
+	#non considerare quelli futuri
 	totPasseggeri = conn.execute("SELECT sum(pren) FROM pren_volo").fetchone()
+
 	totPasseggeri_mese = conn.execute("SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE YEAR(dataOraPartenza) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH) AND MONTH(dataOraPartenza) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)").fetchone()
 	
-	#infoAeroporti = conn.execute("SELECT nome, SUM(prenPartenza) ")
-
+	infoAeroporti = conn.execute(
+		"SELECT nomeA, partenze, arrivi "+
+		"FROM (SELECT a.nome as nomeA, IFNULL(SUM(pren_volo.pren), 0) AS partenze "+
+			  "FROM aeroporti AS a LEFT JOIN voli ON a.id = voli.aeroportoPartenza LEFT JOIN pren_volo ON voli.id = pren_volo.id "+
+			  "GROUP BY a.nome) AS t1,"+
+			  "(SELECT a.nome as nomeB, IFNULL(SUM(pren_volo.pren), 0)AS arrivi "+
+			  "FROM aeroporti AS a LEFT JOIN voli ON a.id = voli.aeroportoArrivo LEFT JOIN pren_volo ON voli.id = pren_volo.id "+
+			  "GROUP BY a.nome) AS t2 "+
+		"WHERE nomeA = nomeB").fetchall()
 	conn.close()
-	return render_template('statistiche.html', title='Statistiche', totPasseggeri = totPasseggeri[0], totPasseggeriMese = totPasseggeri_mese[0])
+	return render_template('statistiche.html', title='Statistiche', totPasseggeri = totPasseggeri[0], totPasseggeriMese = totPasseggeri_mese[0], aeroporti = infoAeroporti)
 
 """
 
