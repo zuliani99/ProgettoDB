@@ -26,8 +26,8 @@ users = Table('users', metadata,
 
 aerei = Table('aerei', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('nome', String(20), nullable=False, server_default='Boeing 777'),
-	Column('numeroPosti', Integer, nullable=False, server_default=50),
+	Column('nome', String(20), nullable=False, default='Boeing 777'),
+	Column('numeroPosti', Integer, nullable=False, default=50),
 	CheckConstraint('numeroPosti > 0', name='c_nposti')
 )
 
@@ -60,8 +60,8 @@ prenotazioni = Table('prenotazioni', metadata,
 	Column('id_volo', Integer, ForeignKey('voli.id', ondelete="CASCADE"), nullable=False, primary_key = True),
 	Column('prezzo_bagaglio', Float, ForeignKey('bagagli.prezzo'), nullable=False),
 	Column('numeroPosto', Integer, nullable=False, primary_key = True),
-	Column('valutazione', Integer, nullable=False, server_default=None),
-	Column('critiche', String(200), nullable=True, server_default=None)
+	Column('valutazione', Integer, nullable=False, default=None),
+	Column('critiche', String(200), nullable=True, default=None)
 )
 
 Index('idpren_index', prenotazioni.c.id)
