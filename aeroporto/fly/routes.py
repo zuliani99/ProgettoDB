@@ -156,9 +156,9 @@ def delete_fly(fly_id):
 
 
 
-@fly.route("/review_fly<int:fly_id>,<int:val>,<crit>", methods=['GET', 'POST'])
+@fly.route("/review_fly<int:fly_id>,<int:voto>,<crit>", methods=['GET', 'POST'])
 @login_required(role="customer")
-def review_fly(fly_id, val, crit):
+def review_fly(fly_id, voto, crit):
 	conn = engine.connect()
 	pren = conn.execute("SELECT * FROM prenotazioni WHERE id = %s",fly_id).fetchone()
 	if pren is None:
@@ -168,7 +168,7 @@ def review_fly(fly_id, val, crit):
 
 	val = conn.execute("SELECT valutazione FROM prenotazioni WHERE id = %s", fly_id).fetchone()
 	if val[0] is None: 
-		conn.execute("UPDATE prenotazioni SET valutazione = %s , critiche = %s WHERE id = %s", val, crit, fly_id)
+		conn.execute("UPDATE prenotazioni SET valutazione = %s , critiche = %s WHERE id = %s", voto, crit, fly_id)
 		conn.close()
 		flash("Recensione inserita con successo", "success")
 	else:

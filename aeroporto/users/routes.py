@@ -103,11 +103,12 @@ def account(): # funzione di account
 def user_fly():
 	form = AddReviw()
 	conn = engine.connect()
-	voli = conn.execute("SELECT p.id, p.id_volo, a1.nome, v.dataOraPartenza, a2.nome, v.dataOraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale, p.valutazione FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo JOIN aeroporti a1 ON v.aeroportoPartenza=a1.id JOIN aeroporti a2 ON v.aeroportoArrivo=a2.id WHERE p.id_user= %s ORDER BY v.dataOraPartenza", current_user.id).fetchall()
+	voli = conn.execute("SELECT p.id, p.id_volo, a1.nome, v.dataOraPartenza, a2.nome, v.dataOraArrivo, v.aereo, p.numeroPosto, v.prezzo AS pstandard,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, v.prezzo+p.prezzo_bagaglio AS ptotale, p.valutazione, p.critiche FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo JOIN aeroporti a1 ON v.aeroportoPartenza=a1.id JOIN aeroporti a2 ON v.aeroportoArrivo=a2.id WHERE p.id_user= %s ORDER BY v.dataOraPartenza", current_user.id).fetchall()
+	print(voli)
 	conn.close()
 	time = datetime.now()
 	if form.validate_on_submit():
-		return redirect(url_for('fly.review_fly', fly_id=form.idnascosto.data, val=form.valutazione.data, crit=form.critiche.data))
+		return redirect(url_for('fly.review_fly', fly_id=form.idnascosto.data, voto=form.valutazione.data, crit=form.critiche.data))
 	return render_template('imieivoli.html', voli=voli, time=time, form=form)
 
 
