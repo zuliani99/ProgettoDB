@@ -38,8 +38,10 @@ from aeroporto.users.routes import users
 from aeroporto.fly.routes import fly
 from aeroporto.main.routes import main
 from aeroporto.dashboard.routes import dashboard
+from aeroporto.statistics.routes import statistics
 app.register_blueprint(users)
 app.register_blueprint(fly)
 app.register_blueprint(main)
 app.register_blueprint(dashboard)
+app.register_blueprint(statistics)
 

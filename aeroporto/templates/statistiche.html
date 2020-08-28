@@ -5,7 +5,15 @@
    		   		
 		<h1><br></h1>
 
-    	<h3>Passeggeri totali: {{totPasseggeri}}</h3>    	
+    	<h3>
+    		Passeggeri totali {{totPasseggeri}} <br>
+    		Ultimo mese 
+    		{% if totPasseggeriMese < 100 %}
+    			{{totPasseggeriMese}} :( forse è meglio farsi pubblicità
+    		{% else %}
+    			{{totPasseggeriMese}} :) si punta alto!
+    		{% endif %}
+     	</h3>    	
 			  
     	<div id="trattaMigliore">
     		<!-- qui inserire la tratta con più passeggeri nell'ultimo mese -->
@@ -14,7 +22,7 @@
     		<!-- qui inserire la tratta con meno passeggeri nell'ultimo mese-->
     	</div>
 
-    	
+
     	<ul class="nav nav-tabs" id="myTab" role="tablist">
   			<li class="nav-item">
     			<a class="nav-link active" id="aeroporti-tab" data-toggle="tab" href="#aeroporti" role="tab" aria-controls="aeroporti" aria-selected="true">Info aeroporti</a>
