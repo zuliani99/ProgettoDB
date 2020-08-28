@@ -50,6 +50,7 @@ if res[0] == 0:
 		)
 
 conn.execute("CREATE OR REPLACE VIEW pren_volo AS SELECT v.id, count(p.id) AS pren FROM voli v LEFT JOIN prenotazioni p ON v.id = p.id_volo GROUP BY v.id")
+conn.execute("ALTER TABLE prenotazioni CHANGE id id INT NOT NULL AUTO_INCREMENT")
 
 res = conn.execute("SELECT COUNT(*) FROM bagagli").fetchone()
 if res[0] == 0:
