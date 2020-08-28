@@ -55,13 +55,13 @@ bagagli = Table('bagagli', metadata,
 )
 
 prenotazioni = Table('prenotazioni', metadata,
-	Column('id', Integer, index = True, autoincrement = True),
+	Column('id', Integer, autoincrement = True, index = True),
 	Column('id_user', Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False),
 	Column('id_volo', Integer, ForeignKey('voli.id', ondelete="CASCADE"), nullable=False, primary_key = True),
 	Column('prezzo_bagaglio', Float, ForeignKey('bagagli.prezzo'), nullable=False),
 	Column('numeroPosto', Integer, nullable=False, primary_key = True),
-	Column('valutazione', Integer, nullable=False, server_default=None),
-	Column('critiche', String(200), nullable=True, server_default=None)
+	Column('valutazione', Integer, nullable=False, default=None),
+	Column('critiche', String(200), nullable=False, default=None)
 )
 
 Index('idpren_index', prenotazioni.c.id)
