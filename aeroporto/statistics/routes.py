@@ -23,6 +23,8 @@ def statisticsHome():
 
 	totPasseggeri_mese = conn.execute("SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE YEAR(dataOraPartenza) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH) AND MONTH(dataOraPartenza) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)").fetchone()
 	
+	guadagniTotali = conn.execute("SELECT sum(prenotazioni.prezzo_bagaglio)+ sum(voli.prezzo) FROM prenotazioni JOIN voli ON prenotazioni.id_volo = voli.id").fetchone()
+
 	infoAeroporti = conn.execute(
 		"SELECT nomeA, partenze, arrivi "+
 		"FROM (SELECT a.nome as nomeA, IFNULL(SUM(pren_volo.pren), 0) AS partenze "+
@@ -32,8 +34,12 @@ def statisticsHome():
 			  "FROM aeroporti AS a LEFT JOIN voli ON a.id = voli.aeroportoArrivo LEFT JOIN pren_volo ON voli.id = pren_volo.id "+
 			  "GROUP BY a.nome) AS t2 "+
 		"WHERE nomeA = nomeB").fetchall()
+
+	trattaGuadagniMax = conn.execute("SELECT aeroportoP, aeroportoA, guadagniTot FROM guadagniTratte WHERE guadagniTot = (SELECT MAX(guadagniTot) FROM guadagniTratte)").fetchone()
+	#CREATE OR REPLACE VIEW guadagniTratte AS SELECT a1.nome AS aeroportoP, a2.nome AS aeroportoA, SUM(voli.prezzo)+SUM(p.prezzo_bagaglio) AS guadagniTot FROM aeroporti AS a1 JOIN voli on a1.id = voli.aeroportoPartenza JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id JOIN prenotazioni AS p ON voli.id = p.id_volo GROUP BY a1.nome, a2.nome
+
 	conn.close()
-	return render_template('statistiche.html', title='Statistiche', totPasseggeri = totPasseggeri[0], totPasseggeriMese = totPasseggeri_mese[0], aeroporti = infoAeroporti)
+	return render_template('statistiche.html', title='Statistiche', totPasseggeri = totPasseggeri[0], totPasseggeriMese = totPasseggeri_mese[0], aeroporti = infoAeroporti, guadagniTot = guadagniTotali[0], trattaGuadagniMax = trattaGuadagniMax)
 
 """
 

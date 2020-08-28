@@ -450,7 +450,7 @@
 	            var colPren = parseInt(currentRow.find("td:eq(7)").text());
 	            //$("#prenVolo1").css("color", "red");
 	            $('#prenVolo1').text("Andranno cancellate "+ colPren + " prenotazioni");
-	            var newURL = flask_util.url_for('dashboard.delete_volo', {flight_id: colId});
+	            var newURL = flask_util.url_for('dashboard.delete_volo', {volo_id: colId});
 	            $('#formdelFlight').attr('action', newURL);
 	            
 	        });
@@ -460,15 +460,18 @@
 	            var col1 = parseInt(currentRow.find("td:eq(0)").text());
 	            var sum = 0;
 	            var count = 0;
-	            
-	            {%for volo in voli %}
-	            	{% if volo[1] == col1 or volo[3] == col1 %}
-	            		sum += volo[7];
+	           	
+
+	            {% for volo in voli %}
+	            	var volo = [{{ volo[1] }}, {{ volo[3] }}, {{ volo[7] }}];
+	            	if (volo[0] == col1 || volo[1] == col1 ){
+	            		sum += volo[2];
 	            		count++;
-	            	{% endif %}
+	            		//console.log("nel for, col1="+col1+"volo[0]="+volo[0]+"volo[1]="+volo[1]+"volo[2")
+	            	}
 	            {% endfor %}
 	           	
-	           	$('nVoli').text("Andranno eliminati "+ count + " voli")
+	           	$('#nVoli').text("Andranno eliminati "+ count + " voli")
 	            $('#prenVolo2').text("con un totale di "+ sum + " prenotazioni");
 
 	            var newURL = flask_util.url_for('dashboard.delete_aeroporto', {aeroporto_id: col1});

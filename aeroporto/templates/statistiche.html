@@ -5,15 +5,19 @@
    		   		
 		<h1><br></h1>
 
-    	<h3>
+    	<h4>
     		Passeggeri totali {{totPasseggeri}} <br>
     		Ultimo mese 
     		{% if totPasseggeriMese < 100 %}
-    			{{totPasseggeriMese}} :( forse è meglio farsi pubblicità
+    			{{totPasseggeriMese}}, forse è meglio farsi pubblicità :(
     		{% else %}
-    			{{totPasseggeriMese}} :) si punta alto!
+    			{{totPasseggeriMese}}, si punta alto! :) 
     		{% endif %}
-     	</h3>    	
+    		<br>
+    		Guadagni totali €{{guadagniTot}}
+    		<br>
+    		Tratta con più guadagni: {{trattaGuadagniMax[0]}} -> {{trattaGuadagniMax[1]}}, guadagni: €{{trattaGuadagniMax[2]}}
+     	</h4>    	
 			  
     	<div id="trattaMigliore">
     		<!-- qui inserire la tratta con più passeggeri nell'ultimo mese -->
@@ -108,7 +112,6 @@
 			                    <th scope="col">Aeroporto arrivo</th>
 			                    <th scope="col">Aereo</th>
 								<th scope="col">Percentuale carico volo</th>
-								<th scope="col">Valutazione media</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -118,7 +121,6 @@
 									<td>{{ v[1] }}</td><!-- AEROPORTO ARRIVO (NOME)--> 
 									<td>{{ v[3] }}</td><!-- AEREO (NOME) --> 
 									<td>{{ v[4] }}</td><!-- PERCENTUALE CARICO --> 
-									<td>{{ v[5] }}</td><!-- MEDIA RECENSIONI --> 
 								</tr>
 							{% endfor %}
 						</tbody>
