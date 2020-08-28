@@ -1,8 +1,8 @@
-from Flask import Blueprint, render_template
+from flask import Blueprint, render_template
 from sqlalchemy.sql import *
 from aeroporto.table import engine
 from datetime import datetime
-from aeroporto.main.form import SearchFlyForm
+from aeroporto.main.forms import SearchFlyForm
 
 main = Blueprint('main', __name__)
 

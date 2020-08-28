@@ -1,5 +1,5 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint#import necessari per il funzionamento dell'applicazione
-from aeroporto.dashboard.forms import PlaneForm,  AirportForm, AddReviw, SearchFlyForm, FlightForm
+from aeroporto.dashboard.forms import PlaneForm, AirportForm, FlightForm
 from aeroporto.table import engine, voli, aerei, aeroporti, deleteElementByID
 from sqlalchemy.sql import *
 from datetime import datetime, timedelta
@@ -15,7 +15,7 @@ def delete_volo(volo_id):
 	if result:
 		flash('Il volo ' + str(volo_id) + ' è stato cancellato con successo', 'success')
 
-	return redirect(url_for('dashboard'))
+	return redirect(url_for('dashboard.dashboard'))
 
 @dashboard.route("/delete_aeroporto<int:aeroporto_id>", methods=['GET', 'POST'])
 @login_required(role="admin")
@@ -26,7 +26,7 @@ def delete_aeroporto(aeroporto_id):
 	if result:
 		flash('l\'aeroporto ' + str(aeroporto_id) + ' è stato cancellato con successo', 'success')
 		
-	return redirect(url_for('dashboard'))
+	return redirect(url_for('dashboard.dashboard'))
 
 @dashboard.route("/delete_aereo<int:aereo_id>", methods=['GET','POST'])
 @login_required(role="admin")
@@ -36,11 +36,11 @@ def delete_aereo(aereo_id):
 	if result:
 		flash('l \'aereo ' + str(aereo_id) + ' è stato cancellato con successo', 'success')
 	
-	return redirect(url_for('dashboard'))
+	return redirect(url_for('dashboard.dashboard'))
 
-@dashboard.route("/dashboard", methods=['GET', 'POST'])
+@dashboard.route("/dashboardhome", methods=['GET', 'POST'])
 @login_required(role="admin")
-def dashboard():
+def dashboardhome():
 	flightForm = FlightForm()
 	planeForm = PlaneForm()
 	airportForm = AirportForm()
@@ -116,6 +116,7 @@ def dashboard():
 			flash('Qualcosa nell\'inserimento dell\'aeroporto è andato storto :(', 'danger')
 
 	return render_template('dashboard.html', title='Dashboard', flightForm=flightForm, planeForm=planeForm, airportForm=airportForm, voli=voli, aeroporti=aeroporti, aerei=aerei,time=time)
+
 
 
 @dashboard.route("/dashboard_volo<volo_id>", methods=['GET', 'POST'])

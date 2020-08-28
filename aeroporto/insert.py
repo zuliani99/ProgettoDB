@@ -1,4 +1,4 @@
-from aeroporto.routes import bcrypt
+from aeroporto import bcrypt
 from sqlalchemy import *
 
 from aeroporto.table import engine
