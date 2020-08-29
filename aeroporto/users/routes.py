@@ -107,8 +107,11 @@ def user_fly():
 	print(voli)
 	conn.close()
 	time = datetime.now()
-	if form.validate_on_submit():
-		return redirect(url_for('fly.review_fly', fly_id=form.idnascosto.data, voto=form.valutazione.data, crit=form.critiche.data))
+	if form.is_submitted():
+		print("sumbmit")
+		if form.valutazione.data is not None and int(form.valutazione.data) >= 1 and int(form.valutazione.data)<= 5 and form.critiche.data is not None and form.idnascosto.data is not None:
+			print("validato")
+			return redirect(url_for('fly.review_fly', fly_id=form.idnascosto.data, voto=form.valutazione.data, crit=form.critiche.data))
 	return render_template('imieivoli.html', voli=voli, time=time, form=form)
 
 
