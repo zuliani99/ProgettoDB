@@ -69,17 +69,15 @@ prenotazioni = Table('prenotazioni', metadata,
 Index('idpren_index', prenotazioni.c.id)
 
 
-aumento = DDL("DELIMITER $$ CREATE TRIGGER aumento "
-"AFTER INSERT "
-"ON prenotazioni FOR EACH ROW "
+aumento = DDL(
+"CREATE DEFINER='admin'@'localhost' TRIGGER `aumento` "
+"AFTER INSERT ON `prenotazioni` "
+"FOR EACH ROW "
 "BEGIN "
-    "IF (SELECT (pv.pren*100)/a.numeroPosti "
-		"FROM voli v JOIN pren_volo pv ON v.id = pv.id JOIN aerei a on v.aereo = a.id "
-		"WHERE v.id = NEW.id_volo"
-		"GROUP BY v.id) > 50 THEN "
-        "UPDATE voli v SET v.prezzo = v.prezzo + 0.5 WHERE NEW.id_volo = v.id_volo; "
-    "END IF; "
-"END$$ DELIMITER ;"
+	"IF (SELECT (pv.pren*100)/a.numeroPosti FROM voli v JOIN pren_volo pv ON (v.id = pv.id AND v.id = NEW.id_volo) JOIN aerei a on v.aereo = a.id) > 50 "
+		"THEN UPDATE voli v SET v.prezzo = v.prezzo + 0.5 WHERE NEW.id_volo = v.id; "
+	"END IF; "
+"END"
 )
 
 event.listen(
@@ -89,15 +87,14 @@ event.listen(
 )
 
 
-
-controllo_voli = DDL("DELIMITER $$ CREATE TRIGGER controllo_voli "
-"BEFORE INSERT "
-"ON voli FOR EACH ROW "
+controllo_voli = DDL(
+"CREATE DEFINER='admin'@'localhost' TRIGGER controllo_voli "
+"BEFORE INSERT ON voli FOR EACH ROW "
 "BEGIN "
-    "IF (SELECT COUNT(*) FROM voli v1, voli v2 WHERE v1.id != v2.id AND v1.aeroportoPartenza=v2.aeroportoPartenza AND v1.dataOraPartenza= v2.dataOraPartenza) > 1 THEN "
+    "IF (SELECT COUNT(*) FROM voli v1 WHERE v1.id != NEW.id AND v1.aeroportoPartenza = NEW.aeroportoPartenza AND v1.dataOraPartenza = NEW.dataOraPartenza) >= 1 THEN "
         "SET NEW.dataOraPartenza = DATE_ADD(NEW.dataOraPartenza, INTERVAL 1 HOUR); "
     "END IF; "
-"END$$ DELIMITER ;"
+"END"
 )
 
 
@@ -106,6 +103,8 @@ event.listen(
     'after_create',
     controllo_voli.execute_if(dialect='mysql')
 )
+
+
 
 metadata.create_all(engine)
 
