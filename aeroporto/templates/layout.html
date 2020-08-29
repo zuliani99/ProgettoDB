@@ -39,9 +39,8 @@
 				 	<div class="collapse navbar-collapse" id="navbarToggle">
 						<div class="navbar-nav mr-auto">
 					  		{% if current_user.role == 'admin' %}
-					  			<a class="nav-item nav-link" href="{{ url_for('main.home') }}">Prenotazioni*</a>
-								<a class="nav-item nav-link" href="{{ url_for('dashboard.dashboardhome') }}">Dashboard</a>
-								<a class="nav-item nav-link" href="{{ url_for('statistics.statisticsHome') }}">Statistiche*</a>
+					  			<a class="nav-item nav-link" href="{{ url_for('dashboard.dashboardhome') }}">Dashboard</a>
+								<a class="nav-item nav-link" href="{{ url_for('statistics.statisticsHome') }}">Statistiche</a>
 					  		{% else %}
 					  			<a class="nav-item nav-link" href="{{ url_for('main.home') }}">Home</a> <!-- herf manda al nome della funzione e non prettamente al link della pagina in qursti casi -->
 					  		{% endif %}
