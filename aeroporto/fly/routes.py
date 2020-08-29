@@ -35,14 +35,16 @@ def gone(volopart):
 		if current_user.is_authenticated:
 			if load_user(current_user.id).get_urole() == "customer":
 				conn = engine.connect()
-				print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volopart)+","+ formGone.postoAndata.data+","+ formGone.bagaglioAndata.data+")")
+				#prova = float(volo[5])+float(formGone.bagaglioAndata.data)
+				#print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volopart)+","+ formGone.postoAndata.data+","+ formGone.bagaglioAndata.data+","+prova+")")
 				trans = conn.begin()
 				try:
-					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s)",
+					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio, prezzotot) VALUES (%s, %s, %s, %s, %s)",
 						current_user.id,
 						volopart,
 						formGone.postoAndata.data,
-						formGone.bagaglioAndata.data
+						formGone.bagaglioAndata.data,
+						float(volo[5])+float(formGone.bagaglioAndata.data)
 					)
 					trans.commit()
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formGone.bagaglioAndata.data).fetchone()
@@ -96,15 +98,17 @@ def roundtrip(volopart, volorit):
 				trans = conn.begin()
 				print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(andata[0])+","+ formRoundtrip.postoAndata.data+","+ formRoundtrip.bagaglioAndata.data+"), ("+str(current_user.id)+","+ str(ritorno[0])+","+ formRoundtrip.postoRitorno.data+","+ formRoundtrip.bagaglioRitorno.data+")")
 				try:
-					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES (%s, %s, %s, %s),(%s, %s, %s, %s)", 
+					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio, prezzotot) VALUES (%s, %s, %s, %s),(%s, %s, %s, %s)", 
 						current_user.id,
 						andata[0],
 						formRoundtrip.postoAndata.data,
 						formRoundtrip.bagaglioAndata.data,
+						float(andata[5])+float(formGone.bagaglioAndata.data),
 						current_user.id,
 						ritorno[0],
 						formRoundtrip.postoRitorno.data,
-						formRoundtrip.bagaglioRitorno.data
+						formRoundtrip.bagaglioRitorno.data,
+						float(ritorno[5])+float(formRoundtrip.bagaglioRitorno.data)
 					)
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioAndata.data).fetchone()
 					bagRitorno = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioRitorno.data).fetchone()

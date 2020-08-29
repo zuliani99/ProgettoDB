@@ -62,6 +62,7 @@ prenotazioni = Table('prenotazioni', metadata,
 	Column('id_volo', Integer, ForeignKey('voli.id', ondelete="CASCADE", onupdate="CASCADE"), nullable=False, primary_key = True),
 	Column('prezzo_bagaglio', Float, ForeignKey('bagagli.prezzo'), nullable=False),
 	Column('numeroPosto', Integer, nullable=False, primary_key = True),
+	Column('prezzotot', Float, nullable=False),
 	Column('valutazione', Integer, nullable=True),
 	Column('critiche', String(200), nullable=True)
 )

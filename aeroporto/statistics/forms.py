@@ -1,15 +1,15 @@
 from flask_wtf import FlaskForm
 from wtforms import DateField, SubmitField
-from wtforms.validators import ValidationError
+from wtforms.validators import ValidationError, Optional
 import datetime
 
 class StatisticsForm(FlaskForm):
-	dataA = DateField("Data inizio", validators=[])
-	dataB = DateField("Data fine", validators=[])
+	dataA = DateField("Data inizio", validators=[Optional()])
+	dataB = DateField("Data fine", validators=[Optional()])
 
-	submitFilter= SubmitField()
+	submitFilter = SubmitField("Cerca per data/e")
 
 	def validate_dataB(self, dataB):
-		if self.dataA.data > dataB.data:
-				raise ValidationError('La data di arrivo non può essere prima della data di partenza')
+		if self.dataA.data is not None and dataB.data is not None and self.dataA.data > dataB.data:
+			raise ValidationError('La data di arrivo non può essere prima della data di partenza')
 	

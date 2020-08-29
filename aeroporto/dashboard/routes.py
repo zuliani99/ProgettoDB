@@ -4,6 +4,7 @@ from aeroporto.table import engine, voli, aerei, aeroporti, deleteElementByID
 from sqlalchemy.sql import *
 from datetime import datetime, timedelta
 from aeroporto.main.utils import login_required
+from aeroporto.dashboard.utils import send_mail_deletefly
 
 dashboard = Blueprint('dashboard', __name__)
 
@@ -11,8 +12,17 @@ dashboard = Blueprint('dashboard', __name__)
 @login_required(role="admin")
 def delete_volo(volo_id):
 
+	conn = engine.connect()
+	usersmail = conn.execute("SELECT u.email FROM users u JOIN prenotazioni p on u.id = p.id_user WHERE p.id_volo = %s", volo_id).fetchall()
+	conn.close()
+
+	listmail = []
+	for mail in usersmail:
+		listmail.append(mail[0])
+
 	result = deleteElementByID("id", volo_id, "voli")
 	if result:
+		send_mail_deletefly(volo_id, listmail)
 		flash('Il volo ' + str(volo_id) + ' è stato cancellato con successo', 'success')
 
 	return redirect(url_for('dashboard.dashboardhome'))

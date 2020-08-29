@@ -27,6 +27,43 @@
     	</div>
 
 
+
+    	<form method="POST" action="" id="dateStat">
+	   		{{ fromStat.hidden_tag() }}
+	   		<fieldset class="form-group">
+    								<div class="form-group">
+										{{ fromStat.dataA.label(class="form-control-label") }}
+										{% if fromStat.dataA.errors %}
+											{{ fromStat.dataA(class="form-control is-invalid", type="date") }}
+											<div class="invalid-feedback">
+					                            {% for error in fromStat.dataA.errors %}
+					                                <span>{{ error }}</span>
+					                            {% endfor %}
+					                        </div>
+										{% else %}
+											{{ fromStat.dataA(class="form-control", type="date") }}
+										{% endif %}
+									</div>
+    									<div class="form-group">
+									        {{ fromStat.dataB.label(class="form-control-label") }}
+											{% if fromStat.dataB.errors %}
+												{{ fromStat.dataB(class="form-control is-invalid", type="date") }}
+												<div class="invalid-feedback">
+							                           {% for error in fromStat.dataB.errors %}
+							                               <span>{{ error }}</span>
+							                           {% endfor %}
+							                       </div>
+											{% else %}
+												{{ fromStat.dataB(class="form-control", type="date") }}
+											{% endif %}
+										</div>
+
+						</fieldset>
+						<div class="form-group">
+							{{ fromStat.submitFilter(class="btn btn-primary", form="dateStat", id="dateStatBtn") }}
+						</div>
+					</form>
+
     	<ul class="nav nav-tabs" id="myTab" role="tablist">
   			<li class="nav-item">
     			<a class="nav-link active" id="aeroporti-tab" data-toggle="tab" href="#aeroporti" role="tab" aria-controls="aeroporti" aria-selected="true">Info aeroporti</a>
