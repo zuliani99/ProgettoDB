@@ -10,61 +10,65 @@ class RegistrationForm(FlaskForm):
 	email = StringField('Email',validators=[DataRequired(), Email()]) 
 	password = PasswordField('Password', validators=[DataRequired()]) 
 	
-	confirm_password = PasswordField('Confirm Password',
+	confirm_password = PasswordField('Conferma Password',
 					validators=[DataRequired(), EqualTo('password')]) 
 
-	submit = SubmitField('Sign Up')
+	submit = SubmitField('Registrati')
 
 	def validate_username(self, username):
 		#user = User.query.filter_by(username=username.data).first()
 		conn = engine.connect()
-		u = conn.execute(select([users]).where(users.c.username == username.data))
+		#u = conn.execute(select([users]).where(users.c.username == username.data))
+		u = conn.execute("SELECT * FROM users WHERE username = %s", username.data)
 		user = u.fetchone()
 		conn.close()
 		if user: 
-			raise ValidationError('That username is taken. Please choose a different one.')
+			raise ValidationError('Username già in uso. Scegliene uno differente.')
 
 	def validate_email(self, email):
 		#user = User.query.filter_by(email=email.data).first()
 		conn = engine.connect()
-		u = conn.execute(select([users]).where(users.c.email == email.data))
+		#u = conn.execute(select([users]).where(users.c.email == email.data))
+		u = conn.execute("SELECT * FROM users WHERE email = %s", email.data)
 		user = u.fetchone()
 		conn.close()
 		if user:
-			raise ValidationError('That email is taken. Please choose a different one.')
+			raise ValidationError('Email già in uso. Scegliene una differente.')
 
 
 class LoginForm(FlaskForm): 
 	email = StringField('Email', validators=[DataRequired(), Email()])
 	password = PasswordField('Password', validators=[DataRequired()])
-	remember = BooleanField('Remember Me')
+	remember = BooleanField('Ricordami')
 	submit = SubmitField('Login')
 
 class UpdateAccountForm(FlaskForm):  
 	username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)]) 
 	email = StringField('Email', validators=[DataRequired(), Email()])
-	picture = FileField('Update Profile Pictures', validators=[FileAllowed(['jpg', 'png'])]) #accetta solo file con estensione jpg e png
+	picture = FileField('Aggiorna Foto Profilo', validators=[FileAllowed(['jpg', 'png'])]) #accetta solo file con estensione jpg e png
 	submit = SubmitField('Update')
 
 	def validate_username(self, username):
 		if username.data != current_user.username:
 			#user = User.query.filter_by(username=username.data).first() 
 			conn = engine.connect()
-			u = conn.execute(select([users]).where(users.c.username == username.data))
+			#u = conn.execute(select([users]).where(users.c.username == username.data))
+			u = conn.execute("SELECT * FROM users WHERE username = %s", username.data)
 			user = u.fetchone()
 			conn.close()
 			if user: 
-				raise ValidationError('That username is taken. Please choose a different one.')
+				raise ValidationError('Username già in uso. Scegliene uno differente.')
 
 	def validate_email(self, email):
 		if email.data != current_user.email:
 			#user = User.query.filter_by(email=email.data).first()
 			conn = engine.connect()
-			u = conn.execute(select([users]).where(users.c.email == email.data))
+			u = conn.execute("SELECT * FROM users WHERE email = %s", email.data)
+			#u = conn.execute(select([users]).where(users.c.email == email.data))
 			user = u.fetchone()
 			conn.close()
 			if user:
-				raise ValidationError('That email is taken. Please choose a different one.')
+				raise ValidationError('Email già in uso. Scegliene una differente.')
 
 class RequestResetForm(FlaskForm):
 	email = StringField('Email', validators=[DataRequired(), Email()])
@@ -73,13 +77,14 @@ class RequestResetForm(FlaskForm):
 	def validate_email(self, email):
 		#user = User.query.filter_by(email=email.data).first()
 		conn = engine.connect()
-		u = conn.execute(select([users]).where(users.c.email == email.data))
+		#u = conn.execute(select([users]).where(users.c.email == email.data))
+		u = conn.execute("SELECT * FROM users WHERE email = %s", email.data)
 		user = u.fetchone()
 		conn.close()
 		if user is None:
-			raise ValidationError('The is no account with that email. You must register first')
+			raise ValidationError("Non c'è nessun account con quella mail. Devi prima registrarti")
 
 class ResetPasswordForm(FlaskForm):
 	password = PasswordField('Password', validators=[DataRequired()]) 
-	confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')]) 
+	confirm_password = PasswordField('Conferma Password', validators=[DataRequired(), EqualTo('password')]) 
 	submit = SubmitField('Reset Password')

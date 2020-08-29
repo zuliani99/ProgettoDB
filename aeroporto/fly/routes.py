@@ -49,7 +49,7 @@ def gone(volopart):
 					trans.commit()
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formGone.bagaglioAndata.data).fetchone()
 
-					#send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
+					send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
 						
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
 					return redirect(url_for('users.user_fly'))
@@ -96,7 +96,7 @@ def roundtrip(volopart, volorit):
 			if load_user(current_user.id).get_urole() == "customer":
 				conn = engine.connect()
 				trans = conn.begin()
-				print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(andata[0])+","+ formRoundtrip.postoAndata.data+","+ formRoundtrip.bagaglioAndata.data+"), ("+str(current_user.id)+","+ str(ritorno[0])+","+ formRoundtrip.postoRitorno.data+","+ formRoundtrip.bagaglioRitorno.data+")")
+				#print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(andata[0])+","+ formRoundtrip.postoAndata.data+","+ formRoundtrip.bagaglioAndata.data+"), ("+str(current_user.id)+","+ str(ritorno[0])+","+ formRoundtrip.postoRitorno.data+","+ formRoundtrip.bagaglioRitorno.data+")")
 				try:
 					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio, prezzotot) VALUES (%s, %s, %s, %s),(%s, %s, %s, %s)", 
 						current_user.id,
@@ -113,7 +113,7 @@ def roundtrip(volopart, volorit):
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioAndata.data).fetchone()
 					bagRitorno = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioRitorno.data).fetchone()
 					
-					#send_ticket_notify(andata, formRoundtrip.postoAndata.data, bagAndata, ritorno, formRoundtrip.postoRitorno.data, bagRitorno)
+					send_ticket_notify(andata, formRoundtrip.postoAndata.data, bagAndata, ritorno, formRoundtrip.postoRitorno.data, bagRitorno)
 					
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni dei biglietti', 'success')
 					trans.commit()

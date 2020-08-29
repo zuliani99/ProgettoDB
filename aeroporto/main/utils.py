@@ -9,14 +9,14 @@ def login_required(role="ANY"):
 		def wrap(*args, **kwargs):
 			if not current_user.is_authenticated:
 				flash("Devi accedere al tuo account per visitare la pagina", 'danger')
-				return redirect(url_for('login'))
+				return redirect(url_for('users.login'))
 			urole = load_user(current_user.id).get_urole()
 			if ((urole != role) and (role == "admin")):
 				flash("Devi essere un admin per visualizzare la pagina", 'danger')
-				return redirect(url_for('home'))
+				return redirect(url_for('main.home'))
 			elif ((urole != role) and (role == "customer")):
 				flash("Devi essere un cliente per visualizzare la pagina", 'danger')
-				return redirect(url_for('home'))
+				return redirect(url_for('main.home'))
 			return fn(*args, **kwargs)
 		return wrap
 	return wrapper
