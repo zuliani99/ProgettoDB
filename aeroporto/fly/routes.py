@@ -121,20 +121,20 @@ def roundtrip(volopart, volorit):
 				trans = conn.begin()
 				try:
 					# Inserisco la prenotazione nella tabella prenotazioni con i suoli campi necessari
-					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio, prezzotot) VALUES (%s, %s, %s, %s),(%s, %s, %s, %s)", 
+					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio, prezzotot) VALUES (%s, %s, %s, %s, %s),(%s, %s, %s, %s, %s)", 
 						current_user.id,
 						andata[0],
 						formRoundtrip.postoAndata.data,
 						formRoundtrip.bagaglioAndata.data,
-						float(andata[5])+float(formGone.bagaglioAndata.data),
+						float(andata[5])+float(formRoundtrip.bagaglioAndata.data),
 						current_user.id,
 						ritorno[0],
 						formRoundtrip.postoRitorno.data,
 						formRoundtrip.bagaglioRitorno.data,
 						float(ritorno[5])+float(formRoundtrip.bagaglioRitorno.data)
 					)
-					# Committo la transazione
-					trans.commit()
+					
+					
 
 					# Restituisco la descrizione del bagaglio che l'utente ha scelto
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioAndata.data).fetchone()
@@ -142,7 +142,8 @@ def roundtrip(volopart, volorit):
 					
 					# Richiamo la funzione send_ticket_notify per invisare una mail all'utente di avvenuta prenotazione del tocket con tutte le informazioni necessarie per l'imbarco
 					send_ticket_notify(andata, formRoundtrip.postoAndata.data, bagAndata, ritorno, formRoundtrip.postoRitorno.data, bagRitorno)
-					
+					# Committo la transazione
+					trans.commit()
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni dei biglietti', 'success')
 					return redirect(url_for('users.user_fly'))
 				except:
