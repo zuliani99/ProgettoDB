@@ -3,20 +3,20 @@ from wtforms import SubmitField, BooleanField, SelectField, DateField
 from wtforms.validators import DataRequired, ValidationError, Optional
 import datetime
 
-
+# Form per la ricerca di un volo
 class SearchFlyForm(FlaskForm):
 	tomorrowDate = datetime.date.today() + datetime.timedelta(days=1)
 	
 	aeroportoPartenza = SelectField('Aeroporto di partenza',validators=[DataRequired()])
 	dataPartenza = DateField('Data partenza', default=tomorrowDate, validators=[DataRequired()])
 	aeroportoArrivo = SelectField('Aeroporto di arrivo', validators=[DataRequired()])
-	dataRitorno = DateField('Data ritrono', validators=[DataRequired()])
+	dataRitorno = DateField('Data ritrono', default=tomorrowDate + datetime.timedelta(days=1), validators=[Optional()])
 	checkAndata = BooleanField('Solo Andata', default="checked", validators=[Optional()])
 	checkAndataRitorno = BooleanField('Andata e Ritorno', validators=[Optional()])
 
 	searchFly = SubmitField('Cerca Volo')
-	#buyStep = SubmitField('Continua')
 
+	# Creazione di validators personalizzati 
 	def validate_dataPartenza(self, dataPartenza):
 		if dataPartenza.data < self.tomorrowDate:
 			raise ValidationError('La data deve essere futura')

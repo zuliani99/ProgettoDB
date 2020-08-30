@@ -6,16 +6,16 @@
 	</style>
     <script type="text/javascript">
 		function setdate(d){
-			if (d == 'None' || d == ''){
+			if (d == ''){
 				var date = new Date($("#dataPartenza").val());
 				var datenew = new Date(date);
 				var yr      = datenew.getFullYear();
 				var month   = datenew.getMonth() < 10 ? '0' + (datenew.getMonth()+1) : (datenew.getMonth()+1);
 				var day     = datenew.getDate()  < 10 ? '0' + (datenew.getDate()+1) : (datenew.getDate()+1);
 				var newDate = yr + '-' + month + '-' + day;
-				$("#dataRitorno").prop("value", newDate);
+				$("#dataRitorno").attr("value", newDate);
 			}else{
-				$("#dataRitorno").prop("value", d);
+				$("#dataRitorno").attr("value", d);
 			}
 
 
