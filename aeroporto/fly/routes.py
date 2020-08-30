@@ -16,16 +16,11 @@ fly = Blueprint('fly', __name__)
 def gone(volopart):
 	formGone = AddBookingGone()
 	conn = engine.connect()
-	#trans = conn.begin()
 
 	volo = conn.execute("SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volopart).fetchone()
-	#print("SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = "+volopart)
 	pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
-	conn.close()
 	
 	available_sits = get_available_sit(pocc,volo)
-
-	conn = engine.connect()
 
 	bagagli = conn.execute("SELECT prezzo, descrizione FROM bagagli").fetchall()
 	formGone.bagaglioAndata.choices = [(str(bag[0]), str(bag[1])) for bag in bagagli]
@@ -35,8 +30,6 @@ def gone(volopart):
 		if current_user.is_authenticated:
 			if load_user(current_user.id).get_urole() == "customer":
 				conn = engine.connect()
-				#prova = float(volo[5])+float(formGone.bagaglioAndata.data)
-				#print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(volopart)+","+ formGone.postoAndata.data+","+ formGone.bagaglioAndata.data+","+prova+")")
 				trans = conn.begin()
 				try:
 					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio, prezzotot) VALUES (%s, %s, %s, %s, %s)",
@@ -47,7 +40,7 @@ def gone(volopart):
 						float(volo[5])+float(formGone.bagaglioAndata.data)
 					)
 					trans.commit()
-					
+
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formGone.bagaglioAndata.data).fetchone()
 
 					send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
@@ -70,14 +63,11 @@ def gone(volopart):
 
 
 @fly.route("/roundtrip/<int:volopart>/<int:volorit>", methods=['GET', 'POST'])
-#@login_required(role="customer")
 def roundtrip(volopart, volorit):
 	formRoundtrip = AddBookingReturn()
 	conn = engine.connect()
-	#trans = conn.begin()
 
 	andata = conn.execute("SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volopart).fetchone()
-	#print("SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = "+volopart)
 	poccandata = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
 	
 	available_groups_gone = get_available_sit(poccandata, andata)
@@ -97,7 +87,6 @@ def roundtrip(volopart, volorit):
 			if load_user(current_user.id).get_urole() == "customer":
 				conn = engine.connect()
 				trans = conn.begin()
-				#print("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio) VALUES ( "+str(current_user.id)+","+ str(andata[0])+","+ formRoundtrip.postoAndata.data+","+ formRoundtrip.bagaglioAndata.data+"), ("+str(current_user.id)+","+ str(ritorno[0])+","+ formRoundtrip.postoRitorno.data+","+ formRoundtrip.bagaglioRitorno.data+")")
 				try:
 					conn.execute("INSERT INTO prenotazioni (id_user, id_volo, numeroPosto, prezzo_bagaglio, prezzotot) VALUES (%s, %s, %s, %s),(%s, %s, %s, %s)", 
 						current_user.id,
@@ -121,13 +110,7 @@ def roundtrip(volopart, volorit):
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni dei biglietti', 'success')
 					
 					return redirect(url_for('users.user_fly'))
-					#possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
-				##else:
 				except:
-					'''if verposto1 is not None:
-						flash("Posto da sedere per l'andata appena acquistato, scegliene un altro", 'warning')
-					if verposto2 is not None:
-						flash("Posto da sedere per il ritorno appena acquistato, scegliene un altro", 'warning')'''
 					flash("Attenzione posto da sedere per l'andata o rtitorno appena acquistato, sceglierne un altro", "warning")
 				finally:
 					conn.close()

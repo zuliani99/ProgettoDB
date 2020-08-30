@@ -16,9 +16,7 @@ class RegistrationForm(FlaskForm):
 	submit = SubmitField('Registrati')
 
 	def validate_username(self, username):
-		#user = User.query.filter_by(username=username.data).first()
 		conn = engine.connect()
-		#u = conn.execute(select([users]).where(users.c.username == username.data))
 		u = conn.execute("SELECT * FROM users WHERE username = %s", username.data)
 		user = u.fetchone()
 		conn.close()
@@ -26,9 +24,7 @@ class RegistrationForm(FlaskForm):
 			raise ValidationError('Username già in uso. Scegliene uno differente.')
 
 	def validate_email(self, email):
-		#user = User.query.filter_by(email=email.data).first()
 		conn = engine.connect()
-		#u = conn.execute(select([users]).where(users.c.email == email.data))
 		u = conn.execute("SELECT * FROM users WHERE email = %s", email.data)
 		user = u.fetchone()
 		conn.close()
@@ -50,9 +46,7 @@ class UpdateAccountForm(FlaskForm):
 
 	def validate_username(self, username):
 		if username.data != current_user.username:
-			#user = User.query.filter_by(username=username.data).first() 
 			conn = engine.connect()
-			#u = conn.execute(select([users]).where(users.c.username == username.data))
 			u = conn.execute("SELECT * FROM users WHERE username = %s", username.data)
 			user = u.fetchone()
 			conn.close()
@@ -61,10 +55,8 @@ class UpdateAccountForm(FlaskForm):
 
 	def validate_email(self, email):
 		if email.data != current_user.email:
-			#user = User.query.filter_by(email=email.data).first()
 			conn = engine.connect()
 			u = conn.execute("SELECT * FROM users WHERE email = %s", email.data)
-			#u = conn.execute(select([users]).where(users.c.email == email.data))
 			user = u.fetchone()
 			conn.close()
 			if user:
@@ -75,9 +67,7 @@ class RequestResetForm(FlaskForm):
 	submit = SubmitField('Request Password Reset')
 
 	def validate_email(self, email):
-		#user = User.query.filter_by(email=email.data).first()
 		conn = engine.connect()
-		#u = conn.execute(select([users]).where(users.c.email == email.data))
 		u = conn.execute("SELECT * FROM users WHERE email = %s", email.data)
 		user = u.fetchone()
 		conn.close()

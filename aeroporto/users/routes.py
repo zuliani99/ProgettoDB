@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request, current_app, Blueprint #import necessari per il funzionamento dell'applicazione
+from flask import render_template, url_for, flash, redirect, request, current_app, Blueprint, abort #import necessari per il funzionamento dell'applicazione
 from aeroporto import bcrypt
 from aeroporto.users.forms import RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm
 from flask_login import login_user, current_user, logout_user
@@ -158,3 +158,16 @@ def reset_token(token):
 		flash('La tua password  stata aggiornata! Ora puoi eseguire il log in', 'success')
 		return redirect(url_for('users.login')) # redirect alla funzione login
 	return render_template('reset_token.html', title='Reset Password', form=form)
+
+
+@users.route("/delete_account<int:id_account>", methods=['POST'])
+@login_required(role="customer")
+def delete_account(id_account):
+	if id_account != current_user.id:
+		return redirect(url_for("main.home"))
+	else:
+		conn = engine.connect()
+		conn.execute("DELETE FROM users WHERE id = %s", id_account)
+		conn.close()
+		flash("Account eliminato con successo", 'success')
+		return redirect(url_for('users.logout'))

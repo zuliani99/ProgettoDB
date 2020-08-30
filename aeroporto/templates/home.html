@@ -62,22 +62,17 @@
 			$("table tr").click(function() {
 				var attrandata = $("#andata").attr("checked");
 				var elemand = $("#select-part tr").hasClass("activepart");
-				console.log(elemand);
 				if(!elemand){
-					console.log("disabilitato1")
 					$("#continue").prop('disabled', true)
 				}else{
 					if (!(typeof attrandata !== typeof undefined && attrandata !== false)) {
 						var elemrit = $("#select-rit tr").hasClass("activerit");
 						if(!elemrit){
-							console.log("disabilitato2")
 							$("#continue").prop('disabled', true)
 						}else{
-							console.log("abilitato1")
 							$("#continue").prop('disabled', false)
 						}
 					}else{
-						console.log("abilitato2")
 						$("#continue").prop('disabled', false)
 					}
 				}
