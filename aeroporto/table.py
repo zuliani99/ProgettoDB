@@ -7,15 +7,13 @@ from sqlalchemy.event import listen
 from sqlalchemy import event
 from flask import abort
 from flask_mysqldb import MySQL
+from sqlalchemy_utils import create_database, database_exists
 
 #Creiamo l'astrazione del DBMS mySql
-engine = create_engine('mysql://admin:admin@localhost')
+engine = create_engine('mysql://admin:admin@localhost/takeafly')
+if not database_exists(engine.url):
+    create_database(engine.url)
 
-#Se non è già stato creato crea il database takeafly
-engine.execute("CREATE DATABASE IF NOT EXISTS takeafly")
-
-#Seleziona il database appena creato
-engine.execute("USE takeafly")
 
 #oggetto contenente che rappresenta l'astrazione dello schema relazionale, contenente tutte le relazioni al suo interno
 metadata = MetaData()
@@ -156,7 +154,7 @@ class User(UserMixin):
 def load_user(user_id):
 	conn = engine.connect()
 	#s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
-	s = conn.execute("SELECT * FROM users WHERE id = %s", user_id).fetchone()
+	s = conn.execute("SELECT * FROM takeafly.users WHERE id = %s", user_id).fetchone()
 	conn.close()
 	if s is None:
 		return None

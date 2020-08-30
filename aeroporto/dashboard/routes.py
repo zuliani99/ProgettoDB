@@ -34,7 +34,8 @@ def delete_volo(volo_id):
 			trans.commit()										#Esegue la commit confermando le azioni all'interno della transazione
 			flash('Il volo ' + str(volo_id) + ' è stato cancellato con successo', 'success')
 	except:
-		trans.rollback()										#Se qualcosa è andato storto la rollback ripristina lo stato precedente della tabella
+		trans.rollback()	
+		raise									#Se qualcosa è andato storto la rollback ripristina lo stato precedente della tabella
 		flash('Il volo NON ' + str(volo_id) + ' è stato cancellato', 'danger')
 	finally:
 		conn.close()											#In qualunque caso chiude la connessione
