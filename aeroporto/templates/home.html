@@ -6,19 +6,21 @@
 	</style>
     <script type="text/javascript">
 		function setdate(d){
-			if (d == ''){
+			console.log(d);
+			if (d == 'None' || d == ''){
+				console.log("cambio");
 				var date = new Date($("#dataPartenza").val());
 				var datenew = new Date(date);
+				datenew.setDate(datenew.getDate() + 1);
 				var yr      = datenew.getFullYear();
-				var month   = datenew.getMonth() < 10 ? '0' + (datenew.getMonth()+1) : (datenew.getMonth()+1);
-				var day     = datenew.getDate()  < 10 ? '0' + (datenew.getDate()+1) : (datenew.getDate()+1);
+				var month   = datenew.getMonth()+1 < 10 ? '0' + (datenew.getMonth()+1) : (datenew.getMonth()+1);
+				var day     = datenew.getDate()  < 10 ? '0' + (datenew.getDate()) : (datenew.getDate());
 				var newDate = yr + '-' + month + '-' + day;
-				$("#dataRitorno").attr("value", newDate);
+				console.log(newDate);
+				$("#dataRitorno").prop("value",newDate);
 			}else{
-				$("#dataRitorno").attr("value", d);
+				$("#dataRitorno").prop("value", d);
 			}
-
-
 		}
 
     	$(document).ready(function () {
