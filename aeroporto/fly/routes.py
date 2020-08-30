@@ -12,7 +12,6 @@ fly = Blueprint('fly', __name__)
 
 
 @fly.route("/gone<int:volopart>", methods=['GET', 'POST'])
-#@login_required(role="customer")
 def gone(volopart):
 	formGone = AddBookingGone()
 	conn = engine.connect()
@@ -116,7 +115,6 @@ def roundtrip(volopart, volorit):
 					conn.close()
 			else:
 				flash("Devi essere un cliente acquistare il biglietto", 'warning')
-				#return redirect(url_for('roundtrip'))
 		else:
 			flash("Devi accedere al tuo account per acquistare il biglietto", 'danger')
 			return redirect(url_for('users.login'))

@@ -116,7 +116,6 @@ def user_fly():
 
 
 @users.route("/reset_password", methods=['GET', 'POST']) #route per inserire la mail per il recuper della password
-@login_required()
 def reset_request():
 	if current_user.is_authenticated: 
 		return redirect(url_for('main.home'))
@@ -128,15 +127,14 @@ def reset_request():
 		rs = conn.execute("SELECT * FROM users WHERE email = %s", form.email.data)
 		u = rs.fetchone()
 		conn.close()
-		user = User(u.id, u.nome, u.email, u.image_file, u.password, u.role)
+		user = User(u.id, u.username, u.email, u.image_file, u.password, u.role)
 
 		send_reset_email(user)  # la inviamo
-		flash('Una mial ti è stata inviata con le istruzioni per resettare la password', 'info')
+		flash('Una mail ti è stata inviata con le istruzioni per resettare la password', 'info')
 		return redirect(url_for('users.login'))
 	return render_template('reset_request.html', title='Reset Password', form=form)
 
 @users.route("/reset_password<token>", methods=['GET', 'POST'])
-@login_required()
 def reset_token(token):
 	if current_user.is_authenticated: 
 		return redirect(url_for('main.home'))
