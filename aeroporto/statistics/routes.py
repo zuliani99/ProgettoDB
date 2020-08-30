@@ -14,17 +14,21 @@ def statisticsHome():
 
 	conn = engine.connect()
 
+	#Read uncommitted non avendo necessità di leggere i dati precisi per le statistiche
 	conn = conn.execution_options(
     	isolation_level="READ UNCOMMITTED"
 	)
 
-	#non considerare quelli futuri
+	#Numero totale di passeggeri
 	totPasseggeri = conn.execute("SELECT sum(pren) FROM pren_volo").fetchone()
 
+	#Passeggeri totali nell'ultimo mese
 	totPasseggeri_mese = conn.execute("SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE YEAR(dataOraPartenza) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH) AND MONTH(dataOraPartenza) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)").fetchone()
 	
+	#Guadagni totali calcolati sulla somma del prezzo delle prenotazioni
 	guadagniTotali = conn.execute("SELECT IFNULL(sum(prenotazioni.prezzotot),0) FROM prenotazioni").fetchone()
 
+	#Ritorna la lista di aeroporti con nome e il numero totale di passeggeri arrivati e in partenza
 	infoAeroporti = conn.execute(
 		"SELECT nomeA, partenze, arrivi "+
 		"FROM (SELECT a.nome as nomeA, IFNULL(SUM(pren_volo.pren), 0) AS partenze "+
@@ -35,8 +39,9 @@ def statisticsHome():
 					"GROUP BY a.nome) AS t2 "+
 		"WHERE nomeA = nomeB").fetchall()
 
+	#Ritorna la tratta del volo con il rapporto fra il numero di prenotazioni e posti totali e la media delle valutazioni (0 se non ci sono valutazioni) 
 	infoVoli = conn.execute(
-		"SELECT a1.nome, a2.nome, aerei.nome, pren_volo.pren/aerei.numeroPosti AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
+		"SELECT a1.nome, a2.nome, aerei.nome, (pren_volo.pren/aerei.numeroPosti)*100 AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
 		"FROM voli JOIN aeroporti AS a1 on voli.aeroportoPartenza = a1.id "+
 						"JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id "+
 						"JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
@@ -48,6 +53,7 @@ def statisticsHome():
 		dataDa = statisticsForm.dataA.data
 		dataA = statisticsForm.dataB.data
 
+		#Ha inserito un filtro con dataInizio e dataFine per il calcolo delle informazioni
 		if dataDa is not None and dataA is not None:
 			infoAeroporti = conn.execute(
 				"SELECT nomeA, partenze, arrivi "+
@@ -62,7 +68,7 @@ def statisticsHome():
 				"WHERE nomeA = nomeB", dataDa, dataA, dataDa, dataA).fetchall()
 
 			infoVoli = conn.execute(
-				"SELECT a1.nome, a2.nome, aerei.nome, pren_volo.pren/aerei.numeroPosti AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
+				"SELECT a1.nome, a2.nome, aerei.nome, (pren_volo.pren/aerei.numeroPosti)*100 AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
 				"FROM voli JOIN aeroporti AS a1 on voli.aeroportoPartenza = a1.id "+
 						  "JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id "+
 						  "JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
@@ -70,6 +76,7 @@ def statisticsHome():
 				"WHERE voli.dataOraPartenza >= %s AND voli.dataOraArrivo <= %s"+
 				"GROUP BY voli.id", dataDa, dataA).fetchall()
 
+		#Ha inserito solo la data fine, quindi calcola le informazioni sulle tuple con data precendente a quella
 		elif dataDa is None and dataA is not None:
 			infoAeroporti = conn.execute(
 				"SELECT nomeA, partenze, arrivi "+
@@ -84,13 +91,15 @@ def statisticsHome():
 				"WHERE nomeA = nomeB", dataA, dataA).fetchall()
 
 			infoVoli = conn.execute(
-				"SELECT a1.nome, a2.nome, aerei.nome, pren_volo.pren/aerei.numeroPosti AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
+				"SELECT a1.nome, a2.nome, aerei.nome, (pren_volo.pren/aerei.numeroPosti)*100 AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
 				"FROM voli JOIN aeroporti AS a1 on voli.aeroportoPartenza = a1.id "+
 						  "JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id "+
 						  "JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
 						  "LEFT JOIN prenotazioni on voli.id = prenotazioni.id_volo "+
 				"WHERE voli.dataOraArrivo<= %s"+
 				"GROUP BY voli.id", dataA).fetchall()
+
+		#Ha inserito solo la data fine, quindi calcola le informazioni su tutte le tuple con data successiva a quella
 		elif dataDa is not None and dataA is None:
 			infoAeroporti = conn.execute(
 				"SELECT nomeA, partenze, arrivi "+
@@ -105,7 +114,7 @@ def statisticsHome():
 				"WHERE nomeA = nomeB", dataDa, dataDa).fetchall()
 
 			infoVoli = conn.execute(
-				"SELECT a1.nome, a2.nome, aerei.nome, pren_volo.pren/aerei.numeroPosti AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
+				"SELECT a1.nome, a2.nome, aerei.nome, (pren_volo.pren/aerei.numeroPosti)*100 AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
 				"FROM voli JOIN aeroporti AS a1 on voli.aeroportoPartenza = a1.id "+
 						  "JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id "+
 						  "JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
@@ -113,6 +122,7 @@ def statisticsHome():
 				"WHERE voli.dataOraPartenza >= %s"+
 				"GROUP BY voli.id ",dataDa).fetchall()
 
+		#Non ha inserito alcun filtro quindi calcola le informazioni su tutte le tuple
 		else:
 			infoAeroporti = conn.execute(
 				"SELECT nomeA, partenze, arrivi "+
@@ -125,15 +135,15 @@ def statisticsHome():
 				"WHERE nomeA = nomeB").fetchall()
 
 			infoVoli = conn.execute(
-				"SELECT a1.nome, a2.nome, aerei.nome, pren_volo.pren/aerei.numeroPosti AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
+				"SELECT a1.nome, a2.nome, aerei.nome, (pren_volo.pren/aerei.numeroPosti)*100 AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione),0) AS valutazioneMedia, voli.dataOraArrivo "+
 				"FROM voli JOIN aeroporti AS a1 on voli.aeroportoPartenza = a1.id "+
 						  "JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id "+
 						  "JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
 						  "LEFT JOIN prenotazioni on voli.id = prenotazioni.id_volo "+
 				"GROUP BY voli.id").fetchall()
 
+	#Calcola la tratta (partenza, arrivo) con il guadagno massimo 
 	trattaGuadagniMax = conn.execute("SELECT IFNULL(aeroportoP, 'None'), IFNULL(aeroportoA, 'None'), IFNULL(guadagniTot,0) FROM guadagniTratte WHERE guadagniTot = (SELECT MAX(guadagniTot) FROM guadagniTratte)").fetchone()
-	#CREATE OR REPLACE VIEW guadagniTratte AS SELECT a1.nome AS aeroportoP, a2.nome AS aeroportoA, SUM(voli.prezzo)+SUM(p.prezzo_bagaglio) AS guadagniTot FROM aeroporti AS a1 JOIN voli on a1.id = voli.aeroportoPartenza JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id JOIN prenotazioni AS p ON voli.id = p.id_volo GROUP BY a1.nome, a2.nome
 
 	conn.close()
 	return render_template('statistiche.html', title='Statistiche', fromStat = statisticsForm, totPasseggeri = totPasseggeri[0], totPasseggeriMese = totPasseggeri_mese[0], aeroporti = infoAeroporti, guadagniTot = guadagniTotali[0], trattaGuadagniMax = trattaGuadagniMax, voli=infoVoli)

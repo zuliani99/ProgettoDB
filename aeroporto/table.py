@@ -8,13 +8,16 @@ from sqlalchemy import event
 from flask import abort
 from flask_mysqldb import MySQL
 
-
+#Creiamo l'astrazione del DBMS mySql
 engine = create_engine('mysql://admin:admin@localhost')
 
+#Se non è già stato creato crea il database takeafly
 engine.execute("CREATE DATABASE IF NOT EXISTS takeafly")
 
+#Seleziona il database appena creato
 engine.execute("USE takeafly")
 
+#oggetto contenente che rappresenta l'astrazione dello schema relazionale, contenente tutte le relazioni al suo interno
 metadata = MetaData()
 
 users = Table('users', metadata,
@@ -67,9 +70,10 @@ prenotazioni = Table('prenotazioni', metadata,
 	Column('critiche', String(200), nullable=True)
 )
 
+#Mette un indice per la colonna id
 Index('idpren_index', prenotazioni.c.id)
 
-
+#Definizione trigger per l'aumento del prezzo quando un volo supera il 50% della capienza
 aumento = DDL(
 "CREATE DEFINER='admin'@'localhost' TRIGGER `aumento` "
 "AFTER INSERT ON `prenotazioni` "
@@ -87,7 +91,7 @@ event.listen(
     aumento.execute_if(dialect='mysql')
 )
 
-
+#Definizione trigger che incrementa l'ora di partenza di un volo quando viene inserito con una data di partenza uguale ad un altro volo per lo stesso aeroporto
 controllo_voli = DDL(
 "CREATE DEFINER='admin'@'localhost' TRIGGER controllo_voli "
 "BEFORE INSERT ON voli FOR EACH ROW "
@@ -98,15 +102,13 @@ controllo_voli = DDL(
 "END"
 )
 
-
 event.listen(
     voli,
     'after_create',
     controllo_voli.execute_if(dialect='mysql')
 )
 
-
-
+#Crea tutti gli elementi appena definiti compresi vincoli e chiavi esterne 
 metadata.create_all(engine)
 
 from aeroporto import insert
@@ -160,14 +162,14 @@ def load_user(user_id):
 		return None
 	return User(s.id, s.username, s.email, s.image_file, s.password, s.role)
 
-
+#Elimina un elemento passando come parametro il nome dell'attributo id, il valore, e il nome della tabella
 def deleteElementByID(nameAttribute, idValue, nameTable):
 	query = "SELECT * FROM "+nameTable+" WHERE "+nameAttribute+" = %s"
 	conn = engine.connect()
 	f = conn.execute(query, idValue).fetchone()
-	if f is None:
+	if f is None:		#Se true non esiste una tupla con quell'id per quel attributo in quella tabella
 		conn.close()
-		abort(404)
+		abort(404)		#Error 404 not found
 		return False
 	query = "DELETE FROM "+nameTable+" WHERE "+nameAttribute+" = %s"
 	conn.execute(query, idValue)

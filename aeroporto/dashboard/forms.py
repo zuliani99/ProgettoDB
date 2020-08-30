@@ -39,28 +39,28 @@ class FlightForm(FlaskForm):
 	submitFlight = SubmitField()
 
 	def validate_timeArrivo(self, timeArrivo):
-		if timeArrivo.data is None and self.check: 
+		if timeArrivo.data is None and self.check: #Valore non valido se non è inserito e il check è true (modifica)
 			raise ValidationError('This field is required')
-		elif timeArrivo.data is not None and self.timePartenza.data is not None and timeArrivo.data < self.timePartenza.data:
+		elif timeArrivo.data is not None and self.timePartenza.data is not None and timeArrivo.data < self.timePartenza.data: #Controlla che la data di arrivo sia successiva a quella di partenza
 				raise ValidationError('La data di arrivo non può essere prima della data di partenza')
 
-	def validate_timePartenza(self, timePartenza):
+	def validate_timePartenza(self, timePartenza):	#Valore non valido se non è inserito e il check è true (modifica)
 		if timePartenza.data is None and self.check: 
 			raise ValidationError('This field is required')	
-		elif (timePartenza.data is not None and timePartenza.data.date() < self.tomorrowDate):
+		elif (timePartenza.data is not None and timePartenza.data.date() < self.tomorrowDate):	#Un volo deve essere inserito o modificato almeno un giorno prima della partenza
 			raise ValidationError('La data di partenza non può essere prima di domani')
 
-	def validate_dataPartenza(self, dataPartenza): 
+	def validate_dataPartenza(self, dataPartenza): #Valore non valido se non è inserito e il check è false (inserimento)
 		if dataPartenza.data is None and not self.check:
 			raise ValidationError('This field is required')
 		elif(dataPartenza.data < self.tomorrowDate):
 			raise ValidationError('La data di partenza non può essere prima di domani')
 
-	def validate_oraPartenza(self, oraPartenza):
+	def validate_oraPartenza(self, oraPartenza):	#Valore non valido se non è inserito e il check è false (inserimento)
 		if(oraPartenza.data is None and not self.check):
 			raise ValidationError('This field is required')
 			
-	def validate_oraArrivo(self, oraArrivo):
+	def validate_oraArrivo(self, oraArrivo):		#Valore non valido se non è inserito e il check è false (inserimento)
 		if(oraArrivo.data is None and not self.check):
 			raise ValidationError('This field is required')
 

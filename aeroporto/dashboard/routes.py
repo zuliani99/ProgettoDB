@@ -37,7 +37,7 @@ def delete_volo(volo_id):
 		trans.rollback()										#Se qualcosa è andato storto la rollback ripristina lo stato precedente della tabella
 		flash('Il volo NON ' + str(volo_id) + ' è stato cancellato', 'danger')
 	finally:
-		conn.close()		
+		conn.close()											#In qualunque caso chiude la connessione
 	return redirect(url_for('dashboard.dashboardhome'))			#Ritorna alla pagina principale della dashboard
 
 @dashboard.route("/delete_aeroporto<int:aeroporto_id>", methods=['GET', 'POST'])
