@@ -47,6 +47,7 @@ def gone(volopart):
 						float(volo[5])+float(formGone.bagaglioAndata.data)
 					)
 					trans.commit()
+					
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formGone.bagaglioAndata.data).fetchone()
 
 					send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
@@ -110,13 +111,15 @@ def roundtrip(volopart, volorit):
 						formRoundtrip.bagaglioRitorno.data,
 						float(ritorno[5])+float(formRoundtrip.bagaglioRitorno.data)
 					)
+					trans.commit()
+
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioAndata.data).fetchone()
 					bagRitorno = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioRitorno.data).fetchone()
 					
 					send_ticket_notify(andata, formRoundtrip.postoAndata.data, bagAndata, ritorno, formRoundtrip.postoRitorno.data, bagRitorno)
 					
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni dei biglietti', 'success')
-					trans.commit()
+					
 					return redirect(url_for('users.user_fly'))
 					#possiamo modificare la tabella escludendo la prima select ed aggiungendo le transazioni
 				##else:
