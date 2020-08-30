@@ -8,9 +8,15 @@ from flask_mail import Mail
 from flask_mysqldb import MySQL
 from flask_util_js import FlaskUtilJs
 
+user = 'admin'
+password = 'admin'
+server = 'localhost'
+nomeDB = 'takeafly'
+urlDB = 'mysql://{0}:{1}@{2}/{3}'.format(user,password,server,nomeDB)	# Link per il database di utilizzo
+
 app = Flask(__name__)	# Creazione dell'applicazione Flask
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'    # Chiave necessaria per l'applicazione
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin:admin@localhost/takeafly'	# Link per il database di utilizzo
+app.config['SQLALCHEMY_DATABASE_URI'] = urlDB
 bcrypt = Bcrypt(app)	# Bycrypt per il criptaggio della password
 login_manager = LoginManager(app) # Creazione della variabile pe ril login dell'applicazione
 login_manager.login_view = 'users.login'
@@ -27,11 +33,11 @@ fujs = FlaskUtilJs(app) # Dichiarazione della variabile per l'utilizzo della lib
 mysql = MySQL()	# Dichiarazione della variabile per l'utilizzo di MySQL
 
 # Configurazione del server MySQL
-app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_HOST'] = server
 app.config['MYSQL_DATABASE_PORT'] = '3306'
-app.config['MYSQL_USER'] = 'admin'
-app.config['MYSQL_PASSWORD'] = 'admin'
-app.config['MYSQL_DB'] = 'takeafly'
+app.config['MYSQL_USER'] = user
+app.config['MYSQL_PASSWORD'] = password
+app.config['MYSQL_DB'] = nomeDB
 app.config['MYSQL_DATABASE_CHARSET'] = 'utf-8'
 
 mysql.init_app(app)

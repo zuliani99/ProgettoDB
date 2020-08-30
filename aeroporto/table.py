@@ -8,9 +8,9 @@ from sqlalchemy import event
 from flask import abort
 from flask_mysqldb import MySQL
 from sqlalchemy_utils import create_database, database_exists
-
+from aeroporto import urlDB
 #Creiamo l'astrazione del DBMS mySql
-engine = create_engine('mysql://admin:admin@localhost/takeafly')
+engine = create_engine(urlDB)
 if not database_exists(engine.url):
     create_database(engine.url)
 
