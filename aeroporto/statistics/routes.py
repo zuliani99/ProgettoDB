@@ -41,7 +41,7 @@ def statisticsHome():
 						"JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id "+
 						"JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
 						"LEFT JOIN prenotazioni on voli.id = prenotazioni.id_volo "+
-		"GROUP BY voli.id HAVING voli.dataOraArrivo <= CURRENT_DATE").fetchall()
+		"GROUP BY voli.id").fetchall()
 
 
 	if statisticsForm.validate_on_submit():
@@ -68,7 +68,7 @@ def statisticsHome():
 						  "JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
 						  "LEFT JOIN prenotazioni on voli.id = prenotazioni.id_volo "+
 				"WHERE voli.dataOraPartenza >= %s AND voli.dataOraArrivo <= %s"+
-				"GROUP BY voli.id HAVING voli.dataOraArrivo <= CURRENT_DATE", dataDa, dataA).fetchall()
+				"GROUP BY voli.id", dataDa, dataA).fetchall()
 
 		elif dataDa is None and dataA is not None:
 			infoAeroporti = conn.execute(
@@ -90,7 +90,7 @@ def statisticsHome():
 						  "JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
 						  "LEFT JOIN prenotazioni on voli.id = prenotazioni.id_volo "+
 				"WHERE voli.dataOraArrivo<= %s"+
-				"GROUP BY voli.id HAVING voli.dataOraArrivo <= CURRENT_DATE", dataA).fetchall()
+				"GROUP BY voli.id", dataA).fetchall()
 		elif dataDa is not None and dataA is None:
 			infoAeroporti = conn.execute(
 				"SELECT nomeA, partenze, arrivi "+
@@ -111,7 +111,7 @@ def statisticsHome():
 						  "JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
 						  "LEFT JOIN prenotazioni on voli.id = prenotazioni.id_volo "+
 				"WHERE voli.dataOraPartenza >= %s"+
-				"GROUP BY voli.id HAVING voli.dataOraArrivo <= CURRENT_DATE",dataDa).fetchall()
+				"GROUP BY voli.id ",dataDa).fetchall()
 
 		else:
 			infoAeroporti = conn.execute(
@@ -130,7 +130,7 @@ def statisticsHome():
 						  "JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id "+
 						  "JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id "+
 						  "LEFT JOIN prenotazioni on voli.id = prenotazioni.id_volo "+
-				"GROUP BY voli.id HAVING voli.dataOraArrivo <= CURRENT_DATE").fetchall()
+				"GROUP BY voli.id").fetchall()
 
 	trattaGuadagniMax = conn.execute("SELECT IFNULL(aeroportoP, 'None'), IFNULL(aeroportoA, 'None'), IFNULL(guadagniTot,0) FROM guadagniTratte WHERE guadagniTot = (SELECT MAX(guadagniTot) FROM guadagniTratte)").fetchone()
 	#CREATE OR REPLACE VIEW guadagniTratte AS SELECT a1.nome AS aeroportoP, a2.nome AS aeroportoA, SUM(voli.prezzo)+SUM(p.prezzo_bagaglio) AS guadagniTot FROM aeroporti AS a1 JOIN voli on a1.id = voli.aeroportoPartenza JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id JOIN prenotazioni AS p ON voli.id = p.id_volo GROUP BY a1.nome, a2.nome
