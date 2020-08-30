@@ -14,17 +14,24 @@ def delete_volo(volo_id):
 
 	conn = engine.connect()
 	usersmail = conn.execute("SELECT u.email FROM users u JOIN prenotazioni p on u.id = p.id_user WHERE p.id_volo = %s", volo_id).fetchall()
-	conn.close()
 
 	listmail = []
 	for mail in usersmail:
 		listmail.append(mail[0])
-
-	result = deleteElementByID("id", volo_id, "voli")
-	if result:
-		send_mail_deletefly(volo_id, listmail)
-		flash('Il volo ' + str(volo_id) + ' è stato cancellato con successo', 'success')
-
+	print(volo_id)
+	trans = conn.begin()
+	try:
+		result = deleteElementByID("id", volo_id, "voli")
+		if result:
+			if not listmail == []:
+				send_mail_deletefly(volo_id, listmail)
+			trans.commit()
+			flash('Il volo ' + str(volo_id) + ' è stato cancellato con successo', 'success')
+	except:
+		trans.rollback()
+		flash('Il volo NON ' + str(volo_id) + ' è stato cancellato', 'danger')
+	finally:
+		conn.close()
 	return redirect(url_for('dashboard.dashboardhome'))
 
 @dashboard.route("/delete_aeroporto<int:aeroporto_id>", methods=['GET', 'POST'])
