@@ -11,7 +11,7 @@ def save_pictures(form_picture): # funzione di salvataggio nel filesystem
 	picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn) # e salviamo il nuovo file nel filesystem
 	
 	output_size = (125, 125) # impostiamo le dimensione che vogliamo avere dell'immagine
-	i = Image.open(form_picture) #apriamo l'immagine
+	i = Image.open(form_picture) # apriamo l'immagine
 	i.thumbnail(output_size) # cambiamo le dimensioni
 	i.save(picture_path) # la risalviamo
 	
@@ -22,7 +22,7 @@ def send_reset_email(user):
 	token = user.get_reset_token() #prendiamo il token
 	msg = Message('Richiesta di Password Reset', sender='takeaflyspa@gmail.com', recipients=[user.email]) #header del messaggio
 	msg.body = f'''Per resettare la password, visita il seguente link: 
-{url_for('reset_token', token=token, _external=True)}
+{url_for('users.reset_token', token=token, _external=True)}
 
 Se non hai fatto questa richiesta, ignora questa mail e nessuna modifica sarà effettuata
 ''' #body del messaggio
