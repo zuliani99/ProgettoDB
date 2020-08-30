@@ -20,11 +20,11 @@ def statisticsHome():
 	)
 
 	#Numero totale di passeggeri
-	totPasseggeri = conn.execute("SELECT sum(pren) FROM pren_volo").fetchone()
+	totPasseggeri = conn.execute("SELECT IFNULL(sum(pren),0) FROM pren_volo JOIN voli ON pren_volo.id = voli.id WHERE voli.dataOraArrivo < CURRENT_DATE").fetchone()
 
 	#Passeggeri totali nell'ultimo mese
-	totPasseggeri_mese = conn.execute("SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE YEAR(dataOraPartenza) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH) AND MONTH(dataOraPartenza) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)").fetchone()
-	
+	totPasMesePrec = conn.execute("SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE YEAR(dataOraPartenza) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH) AND MONTH(dataOraPartenza) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)").fetchone()
+	totPasMeseSucc = conn.execute("SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE YEAR(dataOraPartenza) = YEAR(CURRENT_DATE + INTERVAL 1 MONTH) AND MONTH(dataOraPartenza) = MONTH(CURRENT_DATE + INTERVAL 1 MONTH)").fetchone()
 	#Guadagni totali calcolati sulla somma del prezzo delle prenotazioni
 	guadagniTotali = conn.execute("SELECT IFNULL(sum(prenotazioni.prezzotot),0) FROM prenotazioni").fetchone()
 
@@ -86,7 +86,7 @@ def statisticsHome():
 					  "GROUP BY a.nome) AS t1,"+
 					  "(SELECT a.nome as nomeB, IFNULL(SUM(pren_volo.pren), 0)AS arrivi "+
 					  "FROM aeroporti AS a LEFT JOIN voli ON a.id = voli.aeroportoArrivo LEFT JOIN pren_volo ON voli.id = pren_volo.id "+
-					  "WHERE oli.dataOraArrivo <= %s"+
+					  "WHERE voli.dataOraArrivo <= %s"+
 					  "GROUP BY a.nome) AS t2 "+
 				"WHERE nomeA = nomeB", dataA, dataA).fetchall()
 
@@ -146,7 +146,7 @@ def statisticsHome():
 	trattaGuadagniMax = conn.execute("SELECT IFNULL(aeroportoP, 'None'), IFNULL(aeroportoA, 'None'), IFNULL(guadagniTot,0) FROM guadagniTratte WHERE guadagniTot = (SELECT MAX(guadagniTot) FROM guadagniTratte)").fetchone()
 
 	conn.close()
-	return render_template('statistiche.html', title='Statistiche', fromStat = statisticsForm, totPasseggeri = totPasseggeri[0], totPasseggeriMese = totPasseggeri_mese[0], aeroporti = infoAeroporti, guadagniTot = guadagniTotali[0], trattaGuadagniMax = trattaGuadagniMax, voli=infoVoli)
+	return render_template('statistiche.html', title='Statistiche', fromStat = statisticsForm, totPasseggeri = totPasseggeri[0], totPasMesePrec = totPasMesePrec[0], totPasMeseSucc = totPasMeseSucc[0],aeroporti = infoAeroporti, guadagniTot = guadagniTotali[0], trattaGuadagniMax = trattaGuadagniMax, voli=infoVoli)
 
 
 #SELECT a1.nome, a2.nome, aerei.nome, pren_volo.pren/aerei.numeroPosti AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione), 'Nessuna recensione') AS valutazioneMedia, voli.dataOraArrivo FROM voli JOIN aeroporti AS a1 on voli.aeroportoPartenza = a1.id JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id LEFT JOIN prenotazioni on voli.id = prenotazioni.id_volo GROUP BY voli.id HAVING voli.dataOraArrivo <= CURRENT_DATE

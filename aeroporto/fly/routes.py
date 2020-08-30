@@ -50,15 +50,15 @@ def gone(volopart):
 						formGone.bagaglioAndata.data,
 						float(volo[5])+float(formGone.bagaglioAndata.data)
 					)
-					# Committo la transazione
-					trans.commit()
+
 
 					# Restituisco la descrizione del bagaglio che l'utente ha scelto
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formGone.bagaglioAndata.data).fetchone()
 
 					# Richiamo la funzione send_ticket_notify per invisare una mail all'utente di avvenuta prenotazione del tocket con tutte le informazioni necessarie per l'imbarco
 					send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
-						
+					# Committo la transazione
+					trans.commit()
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
 					return redirect(url_for('users.user_fly'))
 				except:

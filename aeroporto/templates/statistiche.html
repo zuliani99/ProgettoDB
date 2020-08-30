@@ -6,13 +6,16 @@
 		<h1><br></h1>
 
     	<div class="content-section">
-    		Passeggeri totali {{totPasseggeri}} <br>
+    		Passeggeri totali fino ad oggi: {{totPasseggeri}} 
+    		<br>
     		Ultimo mese 
-    		{% if totPasseggeriMese < 100 %}
-    			{{totPasseggeriMese}}, forse è meglio farsi pubblicità :(
+    		{% if totPasMesePrec < 100 %}
+    			{{totPasMesePrec}} passeggeri, forse è meglio farsi pubblicità :(
     		{% else %}
-    			{{totPasseggeriMese}}, si punta alto! :) 
+    			{{totPasMesePrec}} passeggeri, si punta alto! :) 
     		{% endif %}
+    		<br>
+    		Prossimo mese {{totPasMeseSucc}} passeggeri
     		<br>
     		Guadagni totali €{{guadagniTot}}
     		<br>

@@ -1,6 +1,7 @@
 import secrets
 from flask_mail import Message
 from aeroporto import mail
+from flask_login import current_user
 
 # Funzione per l'invio della mail di prenotazione bgglietti/o
 def send_ticket_notify(volopart, npostopart, bagpart, volorit, npostorit, bagrit):
