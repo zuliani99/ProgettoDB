@@ -51,9 +51,11 @@
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">
-                    Elimina Account
-                </button>
+                {% if current_user.role == 'customer' %}
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">
+                        Elimina Account
+                    </button>
+                {% endif %}
             </div>
         </form>
     </div>
