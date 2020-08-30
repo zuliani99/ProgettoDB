@@ -34,15 +34,7 @@ def home():
 		dRit = searchForm.dataRitorno.data
 		is_return = searchForm.checkAndataRitorno.data
 
-		#print(str(aPart) + " " + str(dPart)  + " " + str(aArr) + " " + str(dRit) + " " + str(is_return))
-		#queryandata = "SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo FROM voli v, aeroporti arr, aeroporti part, aerei a 
-		#WHERE v.aeroportoArrivo = arr.id AND v.aeroportoPartenza = part.id AND v.aereo = a.id AND part.id = "+str(aPart)+" AND arr.id = "+str(aArr)+" AND v.dataOraPartenza BETWEEN '"+str(dPart)+" 00:00:00' AND '"+str(dPart)+" 23:59:59'"
-		#print(query)
-
 		# Resrituisco le informazioni del volo di andata filtrate per i campi del form
-		'''print("SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo " +
-			"FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id AND v.aeroportoPartenza = part.id AND v.aereo = a.id AND part.id = "+aPart+" AND arr.id = "+aArr+" AND v.dataOraPartenza BETWEEN "
-			+(dPart.strftime("%Y-%m-%d") + " 00:00:00")+" AND "+(dPart.strftime("%Y-%m -%d") + " 23:59:59"))'''
 		andata = conn.execute(
 			"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo " +
 			"FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id AND v.aeroportoPartenza = part.id AND v.aereo = a.id AND part.id = %s AND arr.id = %s AND v.dataOraPartenza BETWEEN %s AND %s",
@@ -50,7 +42,6 @@ def home():
 		).fetchall()
 
 		if dRit is not None:
-			#queryritorno = "SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id AND v.aeroportoPartenza = part.id AND v.aereo = a.id AND part.id = "+str(aArr)+" AND arr.id = "+str(aPart)+" AND v.dataOraPartenza BETWEEN '"+str(dRit)+" 00:00:00' AND '"+str(dRit)+" 23:59:59'"
 			# Resrituisco le informazioni del volo di ritorno filtrate per i campi del form
 			ritorno = conn.execute(
 				"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo " + 

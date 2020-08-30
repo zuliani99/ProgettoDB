@@ -10,7 +10,7 @@ class SearchFlyForm(FlaskForm):
 	aeroportoPartenza = SelectField('Aeroporto di partenza',validators=[DataRequired()])
 	dataPartenza = DateField('Data partenza', default=tomorrowDate, validators=[DataRequired()])
 	aeroportoArrivo = SelectField('Aeroporto di arrivo', validators=[DataRequired()])
-	dataRitorno = DateField('Data ritrono', default=tomorrowDate + datetime.timedelta(days=1), validators=[Optional()])
+	dataRitorno = DateField('Data ritrono', default=tomorrowDate + datetime.timedelta(days=1), validators=[DataRequired()])
 	checkAndata = BooleanField('Solo Andata', default="checked", validators=[Optional()])
 	checkAndataRitorno = BooleanField('Andata e Ritorno', validators=[Optional()])
 

@@ -153,8 +153,7 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
 	conn = engine.connect()
-	#s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
-	s = conn.execute("SELECT * FROM takeafly.users WHERE id = %s", user_id).fetchone()
+	s = conn.execute("SELECT * FROM users WHERE id = %s", user_id).fetchone()
 	conn.close()
 	if s is None:
 		return None
