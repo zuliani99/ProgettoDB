@@ -41,6 +41,13 @@ def gone(volopart):
 			if load_user(current_user.id).get_urole() == "customer":
 				# Creo una connessione ed una transazione
 				conn = engine.connect()
+
+				# Imposto il livello di isolamento pe rla transazione
+				conn = conn.execution_options(
+					isolation_level="SERIALIZABLE"
+				)
+
+				# Inizializzo la transazione
 				trans = conn.begin()
 				try:
 					# Inserisco la prenotazione nella tabella prenotazioni con i suoli campi necessari
@@ -121,6 +128,13 @@ def roundtrip(volopart, volorit):
 			if load_user(current_user.id).get_urole() == "customer":
 				# Creo una connessione ed una transazione
 				conn = engine.connect()
+
+				# Imposto il livello di isolamento pe rla transazione
+				conn = conn.execution_options(
+			    	isolation_level="SERIALIZABLE"
+				)
+
+				# Inizializzo la transazione
 				trans = conn.begin()
 				try:
 					# Inserisco la prenotazione nella tabella prenotazioni con i suoli campi necessari
