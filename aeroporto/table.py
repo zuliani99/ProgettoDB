@@ -3,75 +3,116 @@ from flask_login import UserMixin
 from flask_user import current_user, roles_required, UserManager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from sqlalchemy import *
-
-from aeroporto.routes import bcrypt
+from sqlalchemy.event import listen
+from sqlalchemy import event
+from flask import abort
 from flask_mysqldb import MySQL
+from sqlalchemy_utils import create_database, database_exists
+from aeroporto import urlDB
+#Creiamo l'astrazione del DBMS mySql
+engine = create_engine(urlDB)
+if not database_exists(engine.url):
+    create_database(engine.url)
 
 
-engine = create_engine('mysql://admin:admin@localhost/MyDB')
+#oggetto contenente che rappresenta l'astrazione dello schema relazionale, contenente tutte le relazioni al suo interno
 metadata = MetaData()
 
 users = Table('users', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('username', String(20), unique=True, nullable=False),
 	Column('email', String(120), unique=True, nullable=False),
-	Column('image_file', String(20), nullable=False, default='default.jpg'),
+	Column('image_file', String(20), nullable=False, server_default='default.jpg'),
 	Column('password', String(60), nullable=False),
-	Column('role', String(10), nullable=False, default='customer')
+	Column('role', String(10), nullable=False, server_default='customer')
 )
 
 aerei = Table('aerei', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('name', String(20), nullable=False, default='Boeing 777'),
-	Column('numeroPosti', Integer, nullable=False, default=50)
+	Column('nome', String(20), nullable=False, default='Boeing 777'),
+	Column('numeroPosti', Integer, nullable=False, default=50),
+	CheckConstraint('numeroPosti > 0', name='c_nposti')
 )
 
 aeroporti = Table('aeroporti', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('name', String(20), nullable = False),
+	Column('nome', String(30), nullable = False),
 	Column('indirizzo', String(60), nullable= False)
 )
 
 voli = Table('voli', metadata,
 	Column('id', Integer, primary_key = True),
-	Column('aeroportoPartenza', Integer, ForeignKey('aeroporti.id'), nullable=False),
-	Column('oraPartenza', DateTime, nullable=False),
-	Column('aeroportoArrivo', Integer, ForeignKey('aeroporti.id'), nullable=False),
-	Column('oraArrivo', DateTime, nullable=False),
-	Column('aereo', Integer, ForeignKey('aerei.id'), nullable=False),
-	Column('prezzo', Float, nullable=False)
+	Column('aeroportoPartenza', Integer, ForeignKey('aeroporti.id', ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+	Column('dataOraPartenza', DateTime, nullable=False),
+	Column('aeroportoArrivo', Integer, ForeignKey('aeroporti.id', ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+	Column('dataOraArrivo', DateTime, nullable=False),
+	Column('aereo', Integer, ForeignKey('aerei.id', ondelete="CASCADE"),nullable=False),
+	Column('prezzo', Float, nullable=False),
+	CheckConstraint('prezzo > 0', name='c_prezzo'),
+	CheckConstraint('dataOraArrivo > dataOraPartenza', name='c_date')
 )
 
 bagagli = Table('bagagli', metadata,
 	Column('prezzo', Float, primary_key=True),
-	Column('descrizione', String(50), nullable=False)
+	Column('descrizione', String(60), nullable=False)
 )
 
 prenotazioni = Table('prenotazioni', metadata,
-	Column('id', Integer, primary_key = True),
-	Column('id_user', Integer, ForeignKey('users.id'), nullable=False),
-	Column('id_volo', Integer, ForeignKey('voli.id'), nullable=False),
-	Column('prezzo_bagaglio', Integer, ForeignKey('bagagli.prezzo'), nullable=False),
-	Column('numeroPosto', Integer, nullable=False),
-	Column('valutazione', Integer, nullable=False, default=None),
-	Column('critiche', String(200), nullable=True, default=None)
+	Column('id', Integer, nullable = False),
+	Column('id_user', Integer, ForeignKey('users.id', ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+	Column('id_volo', Integer, ForeignKey('voli.id', ondelete="CASCADE", onupdate="CASCADE"), nullable=False, primary_key = True),
+	Column('prezzo_bagaglio', Float, ForeignKey('bagagli.prezzo'), nullable=False),
+	Column('numeroPosto', Integer, nullable=False, primary_key = True),
+	Column('prezzotot', Float, nullable=False),
+	Column('valutazione', Integer, nullable=True),
+	Column('critiche', String(200), nullable=True)
 )
 
+#Mette un indice per la colonna id nella tabella prenotazioni
+Index('idpren_index', prenotazioni.c.id)
+
+#Mette un indice per la colonna aeroportoPartenza e aeroportoArrivo nella tabella voli
+Index('aeroportiPartArr_index', voli.c.aeroportoPartenza, voli.c.aeroportoArrivo)
+
+#Definizione trigger per l'aumento del prezzo quando un volo supera il 50% della capienza
+aumento = DDL(
+"CREATE DEFINER='admin'@'localhost' TRIGGER `aumento` "
+"AFTER INSERT ON `prenotazioni` "
+"FOR EACH ROW "
+"BEGIN "
+	"IF (SELECT (pv.pren*100)/a.numeroPosti FROM voli v JOIN pren_volo pv ON (v.id = pv.id AND v.id = NEW.id_volo) JOIN aerei a on v.aereo = a.id) > 50 "
+		"THEN UPDATE voli v SET v.prezzo = v.prezzo + 0.5 WHERE NEW.id_volo = v.id; "
+	"END IF; "
+"END"
+)
+
+event.listen(
+    prenotazioni,
+    'after_create',
+    aumento.execute_if(dialect='mysql')
+)
+
+#Definizione trigger che incrementa l'ora di partenza di un volo quando viene inserito con una data di partenza uguale ad un altro volo per lo stesso aeroporto
+controllo_voli = DDL(
+"CREATE DEFINER='admin'@'localhost' TRIGGER controllo_voli "
+"BEFORE INSERT ON voli FOR EACH ROW "
+"BEGIN "
+    "IF (SELECT COUNT(*) FROM voli v1 WHERE v1.id != NEW.id AND v1.aeroportoPartenza = NEW.aeroportoPartenza AND v1.dataOraPartenza = NEW.dataOraPartenza) >= 1 THEN "
+        "SET NEW.dataOraPartenza = DATE_ADD(NEW.dataOraPartenza, INTERVAL 1 HOUR); "
+    "END IF; "
+"END"
+)
+
+event.listen(
+    voli,
+    'after_create',
+    controllo_voli.execute_if(dialect='mysql')
+)
+
+#Crea tutti gli elementi appena definiti compresi vincoli e chiavi esterne 
 metadata.create_all(engine)
 
-
-conn = engine.connect()
-trans = conn.begin()
-try:
-	conn.execute("INSERT INTO users (username, email, image_file, password, role) VALUES ('Administrator', 'administrator@takeafly.com', 'default.jpg', %s, 'admin')",  bcrypt.generate_password_hash("adminpassword123").decode('utf-8'))
-except:
-	trans.rollback()
-
-#conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (0, 'Standard - Borsa piccola ( + 0€ )')")
-#conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (20, 'Plus - Bagaglio a mano da 10 Kg e borsa piccola ( + 20€ )')")
-#conn.execute("INSERT INTO bagagli (prezzo, descrizione) VALUES (40, 'Deluxe - Bagaglio a mano da 20Kg e borsa piccola ( + 40€ )')")
-
-conn.close()
+from aeroporto import insert
 
 class User(UserMixin):
     def __init__(self, id, username, email, image_file, password, role):
@@ -115,20 +156,20 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
 	conn = engine.connect()
-	s = conn.execute(select([users]).where(users.c.id == user_id)).fetchone()
+	s = conn.execute("SELECT * FROM users WHERE id = %s", user_id).fetchone()
 	conn.close()
 	if s is None:
 		return None
 	return User(s.id, s.username, s.email, s.image_file, s.password, s.role)
 
-
+#Elimina un elemento passando come parametro il nome dell'attributo id, il valore, e il nome della tabella
 def deleteElementByID(nameAttribute, idValue, nameTable):
 	query = "SELECT * FROM "+nameTable+" WHERE "+nameAttribute+" = %s"
 	conn = engine.connect()
 	f = conn.execute(query, idValue).fetchone()
-	if f is None:
+	if f is None:		#Se true non esiste una tupla con quell'id per quel attributo in quella tabella
 		conn.close()
-		abort(404)
+		abort(404)		#Error 404 not found
 		return False
 	query = "DELETE FROM "+nameTable+" WHERE "+nameAttribute+" = %s"
 	conn.execute(query, idValue)

@@ -56,6 +56,8 @@
 						<tr class="border_bottom">
 						{% elif i == 3 %}
 						<tr class="border_top">
+						{% else %}
+						<tr>
 						{% endif %}
 						{% for j in range (0,ran) %}
 							{% if j*4+i in free %}
@@ -122,6 +124,7 @@
 			var b = parseFloat($("#bagaglio").val());
 			var pb = parseFloat('{{ volo[5] }}');
 			var sum = b+pb
+			$("#prezzobagaglio").css("font-weight","Bold");
 			$("#prezzobagaglio").text("Prezzo Totale: " + pb + "€ + " + b + "€ = " + sum + "€");
 		});
 		$("#confirmbuy").click(function(){
