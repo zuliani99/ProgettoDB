@@ -20,7 +20,8 @@ def gone(volopart):
 	# Restituisco tutte le particolari informazioni per il volo
 	volo = conn.execute(
 		"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp " + 
-		"FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volopart
+		"FROM voli v JOIN aeroporti arr ON v.aeroportoArrivo = arr.id JOIN aeroporti part ON v.aeroportoPartenza = part.id JOIN aerei a ON v.aereo = a.id "
+		"JOIN pren_volo pv ON pv.id = v.id WHERE v.id = %s",volopart
 	).fetchone()
 	# Restituisco i posti occupati per il volo che voglio prenotare
 	pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
@@ -87,7 +88,8 @@ def roundtrip(volopart, volorit):
 	# Restituisco tutte le particolari informazioni per il volo di andata
 	andata = conn.execute(
 		"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp " + 
-		"FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volopart
+		"FROM voli v JOIN aeroporti arr ON v.aeroportoArrivo = arr.id JOIN aeroporti part ON v.aeroportoPartenza = part.id JOIN aerei a ON v.aereo = a.id "
+		"JOIN pren_volo pv ON pv.id = v.id WHERE v.id = %s",volopart
 	).fetchone()
 	# Restituisco i posti occupati per il volo di andata che voglio prenotare
 	poccandata = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
@@ -97,8 +99,9 @@ def roundtrip(volopart, volorit):
 
 	# Restituisco tutte le particolari informazioni per il volo di ritorno
 	ritorno = conn.execute(
-		"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp " +
-		"FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volorit
+		"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp " + 
+		"FROM voli v JOIN aeroporti arr ON v.aeroportoArrivo = arr.id JOIN aeroporti part ON v.aeroportoPartenza = part.id JOIN aerei a ON v.aereo = a.id "
+		"JOIN pren_volo pv ON pv.id = v.id WHERE v.id = %s",volorit
 	).fetchone()
 	# Restituisco i posti occupati per il volo di ritorno che voglio prenotare
 	poccritorno = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volorit).fetchall()
