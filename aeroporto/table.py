@@ -68,8 +68,11 @@ prenotazioni = Table('prenotazioni', metadata,
 	Column('critiche', String(200), nullable=True)
 )
 
-#Mette un indice per la colonna id
+#Mette un indice per la colonna id nella tabella prenotazioni
 Index('idpren_index', prenotazioni.c.id)
+
+#Mette un indice per la colonna aeroportoPartenza e aeroportoArrivo nella tabella voli
+Index('aeroportiPartArr_index', voli.c.aeroportoPartenza, voli.c.aeroportoArrivo)
 
 #Definizione trigger per l'aumento del prezzo quando un volo supera il 50% della capienza
 aumento = DDL(
