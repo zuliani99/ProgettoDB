@@ -149,10 +149,9 @@ def statisticsHome():
 				"GROUP BY voli.id").fetchall()
 
 	#Calcola la tratta (partenza, arrivo) con il guadagno massimo 
-	trattaGuadagniMax = conn.execute("SELECT IFNULL(aeroportoP, 'None'), IFNULL(aeroportoA, 'None'), IFNULL(guadagniTot,0) FROM guadagniTratte WHERE guadagniTot = (SELECT MAX(guadagniTot) FROM guadagniTratte)").fetchone()
+	trattaGuadagniMax = conn.execute(
+		"SELECT IFNULL(aeroportoP, 'None'), IFNULL(aeroportoA, 'None'), IFNULL(guadagniTot,0) FROM guadagniTratte WHERE guadagniTot = (SELECT MAX(guadagniTot) FROM guadagniTratte)"
+	).fetchone()
 
 	conn.close()
 	return render_template('statistiche.html', title='Statistiche', fromStat = statisticsForm, totPasseggeri = totPasseggeri[0], totPasMesePrec = totPasMesePrec[0], totPasMeseSucc = totPasMeseSucc[0],aeroporti = infoAeroporti, guadagniTot = guadagniTotali[0], trattaGuadagniMax = trattaGuadagniMax, voli=infoVoli)
-
-
-#SELECT a1.nome, a2.nome, aerei.nome, pren_volo.pren/aerei.numeroPosti AS percentualeCarico, IFNULL(AVG(prenotazioni.valutazione), 'Nessuna recensione') AS valutazioneMedia, voli.dataOraArrivo FROM voli JOIN aeroporti AS a1 on voli.aeroportoPartenza = a1.id JOIN aeroporti AS a2 ON voli.aeroportoArrivo = a2.id JOIN aerei ON voli.aereo = aerei.id JOIN pren_volo ON voli.id = pren_volo.id LEFT JOIN prenotazioni on voli.id = prenotazioni.id_volo GROUP BY voli.id HAVING voli.dataOraArrivo <= CURRENT_DATE
