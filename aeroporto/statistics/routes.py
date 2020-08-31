@@ -24,12 +24,10 @@ def statisticsHome():
 
 	#Passeggeri totali nell'ultimo mese
 	totPasMesePrec = conn.execute(
-		"SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE YEAR(dataOraPartenza) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH) " + 
-		"AND MONTH(dataOraPartenza) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)"
+		"SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE voli.dataOraPartenza BETWEEN (CURRENT_DATE() - INTERVAL 1 MONTH) AND CURRENT_DATE()"
 	).fetchone()
 	totPasMeseSucc = conn.execute(
-		"SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE YEAR(dataOraPartenza) = YEAR(CURRENT_DATE + INTERVAL 1 MONTH) " +
-		"AND MONTH(dataOraPartenza) = MONTH(CURRENT_DATE + INTERVAL 1 MONTH)"
+		"SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE voli.dataOraPartenza BETWEEN CURRENT_DATE() AND (CURRENT_DATE() + INTERVAL 1 MONTH)"
 	).fetchone()
 	#Guadagni totali calcolati sulla somma del prezzo delle prenotazioni
 	guadagniTotali = conn.execute("SELECT IFNULL(sum(prenotazioni.prezzotot),0) FROM prenotazioni").fetchone()
