@@ -37,7 +37,7 @@ def home():
 		# Resrituisco le informazioni del volo di andata filtrate per i campi del form
 		andata = conn.execute(
 			"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo " +
-			"FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id AND v.aeroportoPartenza = part.id AND v.aereo = a.id AND part.id = %s AND arr.id = %s AND v.dataOraPartenza BETWEEN %s AND %s",
+			"FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id AND v.aeroportoPartenza = part.id AND v.aereo = a.id AND part.id = %s AND arr.id = %s AND v.dataOraPartenza BETWEEN %s AND %s ORDER BY v.dataOraPartenza ASC",
 			aPart, aArr, (dPart.strftime("%Y-%m-%d") + " 00:00:00"), (dPart.strftime("%Y-%m-%d") + " 23:59:59")
 		).fetchall()
 
@@ -45,7 +45,7 @@ def home():
 			# Resrituisco le informazioni del volo di ritorno filtrate per i campi del form
 			ritorno = conn.execute(
 				"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo " + 
-				"FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id AND v.aeroportoPartenza = part.id AND v.aereo = a.id AND part.id = %s AND arr.id = %s AND v.dataOraPartenza BETWEEN %s AND %s",
+				"FROM voli v, aeroporti arr, aeroporti part, aerei a WHERE v.aeroportoArrivo = arr.id AND v.aeroportoPartenza = part.id AND v.aereo = a.id AND part.id = %s AND arr.id = %s AND v.dataOraPartenza BETWEEN %s AND %s ORDER BY v.dataOraPartenza ASC",
 				aArr, aPart, (dRit.strftime("%Y-%m-%d") + " 00:00:00"), (dRit.strftime("%Y-%m-%d") + " 23:59:59")
 			).fetchall()
 
