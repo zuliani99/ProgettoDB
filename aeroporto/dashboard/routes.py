@@ -72,7 +72,7 @@ def dashboardhome():
 	conn = engine.connect()
 	aeroporti = conn.execute("SELECT id, nome, indirizzo FROM aeroporti").fetchall()	#Informazioni necessarie per aeroporti 
 	aerei = conn.execute("SELECT id, nome, numeroPosti FROM aerei").fetchall()			#Informazioni necessarie per aerei 
-	voli = conn.execute("SELECT * FROM voli NATURAL JOIN pren_volo").fetchall()			#Informazioni necessarie per voli compreso il numero di prenotazioni 
+	voli = conn.execute("SELECT * FROM voli NATURAL JOIN pren_volo JOIN aeroporti AS aPartenza ON voli.aeroportoPartenza = aPartenza.id JOIN aeroporti AS aArrivo ON voli.aeroportoArrivo = aArrivo.id").fetchall()			#Informazioni necessarie per voli compreso il numero di prenotazioni 
 	conn.close()
 
 	#Crea le scelte possibili per i select field visibili nel modal per l'inserimento
