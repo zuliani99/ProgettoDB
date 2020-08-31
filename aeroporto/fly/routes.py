@@ -64,7 +64,7 @@ def gone(volopart):
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formGone.bagaglioAndata.data).fetchone()
 
 					# Richiamo la funzione send_ticket_notify per invisare una mail all'utente di avvenuta prenotazione del tocket con tutte le informazioni necessarie per l'imbarco
-					#send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
+					send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
 
 					# Committo la transazione
 					trans.commit()
@@ -159,7 +159,7 @@ def roundtrip(volopart, volorit):
 					bagRitorno = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioRitorno.data).fetchone()
 					
 					# Richiamo la funzione send_ticket_notify per invisare una mail all'utente di avvenuta prenotazione del tocket con tutte le informazioni necessarie per l'imbarco
-					#send_ticket_notify(andata, formRoundtrip.postoAndata.data, bagAndata, ritorno, formRoundtrip.postoRitorno.data, bagRitorno)
+					send_ticket_notify(andata, formRoundtrip.postoAndata.data, bagAndata, ritorno, formRoundtrip.postoRitorno.data, bagRitorno)
 					
 					# Committo la transazione
 					trans.commit()
