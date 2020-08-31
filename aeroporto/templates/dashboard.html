@@ -265,9 +265,9 @@
 							{% if volo[2] < time %}
 								<tr class="table-dark">
 									<td>{{ volo[0] }}</td><!-- ID -->
-									<td> <a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[1]) }}"> {{ volo[9] }}</a></td><!-- AEROPORTO PARTENZA -->
+									<td> <a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[1]) }}"> {{ volo[9] }} #{{volo[1]}}</a></td><!-- AEROPORTO PARTENZA -->
 									<td>{{ volo[2] }}</td><!-- DATA E ORA PARTENZA -->
-									<td><a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[3]) }}"> {{ volo[12] }}</a></td><!-- AEROPORTO ARRIVO -->
+									<td><a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[3]) }}"> {{ volo[12] }} #{{volo[3]}}</a></td><!-- AEROPORTO ARRIVO -->
 									<td>{{ volo[4] }}</td><!-- DATA E ORA ARRIVO -->
 									<td><a href="{{ url_for('dashboard.configAereo', aereo_id=volo[5]) }}"> {{ volo[5] }}</a></td><!-- AEREO -->
 									<td>{{ volo[6] }}</td><!-- PREZZO -->
