@@ -1,2 +1,0 @@
-{% %} -> per dare inizio a condizioni nel codice come if, for, endif, endfor
-{{ }} -> per accedere ad attributi 
