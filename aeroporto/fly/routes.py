@@ -12,7 +12,7 @@ fly = Blueprint('fly', __name__)
 
 
 # Route per l'aggiunta di una prenotazione di un volo di sola andata
-@fly.route("/gone<int:volopart>", methods=['GET', 'POST'])
+@fly.route("/gone/<int:volopart>", methods=['GET', 'POST'])
 def gone(volopart):
 	formGone = AddBookingGone() # Richiamo il from
 	conn = engine.connect()
@@ -164,7 +164,7 @@ def roundtrip(volopart, volorit):
 
 
 # Route per l'eliminazione di una prenotazione 
-@fly.route("/delete_fly<int:fly_id>", methods=['GET', 'POST'])
+@fly.route("/delete_fly/<int:fly_id>", methods=['GET', 'POST'])
 @login_required(role="customer")
 def delete_fly(fly_id):
 	# Stabilisco una connessione
@@ -187,7 +187,7 @@ def delete_fly(fly_id):
 
 
 # Route per l'aggiunta di una recesione al volo
-@fly.route("/review_fly<int:fly_id>,<int:voto>,<crit>", methods=['GET', 'POST'])
+@fly.route("/review_fly/<int:fly_id>/<int:voto>/<crit>", methods=['GET', 'POST'])
 @login_required(role="customer")
 def review_fly(fly_id, voto, crit):
 	# Stabilisco una connessione

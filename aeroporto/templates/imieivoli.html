@@ -15,9 +15,7 @@
 					<th scope="col">Orario</th>
 					<th scope="col">Codice Aereo</th>
 					<th scope="col">Numero Posto da Sedere</th>
-					<th scope="col">Prezzo Volo</th>
-					<th scope="col">Prezzo Bagaglio</th>
-					<th scope="col">Descrizione</th>
+					<th scope="col">Bagaglio</th>
 					<th scope="col">Prezzo Totale</th>
 					<th scope="col">Azioni</th>
 				</tr>
@@ -29,21 +27,19 @@
 					{% else %}
 						<tr>
 					{% endif %}
-						<td>{{ volo[0] }}</td>
-						<td>{{ volo[1] }}</td>
-						<td>{{ volo[2] }}</td>
-						<td>{{ volo[3] }}</td>
-						<td>{{ volo[4] }}</td>
-						<td>{{ volo[5] }}</td>
-						<td>{{ volo[6] }}</td>
-						<td>{{ volo[7] }}</td>
-						<td>{{ volo[8] }}</td>
-						<td>{{ volo[9] }}</td>
-						<td>{{ volo[10] }}</td>
-						<td>{{ volo[11] }}</td>
+						<td>{{ volo[0] }}</td> <!-- -->
+						<td>{{ volo[1] }}</td><!-- codice volo -->
+						<td>{{ volo[2] }}</td><!-- aeroporto di Partenza -->
+						<td>{{ volo[3] }}</td><!--Orario -->
+						<td>{{ volo[4] }}</td><!-- Aeroporto di Arrivo -->
+						<td>{{ volo[5] }}</td><!-- Orario -->
+						<td>{{ volo[6] }}</td><!-- Codice Aereo -->
+						<td>{{ volo[7] }}</td><!-- Numero Posto da Sedere -->
+						<td>{{ volo[8] }}</td><!-- Bagaglio -->
+						<td>{{ volo[9] }}</td><!-- Prezzo Totale -->
 						<td>
 							{% if volo[3] < time %}
-								{% if volo[12] is none %}
+								{% if volo[10] is none %}
 									<button id="btnrev" type="button" class="btn btn-primary" data-toggle="modal" data-target="#reviewModal">
 										Aggioungi Recensione
 									</button>

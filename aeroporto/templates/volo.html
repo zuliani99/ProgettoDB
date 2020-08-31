@@ -124,6 +124,7 @@
 			var b = parseFloat($("#bagaglio").val());
 			var pb = parseFloat('{{ volo[5] }}');
 			var sum = b+pb
+			$("#prezzobagaglio").css("font-weight","Bold");
 			$("#prezzobagaglio").text("Prezzo Totale: " + pb + "€ + " + b + "€ = " + sum + "€");
 		});
 		$("#confirmbuy").click(function(){
