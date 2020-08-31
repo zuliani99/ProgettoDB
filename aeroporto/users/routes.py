@@ -101,9 +101,9 @@ def user_fly():
 	form = AddReviw()
 	conn = engine.connect()	# Restituiamo le principali informazioni delle prenotazioni del utente 
 	voli = conn.execute(
-		"SELECT p.id, p.id_volo, a1.nome, v.dataOraPartenza, a2.nome, v.dataOraArrivo, v.aereo, p.numeroPosto,  p.prezzo_bagaglio AS pbagaglio, b.descrizione, p.prezzotot, p.valutazione, p.critiche " +
+		"SELECT p.id, p.id_volo, a1.nome, v.dataOraPartenza, a2.nome, v.dataOraArrivo, v.aereo, p.numeroPosto, b.descrizione, p.prezzotot, p.valutazione, p.critiche " +
 		"FROM prenotazioni p JOIN voli v ON p.id_volo = v.id JOIN bagagli b ON p.prezzo_bagaglio=b.prezzo JOIN aeroporti a1 ON v.aeroportoPartenza=a1.id JOIN aeroporti a2 ON v.aeroportoArrivo=a2.id "+
-		"WHERE p.id_user= %s ORDER BY v.dataOraPartenza", current_user.id
+		"WHERE p.id_user= %s ORDER BY v.dataOraPartenza ASC", current_user.id
 	).fetchall()
 	conn.close()
 	time = datetime.now() # Ci salviamo la data e ora attiuale in una variabile che poi passeremo nella pagina html

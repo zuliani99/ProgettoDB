@@ -12,7 +12,7 @@ fly = Blueprint('fly', __name__)
 
 
 # Route per l'aggiunta di una prenotazione di un volo di sola andata
-@fly.route("/gone<int:volopart>", methods=['GET', 'POST'])
+@fly.route("/gone/<int:volopart>", methods=['GET', 'POST'])
 def gone(volopart):
 	formGone = AddBookingGone() # Richiamo il from
 	conn = engine.connect()
@@ -20,7 +20,8 @@ def gone(volopart):
 	# Restituisco tutte le particolari informazioni per il volo
 	volo = conn.execute(
 		"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp " + 
-		"FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volopart
+		"FROM voli v JOIN aeroporti arr ON v.aeroportoArrivo = arr.id JOIN aeroporti part ON v.aeroportoPartenza = part.id JOIN aerei a ON v.aereo = a.id "
+		"JOIN pren_volo pv ON pv.id = v.id WHERE v.id = %s",volopart
 	).fetchone()
 	# Restituisco i posti occupati per il volo che voglio prenotare
 	pocc = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
@@ -56,7 +57,7 @@ def gone(volopart):
 					bagAndata = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formGone.bagaglioAndata.data).fetchone()
 
 					# Richiamo la funzione send_ticket_notify per invisare una mail all'utente di avvenuta prenotazione del tocket con tutte le informazioni necessarie per l'imbarco
-					send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
+					#send_ticket_notify(volo, formGone.postoAndata.data, bagAndata, 0, 0, 0)
 					# Committo la transazione
 					trans.commit()
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni del biglietto', 'success')
@@ -87,7 +88,8 @@ def roundtrip(volopart, volorit):
 	# Restituisco tutte le particolari informazioni per il volo di andata
 	andata = conn.execute(
 		"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp " + 
-		"FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volopart
+		"FROM voli v JOIN aeroporti arr ON v.aeroportoArrivo = arr.id JOIN aeroporti part ON v.aeroportoPartenza = part.id JOIN aerei a ON v.aereo = a.id "
+		"JOIN pren_volo pv ON pv.id = v.id WHERE v.id = %s",volopart
 	).fetchone()
 	# Restituisco i posti occupati per il volo di andata che voglio prenotare
 	poccandata = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volopart).fetchall()
@@ -97,8 +99,9 @@ def roundtrip(volopart, volorit):
 
 	# Restituisco tutte le particolari informazioni per il volo di ritorno
 	ritorno = conn.execute(
-		"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp " +
-		"FROM voli v, aeroporti arr, aeroporti part, aerei a, pren_volo pv WHERE v.aeroportoArrivo = arr.id and v.aeroportoPartenza = part.id and v.aereo = a.id and pv.id = v.id and v.id = %s",volorit
+		"SELECT v.id , part.nome, v.dataOraPartenza, arr.nome, v.dataOraArrivo, v.prezzo, a.numeroPosti, a.numeroPosti-pv.pren as postdisp " + 
+		"FROM voli v JOIN aeroporti arr ON v.aeroportoArrivo = arr.id JOIN aeroporti part ON v.aeroportoPartenza = part.id JOIN aerei a ON v.aereo = a.id "
+		"JOIN pren_volo pv ON pv.id = v.id WHERE v.id = %s",volorit
 	).fetchone()
 	# Restituisco i posti occupati per il volo di ritorno che voglio prenotare
 	poccritorno = conn.execute("SELECT p.numeroPosto FROM voli v JOIN prenotazioni p ON v.id = p.id_volo WHERE v.id = %s",volorit).fetchall()
@@ -141,7 +144,7 @@ def roundtrip(volopart, volorit):
 					bagRitorno = conn.execute("SELECT * FROM bagagli WHERE prezzo = %s", formRoundtrip.bagaglioRitorno.data).fetchone()
 					
 					# Richiamo la funzione send_ticket_notify per invisare una mail all'utente di avvenuta prenotazione del tocket con tutte le informazioni necessarie per l'imbarco
-					send_ticket_notify(andata, formRoundtrip.postoAndata.data, bagAndata, ritorno, formRoundtrip.postoRitorno.data, bagRitorno)
+					#send_ticket_notify(andata, formRoundtrip.postoAndata.data, bagAndata, ritorno, formRoundtrip.postoRitorno.data, bagRitorno)
 					# Committo la transazione
 					trans.commit()
 					flash('Acquisto completato. Ti abbiamo inviato una mail con tutte le informazioni dei biglietti', 'success')
@@ -164,7 +167,7 @@ def roundtrip(volopart, volorit):
 
 
 # Route per l'eliminazione di una prenotazione 
-@fly.route("/delete_fly<int:fly_id>", methods=['GET', 'POST'])
+@fly.route("/delete_fly/<int:fly_id>", methods=['GET', 'POST'])
 @login_required(role="customer")
 def delete_fly(fly_id):
 	# Stabilisco una connessione
@@ -187,7 +190,7 @@ def delete_fly(fly_id):
 
 
 # Route per l'aggiunta di una recesione al volo
-@fly.route("/review_fly<int:fly_id>,<int:voto>,<crit>", methods=['GET', 'POST'])
+@fly.route("/review_fly/<int:fly_id>/<int:voto>/<crit>", methods=['GET', 'POST'])
 @login_required(role="customer")
 def review_fly(fly_id, voto, crit):
 	# Stabilisco una connessione
