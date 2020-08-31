@@ -4,7 +4,7 @@
 	<style type="text/css">
 		.highlight { background-color: red; }
 	</style>
-    <script type="text/javascript">
+	<script type="text/javascript">
 		function setdate(d){
 			console.log(d);
 			if (d == 'None' || d == ''){
@@ -23,39 +23,39 @@
 			}
 		}
 
-    	$(document).ready(function () {
-    		setdate('{{flyForm.dataRitorno.data}}');
-    		{% if flyForm.checkAndataRitorno.data == False %}
-    			$('#collapse').prop("hidden", true);
-    		{% endif %}
+		$(document).ready(function () {
+			setdate('{{flyForm.dataRitorno.data}}');
+			{% if flyForm.checkAndataRitorno.data == False %}
+				$('#collapse').prop("hidden", true);
+			{% endif %}
 
-        	$('select').selectize({
-          		sortField: 'text'
-        	});
+			$('select').selectize({
+				sortField: 'text'
+			});
 
-        	$('.sev_check').click(function(e) {
-		  		var elmId = $(this).attr("id");
-		  		if (elmId == "andata"){
-		  			$('#collapse').slideUp();
-		  		}else{
-		  			$('#collapse').prop("hidden", false);
+			$('.sev_check').click(function(e) {
+				var elmId = $(this).attr("id");
+				if (elmId == "andata"){
+					$('#collapse').slideUp();
+				}else{
+					$('#collapse').prop("hidden", false);
 					$('#collapse').slideDown();
-		  		}
-		    	$('.sev_check').not(this).prop('checked', false);
-		  	});
+				}
+				$('.sev_check').not(this).prop('checked', false);
+			});
 
-		  	$("#select-part tr").click(function() {
-			    var selected = $(this).hasClass("table-active activepart");
-			    $("#select-part tr").removeClass("table-active activepart");
-			    if(!selected)
-			        $(this).addClass("table-active activepart");
+			$("#select-part tr").click(function() {
+				var selected = $(this).hasClass("table-active activepart");
+				$("#select-part tr").removeClass("table-active activepart");
+				if(!selected)
+					$(this).addClass("table-active activepart");
 			});
 
 			$("#select-rit tr").click(function() {
-			    var selected = $(this).hasClass("table-active activerit");
-			    $("#select-rit tr").removeClass("table-active activerit");
-			    if(!selected)
-			        $(this).addClass("table-active activerit");
+				var selected = $(this).hasClass("table-active activerit");
+				$("#select-rit tr").removeClass("table-active activerit");
+				if(!selected)
+					$(this).addClass("table-active activerit");
 			});
 
 
@@ -104,76 +104,76 @@
 				setdate('');
 			});
 
-        });  	
+		});  	
 	</script>
-    <div id="voli">
-	    <form method="POST" action="" id="searchFly">
-	   		{{ flyForm.hidden_tag() }}
-	   		<div>
-			  	<label class="form-checkbox form-icon" for="andata">
-			    	{{ flyForm.checkAndata.label }}
-			    	{{ flyForm.checkAndata(class="sev_check", id="andata") }}
-			    </label>
-			  	<label class="form-checkbox form-icon" for="andataritorno">
-			    	{{ flyForm.checkAndataRitorno.label }}
-			    	{{ flyForm.checkAndataRitorno(class="sev_check", id="andataritorno") }}
-			    </label>
+	<div id="voli">
+		<form method="POST" action="" id="searchFly">
+			{{ flyForm.hidden_tag() }}
+			<div>
+				<label class="form-checkbox form-icon" for="andata">
+					{{ flyForm.checkAndata.label }}
+					{{ flyForm.checkAndata(class="sev_check", id="andata") }}
+				</label>
+				<label class="form-checkbox form-icon" for="andataritorno">
+					{{ flyForm.checkAndataRitorno.label }}
+					{{ flyForm.checkAndataRitorno(class="sev_check", id="andataritorno") }}
+				</label>
 			</div>
-	   		<fieldset class="form-group">
-				        			<div class="form-group">
-				        				{{ flyForm.aeroportoPartenza.label(class="form-control-label") }}
-    									{% if flyForm.aeroportoPartenza.errors %}
-					                        {{ flyForm.aeroportoPartenza(class="form-control is-invalid", id="select-state") }}
-					                        <div class="invalid-feedback">
-					                            {% for error in flyForm.aeroportoPartenza.errors %}
-					                                <span>{{ error }}</span>
-					                            {% endfor %}
-					                        </div>
-					                    {% else %}
-    										{{ flyForm.aeroportoPartenza( id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
-    									{% endif %}
-    								</div>
-    								<div class="form-group">
+			<fieldset class="form-group">
+									<div class="form-group">
+										{{ flyForm.aeroportoPartenza.label(class="form-control-label") }}
+										{% if flyForm.aeroportoPartenza.errors %}
+											{{ flyForm.aeroportoPartenza(class="form-control is-invalid", id="select-state") }}
+											<div class="invalid-feedback">
+												{% for error in flyForm.aeroportoPartenza.errors %}
+													<span>{{ error }}</span>
+												{% endfor %}
+											</div>
+										{% else %}
+											{{ flyForm.aeroportoPartenza( id="select-state", placeholder="Seleziona aeroporto di partenza...") }}
+										{% endif %}
+									</div>
+									<div class="form-group">
 										{{ flyForm.dataPartenza.label(class="form-control-label") }}
 										{% if flyForm.dataPartenza.errors %}
 											{{ flyForm.dataPartenza(class="form-control is-invalid", type="date") }}
 											<div class="invalid-feedback">
-					                            {% for error in flyForm.dataPartenza.errors %}
-					                                <span>{{ error }}</span>
-					                            {% endfor %}
-					                        </div>
+												{% for error in flyForm.dataPartenza.errors %}
+													<span>{{ error }}</span>
+												{% endfor %}
+											</div>
 										{% else %}
 											{{ flyForm.dataPartenza(class="form-control", type="date") }}
 										{% endif %}
 									</div>
 									<div class="form-group">
-									  	{{ flyForm.aeroportoArrivo.label(class="form-control-label") }}
-									  	{% if flyForm.aeroportoArrivo.errors %}
-					                        {{ flyForm.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
-					                        <div class="invalid-feedback">
-					                            {% for error in flyForm.aeroportoArrivo.errors %}
-					                                <span>{{ error }}</span>
-					                            {% endfor %}
-					                        </div>
-					                    {% else %}
-    										{{ flyForm.aeroportoArrivo( id="select-state", placeholder="Seleziona aeroporto di arrivo...") }}
-    									{% endif %}	
-    								</div>
-    									<div id="collapse">
-    										<div class="form-group">
-									        	{{ flyForm.dataRitorno.label(class="form-control-label") }}
+										{{ flyForm.aeroportoArrivo.label(class="form-control-label") }}
+										{% if flyForm.aeroportoArrivo.errors %}
+											{{ flyForm.aeroportoArrivo(class="form-control is-invalid", id="select-state") }}
+											<div class="invalid-feedback">
+												{% for error in flyForm.aeroportoArrivo.errors %}
+													<span>{{ error }}</span>
+												{% endfor %}
+											</div>
+										{% else %}
+											{{ flyForm.aeroportoArrivo( id="select-state", placeholder="Seleziona aeroporto di arrivo...") }}
+										{% endif %}	
+									</div>
+										<div id="collapse">
+											<div class="form-group">
+												{{ flyForm.dataRitorno.label(class="form-control-label") }}
 												{% if flyForm.dataRitorno.errors %}
 													{{ flyForm.dataRitorno(class="form-control is-invalid", type="date") }}
 													<div class="invalid-feedback">
-							                            {% for error in flyForm.dataRitorno.errors %}
-							                                <span>{{ error }}</span>
-							                            {% endfor %}
-							                        </div>
+														{% for error in flyForm.dataRitorno.errors %}
+															<span>{{ error }}</span>
+														{% endfor %}
+													</div>
 												{% else %}
 													{{ flyForm.dataRitorno(class="form-control", type="date") }}
 												{% endif %}
 											</div>
-									    </div>
+										</div>
 
 						</fieldset>
 						<div class="form-group">
@@ -184,7 +184,7 @@
 	{% if flyForm.aeroportoPartenza.errors or flyForm.dataPartenza.errors or flyForm.aeroportoArrivo.errors or flyForm.dataRitorno.errors %}
 
 	<div class="alert alert-danger" role="alert">
-			  	Controllare i campi inseriti
+				Controllare i campi inseriti
 			</div>
 
 	{% else %}
@@ -192,77 +192,77 @@
 		<h2>Voli per l'Andata</h2>
 		{% if voliand == [] %}
 			<div class="alert alert-warning" role="alert">
-			  	Nessun volo trovato
+				Nessun volo trovato
 			</div>
 		{% else %}
 		<table class="table table-hover">
-		  	<thead>
-		    	<tr>
-		      		<th scope="col">Aeroporto di Partenza</th>
-		      		<th scope="col">Orario</th>
-		      		<th scope="col">Aeroporto di Arrivo</th>
-		      		<th scope="col">Orario</th>
-		      		<th scope="col">Prezzo</th>
-		    	</tr>
-		  	</thead>
-		  	<tbody id="select-part">
-			    {% for volop in voliand %}
-			    	<tr>
-			    		<td hidden>{{ volop[0] }}</td>
-				       	<td>{{ volop[1] }}</td>
-				       	<td>{{ volop[2] }}</td>
-				       	<td>{{ volop[3] }}</td>
-				       	<td>{{ volop[4] }}</td>
-				       	<td>{{ volop[5] }}</td>
-				    </tr>
-			    {% endfor %}
-	      	</tbody>
-	    </table>
-	    {% endif %}
+			<thead>
+				<tr>
+					<th scope="col">Aeroporto di Partenza</th>
+					<th scope="col">Orario</th>
+					<th scope="col">Aeroporto di Arrivo</th>
+					<th scope="col">Orario</th>
+					<th scope="col">Prezzo</th>
+				</tr>
+			</thead>
+			<tbody id="select-part">
+				{% for volop in voliand %}
+					<tr>
+						<td hidden>{{ volop[0] }}</td>
+						<td>{{ volop[1] }}</td>
+						<td>{{ volop[2] }}</td>
+						<td>{{ volop[3] }}</td>
+						<td>{{ volop[4] }}</td>
+						<td>{{ volop[5] }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
 	</div>
-    {%  if flyForm.checkAndataRitorno.data == True %}
-    <div id="volirit">
-	    <h2>Voli per il Ritorno</h2>
-	    {% if volirit == [] %}
-		    <div class="alert alert-warning" role="alert">
-			  	Nessun volo trovato
+	{%  if flyForm.checkAndataRitorno.data == True %}
+	<div id="volirit">
+		<h2>Voli per il Ritorno</h2>
+		{% if volirit == [] %}
+			<div class="alert alert-warning" role="alert">
+				Nessun volo trovato
 			</div>
-	    {% else %}
-	    <table class="table table-hover">
-		  	<thead>
-		    	<tr>
-		      		<th scope="col">Aeroporto di Partenza</th>
-		      		<th scope="col">Orario</th>
-		      		<th scope="col">Aeroporto di Arrivo</th>
-		      		<th scope="col">Orario</th>
-		      		<th scope="col">Prezzo</th>
-		    	</tr>
-		  	</thead>
-		  	<tbody id="select-rit">
-			    {% for volor in volirit %}
-				    <tr>
-				    	<td hidden>{{ volor[0] }}</td>
-				       	<td>{{ volor[1] }}</td>
-				       	<td>{{ volor[2] }}</td>
-				       	<td>{{ volor[3] }}</td>
-				       	<td>{{ volor[4] }}</td>
-				       	<td>{{ volor[5] }}</td>
-				    </tr>
-			    {% endfor %}
-	      	</tbody>
-	    </table>
-	    {% endif %}
+		{% else %}
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th scope="col">Aeroporto di Partenza</th>
+					<th scope="col">Orario</th>
+					<th scope="col">Aeroporto di Arrivo</th>
+					<th scope="col">Orario</th>
+					<th scope="col">Prezzo</th>
+				</tr>
+			</thead>
+			<tbody id="select-rit">
+				{% for volor in volirit %}
+					<tr>
+						<td hidden>{{ volor[0] }}</td>
+						<td>{{ volor[1] }}</td>
+						<td>{{ volor[2] }}</td>
+						<td>{{ volor[3] }}</td>
+						<td>{{ volor[4] }}</td>
+						<td>{{ volor[5] }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
 	</div>
-    {% endif %}
-    <div class="form-group">
-    	
+	{% endif %}
+	<div class="form-group">
+		
 
 		<button type="button" class="btn btn-primary" id="continue" disabled>Coninua</button>
 
 
 
-    </div>
-    {% endif %}
+	</div>
+	{% endif %}
 
 {% endblock content %}
 

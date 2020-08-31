@@ -1,76 +1,66 @@
 {% extends "layout.html" %}
 {% block content %}
 	<div class="content-section">
-    	<h1>Statistiche</h1>
-   		   		
+		<h1>Statistiche</h1>
+				
 		<h1><br></h1>
 
-    	<div class="content-section">
-    		Passeggeri totali fino ad oggi: {{totPasseggeri}} 
-    		<br>
-    		Ultimo mese 
-    		{% if totPasMesePrec < 100 %}
-    			{{totPasMesePrec}} passeggeri, forse è meglio farsi pubblicità :(
-    		{% else %}
-    			{{totPasMesePrec}} passeggeri, si punta alto! :) 
-    		{% endif %}
-    		<br>
-    		Prossimo mese {{totPasMeseSucc}} passeggeri
-    		<br>
-    		Guadagni totali €{{guadagniTot}}
-    		<br>
-    		Tratta con più guadagni: {{trattaGuadagniMax[0]}} -> {{trattaGuadagniMax[1]}}, guadagni: €{{trattaGuadagniMax[2]}}
-     	</div>    	
+		<div class="content-section">
+			Passeggeri totali fino ad oggi: {{totPasseggeri}} 
+			<br>
+			Ultimo mese 
+			{% if totPasMesePrec < 100 %}
+				{{totPasMesePrec}} passeggeri, forse è meglio farsi pubblicità :(
+			{% else %}
+				{{totPasMesePrec}} passeggeri, si punta alto! :) 
+			{% endif %}
+			<br>
+			Prossimo mese {{totPasMeseSucc}} passeggeri
+			<br>
+			Guadagni totali €{{guadagniTot}}
+			<br>
+			Tratta con più guadagni: {{trattaGuadagniMax[0]}} -> {{trattaGuadagniMax[1]}}, guadagni: €{{trattaGuadagniMax[2]}}
+		</div>    	
 			  
-    	<div id="trattaMigliore">
-    		<!-- qui inserire la tratta con più passeggeri nell'ultimo mese -->
-    	</div>
-    	<div id="trattaPeggiore">
-    		<!-- qui inserire la tratta con meno passeggeri nell'ultimo mese-->
-    	</div>
-
-
-
-    	<form method="POST" action="" id="dateStat">
-	   		{{ fromStat.hidden_tag() }}
-	   		<fieldset class="form-group">
-    								<div class="form-group">
-										{{ fromStat.dataA.label(class="form-control-label") }}
-										{% if fromStat.dataA.errors %}
-											{{ fromStat.dataA(class="form-control is-invalid", type="date") }}
-											<div class="invalid-feedback">
-					                            {% for error in fromStat.dataA.errors %}
-					                                <span>{{ error }}</span>
-					                            {% endfor %}
-					                        </div>
-										{% else %}
-											{{ fromStat.dataA(class="form-control", type="date") }}
-										{% endif %}
-									</div>
-    									<div class="form-group">
-									        {{ fromStat.dataB.label(class="form-control-label") }}
-											{% if fromStat.dataB.errors %}
-												{{ fromStat.dataB(class="form-control is-invalid", type="date") }}
-												<div class="invalid-feedback">
-							                           {% for error in fromStat.dataB.errors %}
-							                               <span>{{ error }}</span>
-							                           {% endfor %}
-							                       </div>
-											{% else %}
-												{{ fromStat.dataB(class="form-control", type="date") }}
-											{% endif %}
-										</div>
-
-						</fieldset>
-						<div class="form-group">
-							{{ fromStat.submitFilter(class="btn btn-primary", form="dateStat", id="dateStatBtn") }}
+		<form method="POST" action="" id="dateStat">
+			{{ fromStat.hidden_tag() }}
+			<fieldset class="form-group">
+				<div class="form-group">
+					{{ fromStat.dataA.label(class="form-control-label") }}
+					{% if fromStat.dataA.errors %}
+						{{ fromStat.dataA(class="form-control is-invalid", type="date") }}
+						<div class="invalid-feedback">
+							{% for error in fromStat.dataA.errors %}
+							<span>{{ error }}</span>
+							{% endfor %}
 						</div>
-					</form>
+					{% else %}
+						{{ fromStat.dataA(class="form-control", type="date") }}
+					{% endif %}
+				</div>
+				<div class="form-group">
+					{{ fromStat.dataB.label(class="form-control-label") }}
+					{% if fromStat.dataB.errors %}
+						{{ fromStat.dataB(class="form-control is-invalid", type="date") }}
+						<div class="invalid-feedback">
+							{% for error in fromStat.dataB.errors %}
+							<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ fromStat.dataB(class="form-control", type="date") }}
+					{% endif %}
+				</div>
+			</fieldset>
+			<div class="form-group">
+				{{ fromStat.submitFilter(class="btn btn-primary", form="dateStat", id="dateStatBtn") }}
+			</div>
+		</form>
 
-    	<ul class="nav nav-tabs" id="myTab" role="tablist">
-  			<li class="nav-item">
-    			<a class="nav-link active" id="aeroporti-tab" data-toggle="tab" href="#aeroporti" role="tab" aria-controls="aeroporti" aria-selected="true">Info aeroporti</a>
-  			</li>
+		<ul class="nav nav-tabs" id="myTab" role="tablist">
+			<li class="nav-item">
+				<a class="nav-link active" id="aeroporti-tab" data-toggle="tab" href="#aeroporti" role="tab" aria-controls="aeroporti" aria-selected="true">Info aeroporti</a>
+			</li>
 			<li class="nav-item">
 				<a class="nav-link" id="voli-tab" data-toggle="tab" href="#voli" role="tab" aria-controls="voli" aria-selected="false">Info voli</a>
 			</li>
@@ -88,12 +78,13 @@
 							<tr>
 								<th scope="col">Nome aeroporto</th>
 								<th scope="col">Totale passeggeri sbarcati</th>
-								<th scope="col">Totale passeggeri imbarcati</th>	<!-- NOME LABEL DA CONTROLLARE -->
-								<!-- TODO METTERE IL RANGE -->
+								<th scope="col">Totale passeggeri imbarcati</th>	
+								
 							</tr>
 						</thead>
 						<tbody>
-							{% for a in aeroporti %}	<!-- Passare a parametro lista aeroporti con numero totale passeggeri in arrivo e in partenza -->
+							<!-- lista aeroporti con numero totale passeggeri in arrivo e in partenza -->
+							{% for a in aeroporti %}	
 								<tr>
 									<td>{{ a[0] }}</td><!-- AEROPORTO PARTENZA -->
 									<td>{{ a[1] }}</td><!-- PASSEGGERI TOTALI ARRIVO-->
@@ -104,38 +95,6 @@
 					</table>
 				</div>
 			</div>
-			<!--
-			<div class="tab-pane fade" id="tratte" role="tabpanel" aria-labelledby="tratte-tab">
-				{{ flask_util_js.js }}
-		    	
-		    	<div class="content-section">
-		    		<div id="titleStatFlight">
-				        <h2 class="mt-5">Info tratte</h2>
-				          
-			    	</div>
-			        <table class="table table-hover">
-			            <thead>
-			                <tr>
-			                	
-			                	<th scope="col">Aeroporto partenza</th>
-			                    <th scope="col">Aeroporto arrivo</th>
-			                    <th scope="col">Passeggeri totali</th>
-
-			                </tr>
-			            </thead>
-			            <tbody>
-			            	{% for t in tratte %}			
-			            		<tr>
-				            		<td>{{ t[0] }}</td>	AEROPORTO PARTENZA 
-				                    <td>{{ t[1] }}</td> AEROPORTO ARRIVO
-				                    <td>{{ t[2] }}</td>	PASSEGGERI TOTALE 	
-		                       	</tr>
-			            	{% endfor %}
-			            </tbody>
-			        </table>
-		        </div>
-		        
-			</div>-->
 			<div class="tab-pane fade" id="voli" role="tabpanel" aria-labelledby="voli-tab">
 
 				<!--{{ flask_util_js.js }}-->
@@ -147,15 +106,16 @@
 					<table class="table table-hover">
 						<thead>
 							<tr>
-			                	<th scope="col">Aeroporto partenza</th>
-			                    <th scope="col">Aeroporto arrivo</th>
-			                    <th scope="col">Aereo</th>
-								<th scope="col">Percentuale carico volo</th>
+								<th scope="col">Aeroporto partenza</th>
+								<th scope="col">Aeroporto arrivo</th>
+								<th scope="col">Aereo</th>
+								<th scope="col">Percentuale carico volo (%)</th>
 								<th scope="col">Valutazione Media</th>
 							</tr>
 						</thead>
 						<tbody>
-							{% for v in voli %}			<!-- passare lista voli con aeroporto partena e arrivo (nome) + aereo (nome) +rapporto posti prenotati/ posti totale -->
+							<!-- lista voli con aeroporto partena e arrivo (nome) + aereo (nome) + rapporto posti prenotati/posti totale + valutazione media-->
+							{% for v in voli %}	
 								<tr>
 									<td>{{ v[0] }}</td><!-- AEROPORTO PARTENZA (NOME)--> 
 									<td>{{ v[1] }}</td><!-- AEROPORTO ARRIVO (NOME)--> 
