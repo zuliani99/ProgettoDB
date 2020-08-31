@@ -98,7 +98,7 @@ controllo_voli = DDL(
 "BEFORE INSERT ON voli FOR EACH ROW "
 "BEGIN "
     "IF (SELECT COUNT(*) FROM voli v1 WHERE v1.id != NEW.id AND v1.aeroportoPartenza = NEW.aeroportoPartenza AND v1.dataOraPartenza = NEW.dataOraPartenza) >= 1 THEN "
-        "SET NEW.dataOraPartenza = DATE_ADD(NEW.dataOraPartenza, INTERVAL 1 HOUR); "
+        "SET NEW.dataOraPartenza = DATE_ADD(NEW.dataOraPartenza, INTERVAL 1 HOUR), NEW.dataOraArrivo = DATE_ADD(NEW.dataOraArrivo, INTERVAL 1 HOUR); "
     "END IF; "
 "END"
 )
