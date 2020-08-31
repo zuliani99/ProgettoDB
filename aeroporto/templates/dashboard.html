@@ -4,10 +4,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
 
+
+
     <link rel="stylesheet" href="https://formden.com/static/cdn/bootstrap-iso.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
-
+	
 	<div class="content-section">
     	<h1>Dashboard</h1>
    		   		
@@ -250,8 +252,11 @@
 					<div id="titleVoli">
 						<h2 class="mt-5">Voli </h2>
 						<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addFlightModal">Aggiungi volo</button>   
-					</div>
-					<table class="table table-hover">
+						
+					</div><br>
+
+					<input id="filterFlight" type="text" placeholder="Ricerca rapida...">
+					<table class="table table-hover display">
 						<thead>
 							<tr>
 								<th scope="col">Codice volo</th>
@@ -265,7 +270,7 @@
 								<th colspan="2">Azioni</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody id="tableFlight">
 							{% for volo in voli %}
 							{% if volo[2] < time %}
 							<!-- EVIDENZIARE GLI ORDINI PASSATI IN QUALCHE MODO -->
@@ -273,9 +278,9 @@
 									<td>{{ volo[0] }}</td><!-- ID -->
 									<td> <a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[1]) }}"> {{ volo[1] }}</a></td><!-- AEROPORTO PARTENZA -->
 									<td>{{ volo[2] }}</td><!-- DATA E ORA PARTENZA -->
-									<td><a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[1]) }}"> {{ volo[3] }}</a></td><!-- AEROPORTO ARRIVO -->
+									<td><a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[3]) }}"> {{ volo[3] }}</a></td><!-- AEROPORTO ARRIVO -->
 									<td>{{ volo[4] }}</td><!-- DATA E ORA ARRIVO -->
-									<td><a href="{{ url_for('dashboard.configAereo', aereo_id=volo[1]) }}"> {{ volo[5] }}</a></td><!-- AEREO -->
+									<td><a href="{{ url_for('dashboard.configAereo', aereo_id=volo[5]) }}"> {{ volo[5] }}</a></td><!-- AEREO -->
 									<td>{{ volo[6] }}</td><!-- PREZZO -->
 									<td>{{ volo[7] }}</td><!-- NUMERO PRENOTAZIONI -->
 
@@ -285,9 +290,9 @@
 								<td>{{ volo[0] }}</td><!-- ID -->
 								<td> <a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[1]) }}"> {{ volo[1] }}</a></td><!-- AEROPORTO PARTENZA -->
 								<td>{{ volo[2] }}</td><!-- DATA E ORA PARTENZA -->
-								<td><a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[1]) }}"> {{ volo[3] }}</a></td><!-- AEROPORTO ARRIVO -->
+								<td><a href="{{ url_for('dashboard.configAeroporto', aeroporto_id=volo[3]) }}"> {{ volo[3] }}</a></td><!-- AEROPORTO ARRIVO -->
 								<td>{{ volo[4] }}</td><!-- DATA E ORA ARRIVO -->
-								<td><a href="{{ url_for('dashboard.configAereo', aereo_id=volo[1]) }}"> {{ volo[5] }}</a></td><!-- AEREO -->
+								<td><a href="{{ url_for('dashboard.configAereo', aereo_id=volo[5]) }}"> {{ volo[5] }}</a></td><!-- AEREO -->
 								<td>{{ volo[6] }}</td><!-- PREZZO -->
 								<td>{{ volo[7] }}</td><!-- NUMERO PRENOTAZIONI -->
 								
@@ -331,7 +336,9 @@
 		    		<div id="titleAeroporti">
 				        <h2 class="mt-5">Aeroporti</h2>
 				        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addAirportModal">Aggiungi aeroporto</button>   
-			    	</div>
+			    	</div><br>
+
+			    	<input id="filterAirport" type="text" placeholder="Ricerca rapida...">
 			        <table class="table table-hover">
 			            <thead>
 			                <tr>
@@ -341,7 +348,7 @@
 			                    <th colspan="2">Azioni</th>
 			                </tr>
 			            </thead>
-			            <tbody>
+			            <tbody id="tableAirport">
 			            	{% for aeroporto in aeroporti %}
 			            		<tr>
 				            		<td>{{ aeroporto[0] }}</td>
@@ -390,7 +397,9 @@
 					<div id="titleAerei">
 						<h2 class="mt-5">Aerei</h2>
 						<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#addPlaneModal">Aggiungi aereo</button>   
-					</div>
+					</div><br>
+
+					<input id="filterPlane" type="text" placeholder="Ricerca rapida...">
 					<table class="table table-hover">
 						<thead>
 							<tr>
@@ -400,7 +409,7 @@
 								<th colspan="2">Azioni</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody id="tablePlane">
 							{% for aereo in aerei %}
 								<tr>
 									<td>{{ aereo[0] }}</td>
@@ -444,6 +453,28 @@
 		$(document).ready(function () {
 			$('select').selectize({
 				sortField: 'text'
+			});
+
+			$("#filterFlight").on("keyup", function() {
+				var value = $(this).val().toLowerCase();
+				$("#tableFlight tr").filter(function() {
+					$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+				});
+			});
+
+
+			$("#filterPlane").on("keyup", function() {
+				var value = $(this).val().toLowerCase();
+				$("#tablePlane tr").filter(function() {
+					$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+				});
+			});
+
+			$("#filterAirport").on("keyup", function() {
+				var value = $(this).val().toLowerCase();
+				$("#tableAirport tr").filter(function() {
+					$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+				});
 			});
 
 			$(".table tbody").on('click','#btndelFlight',function(){
