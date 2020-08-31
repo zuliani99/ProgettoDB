@@ -30,7 +30,7 @@ def statisticsHome():
 		"SELECT IFNULL(sum(pren), 0) FROM voli NATURAL JOIN pren_volo WHERE voli.dataOraPartenza BETWEEN CURRENT_DATE() AND (CURRENT_DATE() + INTERVAL 1 MONTH)"
 	).fetchone()
 	#Guadagni totali calcolati sulla somma del prezzo delle prenotazioni
-	guadagniTotali = conn.execute("SELECT IFNULL(sum(prenotazioni.prezzotot),0) FROM prenotazioni").fetchone()
+	guadagniTotali = conn.execute("SELECT ROUND(IFNULL(sum(prenotazioni.prezzotot),0),2) FROM prenotazioni").fetchone()
 
 	#Ritorna la lista di aeroporti con nome e il numero totale di passeggeri arrivati e in partenza
 	infoAeroporti = conn.execute(
@@ -148,7 +148,7 @@ def statisticsHome():
 
 	#Calcola la tratta (partenza, arrivo) con il guadagno massimo 
 	trattaGuadagniMax = conn.execute(
-		"SELECT IFNULL(aeroportoP, 'None'), IFNULL(aeroportoA, 'None'), IFNULL(guadagniTot,0) FROM guadagniTratte WHERE guadagniTot = (SELECT MAX(guadagniTot) FROM guadagniTratte)"
+		"SELECT IFNULL(aeroportoP, 'None'), IFNULL(aeroportoA, 'None'), ROUND(IFNULL(guadagniTot,0),2) FROM guadagniTratte WHERE guadagniTot = (SELECT MAX(guadagniTot) FROM guadagniTratte)"
 	).fetchone()
 
 	conn.close()
